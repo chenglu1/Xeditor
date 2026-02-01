@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": false,
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -13,27 +14,27 @@
     "react-dom": "^18.0.0"
   },
   "dependencies": {
+    "@floating-ui/react": "^0.26.24",
+    "@radix-ui/react-popover": "^1.1.0",
     "@tiptap/core": "^3.14.0",
-    "@tiptap/react": "^3.14.0",
-    "@tiptap/starter-kit": "^3.14.0",
     "@tiptap/extension-character-count": "^3.14.0",
     "@tiptap/extension-details": "^3.14.0",
     "@tiptap/extension-highlight": "^3.14.0",
-    "@tiptap/extension-link": "^3.14.0",
     "@tiptap/extension-image": "^3.14.0",
+    "@tiptap/extension-link": "^3.14.0",
     "@tiptap/extension-list": "^3.14.0",
+    "@tiptap/extension-mathematics": "^3.14.0",
+    "@tiptap/extension-ordered-list": "^3.14.0",
     "@tiptap/extension-placeholder": "^3.14.0",
     "@tiptap/extension-table": "^3.14.0",
     "@tiptap/extension-table-cell": "^3.14.0",
     "@tiptap/extension-table-header": "^3.14.0",
     "@tiptap/extension-table-row": "^3.14.0",
     "@tiptap/extension-text-align": "^3.14.0",
-    "@tiptap/extension-ordered-list": "^3.14.0",
-    "@tiptap/extension-mathematics": "^3.14.0",
     "@tiptap/markdown": "^3.14.0",
     "@tiptap/pm": "^3.14.0",
-    "@radix-ui/react-popover": "^1.1.0",
-    "@floating-ui/react": "^0.26.24",
+    "@tiptap/react": "^3.14.0",
+    "@tiptap/starter-kit": "^3.14.0",
     "katex": "^0.16.21",
     "lodash-es": "^4.17.21",
     "react-hotkeys-hook": "^5.2.1",
@@ -42,13 +43,16 @@
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.3",
+    "@vitejs/plugin-react": "^4.7.0",
     "sass": "^1.79.0",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "vite": "^5.4.21"
   },
   "scripts": {
     "build:types": "tsc -p tsconfig.build.json",
     "build:css": "sass src/styles/index.scss dist/xeditor-editor.css --no-source-map",
-    "build": "pnpm run build:types && pnpm run build:css",
+    "build:lib": "vite build",
+    "build": "pnpm run build:types && pnpm run build:css && pnpm run build:lib",
     "prepublishOnly": "pnpm run build",
     "publish:public": "pnpm run build && pnpm publish --access public --no-git-checks"
   },
