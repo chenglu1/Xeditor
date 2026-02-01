@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chenglu1/xeditor-editor": "workspace:*",
+    "@chenglu1/xeditor-editor": "^0.0.1",
     "@mui/material": "^6.1.0",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",

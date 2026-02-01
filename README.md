@@ -9,7 +9,7 @@ A demo online rich text / Markdown editor and reusable React editor library.
 
 - 基于 React 18 + Vite + MUI 构建的 Web 编辑器演示项目  
   Web editor demo built with React 18, Vite and MUI.
--- 提供 `@chenglu1/xeditor-editor` 组件库，可在任意 React 项目中复用  
+- 提供 `@chenglu1/xeditor-editor` 组件库，可在任意 React 项目中复用  
   Ships `@chenglu1/xeditor-editor` package for reuse in any React app.
 - 在线预览 / Live demo: https://xeditor-web.vercel.app
 
@@ -82,6 +82,16 @@ This command will:
 
 `@chenglu1/xeditor-editor` 导出 `ConfigurableTiptapEditor` 组件，用于编辑 Markdown 内容。  
 `@chenglu1/xeditor-editor` exports `ConfigurableTiptapEditor` for editing Markdown content.
+
+在外部项目中安装 / Install in external project:
+
+```bash
+npm install @chenglu1/xeditor-editor
+# or
+pnpm add @chenglu1/xeditor-editor
+```
+
+在 React 组件中使用 / Use in a React component:
 
 ```tsx
 import { useState } from 'react';
