@@ -11,6 +11,7 @@ A demo online rich text / Markdown editor and reusable React editor library.
   Web editor demo built with React 18, Vite and MUI.
 - 提供 `@xeditor/editor` 组件库，可在任意 React 项目中复用  
   Ships `@xeditor/editor` package for reuse in any React app.
+- 在线预览 / Live demo: https://tiptapeditor-xi.vercel.app
 
 项目结构 / Project structure:
 
@@ -84,3 +85,13 @@ function MyEditor() {
 
 更多配置可以直接查看 `packages/editor/src/types.ts`。  
 For more options, check `packages/editor/src/types.ts`.
+
+---
+
+## 部署到 Vercel Deploy to Vercel
+
+- 线上地址 / Production URL: https://tiptapeditor-xi.vercel.app
+- 推送到 `main` 分支会通过 GitHub Actions + Vercel 自动部署。  
+  Pushing to `main` triggers deployment via `.github/workflows/vercel-deploy.yml`.
+- 需要在 GitHub Secrets 中配置 `VERCEL_TOKEN`、`VERCEL_ORG_ID`、`VERCEL_PROJECT_ID`。  
+  Configure these three Secrets in GitHub repo Settings → Secrets → Actions.
