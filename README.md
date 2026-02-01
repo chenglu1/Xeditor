@@ -47,10 +47,34 @@ pnpm dev
 
 ### 构建与预览 Build & preview
 
+在项目根目录 / In project root:
+
 ```bash
-pnpm build   # 构建 build
+pnpm build   # 构建 editor + web
 pnpm preview # 预览 preview
 ```
+
+其中 `pnpm build` 会先构建 `@xeditor/editor`，再构建 web 应用。  
+`pnpm build` first builds `@xeditor/editor`, then the web app.
+
+---
+
+## 打包与测试 Editor bundling & testing
+
+在根目录可以一键打包并验证 `@xeditor/editor` 的 bundle：  
+You can run a one-step bundle build and verification from root:
+
+```bash
+pnpm run test:bundle
+```
+
+该命令会：  
+This command will:
+
+1. 执行 `build:editor`，产出类型声明、CSS 和 JS bundle  
+   Run `build:editor` to generate types, CSS and JS bundles
+2. 使用 Node 以 ESM 方式 `import` `dist/index.esm.js`，确保入口可在 Node 环境加载  
+   Use Node to `import` `dist/index.esm.js` and verify the ESM entry loads in Node
 
 ---
 
