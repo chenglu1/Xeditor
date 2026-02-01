@@ -2,6 +2,11 @@
  * @Description: 自定义上标扩展，支持 Markdown 语法 ^text^
  */
 import { Mark } from '@tiptap/core';
+import type {
+  MarkdownToken,
+  MarkdownParseHelpers,
+  MarkdownParseResult,
+} from '@tiptap/core';
 
 export interface SuperscriptOptions {
   HTMLAttributes: Record<string, unknown>;
@@ -68,16 +73,14 @@ export const Superscript = Mark.create<SuperscriptOptions>({
       'Mod-.': () => this.editor.commands.toggleSuperscript(),
     };
   },
-  // Markdown 支持
   markdownTokenName: 'superscript',
 
-  parseMarkdown: (token: unknown, helpers: unknown) => {
-    const content = (
-      helpers as { parseInline: (tokens: unknown[]) => unknown }
-    ).parseInline((token as { tokens?: unknown[] }).tokens || []);
-    return (
-      helpers as { applyMark: (name: string, content: unknown) => unknown }
-    ).applyMark('superscript', content);
+  parseMarkdown: (
+    token: MarkdownToken,
+    helpers: MarkdownParseHelpers,
+  ): MarkdownParseResult => {
+    const content = helpers.parseInline(token.tokens || []);
+    return helpers.applyMark('superscript', content);
   },
   // Markdown 序列化支持（仅输出，不解析）
   renderMarkdown: (node: unknown, helpers: unknown) => {
@@ -90,17 +93,15 @@ export const Superscript = Mark.create<SuperscriptOptions>({
     name: 'superscript',
     level: 'inline',
     start: (src: string) => src.indexOf('^'),
-    tokenize: (src: string, _tokens: unknown, lexer: unknown) => {
+    tokenize: (src, _tokens, lexer) => {
       const match = /^\^([^^]+)\^/.exec(src);
       if (!match) return undefined;
 
       return {
         type: 'superscript',
-        raw: match[0], // 完整匹配: ^text^
-        text: match[1], // 内容: text
-        tokens: (
-          lexer as { inlineTokens: (text: string) => unknown[] }
-        ).inlineTokens(match[1]), // 支持嵌套格式
+        raw: match[0],
+        text: match[1],
+        tokens: lexer.inlineTokens(match[1]),
       };
     },
   },

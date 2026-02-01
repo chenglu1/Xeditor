@@ -94,17 +94,15 @@ export const Subscript = Mark.create<SubscriptOptions>({
     name: 'subscript',
     level: 'inline',
     start: (src: string) => src.indexOf('~'),
-    tokenize: (src: string, _tokens: unknown, lexer: unknown) => {
+    tokenize: (src, _tokens, lexer) => {
       const match = /^~([^~]+)~/.exec(src);
       if (!match) return undefined;
 
       return {
         type: 'subscript',
-        raw: match[0], // 完整匹配: ~text~
-        text: match[1], // 内容: text
-        tokens: (
-          lexer as { inlineTokens: (text: string) => unknown[] }
-        ).inlineTokens(match[1]), // 支持嵌套格式
+        raw: match[0],
+        text: match[1],
+        tokens: lexer.inlineTokens(match[1]),
       };
     },
   },

@@ -62,8 +62,9 @@ export const ListDropdown = forwardRef<HTMLButtonElement, ListDropdownProps>(
 
     const [isOpen, setIsOpen] = useState(false);
     const [position, setPosition] = useState({ top: 0, left: 0 });
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const buttonRef = useRef<HTMLButtonElement>(null);
+    const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const buttonRef =
+      useRef<HTMLButtonElement | null>(null) as React.MutableRefObject<HTMLButtonElement | null>;
 
     // 点击外部关闭
     useEffect(() => {

@@ -1,4 +1,4 @@
-import type { ChainedCommands, type Editor } from '@tiptap/react';
+import type { ChainedCommands, Editor } from '@tiptap/react';
 import { useCallback, useEffect, useState } from 'react';
 
 // --- Hooks ---

@@ -173,7 +173,7 @@ const ConfigurableTiptapEditor: React.FC<ConfigurableTiptapEditorProps> = ({
         contentType === 'markdown' ? editor.getMarkdown() : editor.getHTML();
 
       if (value !== currentContent) {
-        const options: { emitUpdate: boolean; contentType?: string } = {
+        const options: any = {
           emitUpdate: false,
         };
         if (contentType === 'markdown') {

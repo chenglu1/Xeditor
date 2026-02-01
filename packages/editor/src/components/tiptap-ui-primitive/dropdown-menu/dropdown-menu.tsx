@@ -69,7 +69,7 @@ const DropdownMenuContent = forwardRef<
     <DropdownMenuPrimitive.Content
       ref={ref}
       sideOffset={sideOffset}
-      onCloseAutoFocus={(e) => e.preventDefault()}
+      onCloseAutoFocus={(e: Event) => e.preventDefault()}
       className={cn('tiptap-dropdown-menu', className)}
       {...props}
     />

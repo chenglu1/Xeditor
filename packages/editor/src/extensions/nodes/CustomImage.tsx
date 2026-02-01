@@ -1,17 +1,11 @@
 import { Image } from '@tiptap/extension-image';
-import { ReactNodeViewRenderer, NodeViewWrapper } from '@tiptap/react';
+import {
+  ReactNodeViewRenderer,
+  NodeViewWrapper,
+  type ReactNodeViewProps,
+} from '@tiptap/react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
-
-interface ImageViewProps {
-  node: {
-    attrs: {
-      src: string;
-      alt?: string;
-      title?: string;
-    };
-  };
-}
 
 const PreviewModal = styled.div`
   display: flex;
@@ -132,7 +126,7 @@ const ZoomInfo = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const ImageView: React.FC<ImageViewProps> = ({ node }) => {
+const ImageView: React.FC<ReactNodeViewProps> = ({ node }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
@@ -140,7 +134,11 @@ const ImageView: React.FC<ImageViewProps> = ({ node }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
-  const { src, alt, title } = node.attrs;
+  const { src, alt, title } = node.attrs as {
+    src: string;
+    alt?: string;
+    title?: string;
+  };
 
   const handleImageClick = () => {
     setShowPreview(true);
