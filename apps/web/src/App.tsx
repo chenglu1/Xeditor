@@ -15,7 +15,7 @@ import { RichtextPage } from './pages/RichtextPage';
 import { MarkdownSyncPage } from './pages/MarkdownSyncPage';
 import { DualViewPage } from './pages/DualViewPage';
 
-const GITHUB_REPO_URL = 'https://github.com/your-org/your-repo';
+const GITHUB_REPO_URL = 'https://github.com/chenglu1/';
 
 const theme = createTheme({
   palette: {

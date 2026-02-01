@@ -1,1 +1,9 @@
 node_modules
+
+# Build outputs
+dist
+apps/web/dist
+packages/**/dist
+
+# Logs
+*.log
