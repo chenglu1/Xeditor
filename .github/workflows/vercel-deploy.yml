@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build web app
-        run: pnpm --filter web build
+        run: pnpm run build
 
       - name: Pull Vercel environment
         run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}

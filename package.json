@@ -7,7 +7,9 @@
     "apps/*"
   ],
   "scripts": {
+    "predev": "pnpm run build:editor",
     "dev": "pnpm --filter web dev",
+    "prebuild": "pnpm run build:editor",
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
     "build:editor": "pnpm --filter @xeditor/editor run build",
