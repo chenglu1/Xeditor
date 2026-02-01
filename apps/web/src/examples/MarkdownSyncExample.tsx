@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ChangeEvent } from 'react';
-import { ConfigurableTiptapEditor } from '@xeditor/editor';
+import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
 import { Box, Grid, Typography } from '@mui/material';
 
 export function MarkdownSyncExample() {

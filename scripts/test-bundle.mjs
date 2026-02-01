@@ -6,7 +6,7 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const distDir = path.resolve(dirname, '../packages/editor/dist');
 
-console.log('Testing @xeditor/editor bundle from', distDir);
+console.log('Testing @chenglu1/xeditor-editor bundle from', distDir);
 
 const esmEntry = path.join(distDir, 'index.esm.js');
 const esmUrl = pathToFileURL(esmEntry).href;

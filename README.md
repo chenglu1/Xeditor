@@ -9,15 +9,15 @@ A demo online rich text / Markdown editor and reusable React editor library.
 
 - 基于 React 18 + Vite + MUI 构建的 Web 编辑器演示项目  
   Web editor demo built with React 18, Vite and MUI.
-- 提供 `@xeditor/editor` 组件库，可在任意 React 项目中复用  
-  Ships `@xeditor/editor` package for reuse in any React app.
+-- 提供 `@chenglu1/xeditor-editor` 组件库，可在任意 React 项目中复用  
+  Ships `@chenglu1/xeditor-editor` package for reuse in any React app.
 - 在线预览 / Live demo: https://xeditor-web.vercel.app
 
 项目结构 / Project structure:
 
 ```text
 apps/web         # 演示站 Demo web app
-packages/editor  # @xeditor/editor 组件库 Editor package
+packages/editor  # @chenglu1/xeditor-editor 组件库 Editor package
 ```
 
 ---
@@ -54,14 +54,14 @@ pnpm build   # 构建 editor + web
 pnpm preview # 预览 preview
 ```
 
-其中 `pnpm build` 会先构建 `@xeditor/editor`，再构建 web 应用。  
-`pnpm build` first builds `@xeditor/editor`, then the web app.
+其中 `pnpm build` 会先构建 `@chenglu1/xeditor-editor`，再构建 web 应用。  
+`pnpm build` first builds `@chenglu1/xeditor-editor`, then the web app.
 
 ---
 
 ## 打包与测试 Editor bundling & testing
 
-在根目录可以一键打包并验证 `@xeditor/editor` 的 bundle：  
+在根目录可以一键打包并验证 `@chenglu1/xeditor-editor` 的 bundle：  
 You can run a one-step bundle build and verification from root:
 
 ```bash
@@ -80,12 +80,12 @@ This command will:
 
 ## 编辑器组件使用 Using the editor component
 
-`@xeditor/editor` 导出 `ConfigurableTiptapEditor` 组件，用于编辑 Markdown 内容。  
-`@xeditor/editor` exports `ConfigurableTiptapEditor` for editing Markdown content.
+`@chenglu1/xeditor-editor` 导出 `ConfigurableTiptapEditor` 组件，用于编辑 Markdown 内容。  
+`@chenglu1/xeditor-editor` exports `ConfigurableTiptapEditor` for editing Markdown content.
 
 ```tsx
 import { useState } from 'react';
-import { ConfigurableTiptapEditor } from '@xeditor/editor';
+import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
 
 function MyEditor() {
   const [content, setContent] = useState('# Title\n\nStart writing here.');

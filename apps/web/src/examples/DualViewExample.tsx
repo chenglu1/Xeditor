@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ConfigurableTiptapEditor } from '@xeditor/editor';
+import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
 import { Box, Typography } from '@mui/material';
 
 export function DualViewExample() {
