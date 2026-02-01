@@ -1,0 +1,54 @@
+import * as React from 'react';
+
+export const TableIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <rect
+      x="3"
+      y="3"
+      width="14"
+      height="14"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <line
+      x1="3"
+      y1="8"
+      x2="17"
+      y2="8"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <line
+      x1="3"
+      y1="12"
+      x2="17"
+      y2="12"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <line
+      x1="8"
+      y1="3"
+      x2="8"
+      y2="17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <line
+      x1="12"
+      y1="3"
+      x2="12"
+      y2="17"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+  </svg>
+);

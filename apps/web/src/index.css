@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .example-card {
+    @apply flex flex-col h-full rounded-2xl bg-white shadow-sm border border-slate-200/80 p-4 gap-3;
+  }
+
+  .example-card-title {
+    @apply text-sm font-semibold text-slate-900;
+  }
+
+  .example-card-desc {
+    @apply text-xs text-slate-500;
+  }
+
+  .example-card-body {
+    @apply flex-1 min-h-[200px];
+  }
+
+  .editor-no-border .editor-wrapper {
+    @apply border-0 shadow-none bg-transparent;
+  }
+}

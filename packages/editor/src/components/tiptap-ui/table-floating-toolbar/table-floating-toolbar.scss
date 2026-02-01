@@ -1,0 +1,75 @@
+@use "../../../styles/variables" as *;
+
+.table-floating-toolbar {
+  z-index: 10;
+  animation: fadeInDown 0.2s ease-out;
+  
+  .table-toolbar-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(8px);
+    
+    .card-body {
+      padding: 4px;
+    }
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table-toolbar-separator {
+  height: 20px;
+  margin: 0 4px;
+}
+
+.table-action-btn {
+  transition: all 0.2s ease;
+  font-weight: 500;
+  
+  .tiptap-button-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  
+  &:hover {
+    background: var(--hover-bg-color, rgba(99, 102, 241, 0.1));
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.table-delete-btn {
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: rgb(239, 68, 68);
+  }
+}
+
+.table-delete-table-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  .tiptap-button-icon {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: rgb(239, 68, 68);
+  }
+}

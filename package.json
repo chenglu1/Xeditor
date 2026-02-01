@@ -1,0 +1,18 @@
+{
+  "name": "xeditor-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "preview": "pnpm --filter web preview"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

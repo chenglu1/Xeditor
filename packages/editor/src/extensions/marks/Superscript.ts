@@ -1,0 +1,109 @@
+/*
+ * @Description: 自定义上标扩展，支持 Markdown 语法 ^text^
+ */
+import { Mark } from '@tiptap/core';
+
+export interface SuperscriptOptions {
+  HTMLAttributes: Record<string, unknown>;
+}
+
+declare module '@tiptap/core' {
+  interface Commands<ReturnType> {
+    superscript: {
+      /**
+       * Set a superscript mark
+       */
+      setSuperscript: () => ReturnType;
+      /**
+       * Toggle a superscript mark
+       */
+      toggleSuperscript: () => ReturnType;
+      /**
+       * Unset a superscript mark
+       */
+      unsetSuperscript: () => ReturnType;
+    };
+  }
+}
+
+export const Superscript = Mark.create<SuperscriptOptions>({
+  name: 'superscript',
+
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'sup' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['sup', HTMLAttributes, 0];
+  },
+
+  addCommands() {
+    return {
+      setSuperscript:
+        () =>
+        ({ commands }) => {
+          return commands.setMark(this.name);
+        },
+      toggleSuperscript:
+        () =>
+        ({ commands }) => {
+          return commands.toggleMark(this.name);
+        },
+      unsetSuperscript:
+        () =>
+        ({ commands }) => {
+          return commands.unsetMark(this.name);
+        },
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-.': () => this.editor.commands.toggleSuperscript(),
+    };
+  },
+  // Markdown 支持
+  markdownTokenName: 'superscript',
+
+  parseMarkdown: (token: unknown, helpers: unknown) => {
+    const content = (
+      helpers as { parseInline: (tokens: unknown[]) => unknown }
+    ).parseInline((token as { tokens?: unknown[] }).tokens || []);
+    return (
+      helpers as { applyMark: (name: string, content: unknown) => unknown }
+    ).applyMark('superscript', content);
+  },
+  // Markdown 序列化支持（仅输出，不解析）
+  renderMarkdown: (node: unknown, helpers: unknown) => {
+    const content = (
+      helpers as { renderChildren: (children: unknown[]) => string }
+    ).renderChildren((node as { content?: unknown[] }).content || []);
+    return `^${content}^`;
+  },
+  markdownTokenizer: {
+    name: 'superscript',
+    level: 'inline',
+    start: (src: string) => src.indexOf('^'),
+    tokenize: (src: string, _tokens: unknown, lexer: unknown) => {
+      const match = /^\^([^^]+)\^/.exec(src);
+      if (!match) return undefined;
+
+      return {
+        type: 'superscript',
+        raw: match[0], // 完整匹配: ^text^
+        text: match[1], // 内容: text
+        tokens: (
+          lexer as { inlineTokens: (text: string) => unknown[] }
+        ).inlineTokens(match[1]), // 支持嵌套格式
+      };
+    },
+  },
+  // 设置较低优先级，让数学公式扩展先处理
+  priority: 50,
+});
