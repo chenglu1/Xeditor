@@ -16,8 +16,6 @@ import type { ButtonProps } from '../../tiptap-ui-primitive/button';
 import { Button } from '../../tiptap-ui-primitive/button';
 
 // --- Styles ---
-import './color-highlight-button.scss';
-
 export interface ColorHighlightButtonProps
   extends Omit<ButtonProps, 'type'>, UseColorHighlightConfig {
   /**

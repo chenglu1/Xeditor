@@ -15,9 +15,6 @@ import { useListDropdownMenu } from './use-list-dropdown-menu';
 // --- UI Primitives ---
 import type { ButtonProps } from '../../tiptap-ui-primitive/button';
 import { Button } from '../../tiptap-ui-primitive/button';
-import '../../tiptap-ui-primitive/dropdown-menu/dropdown-menu.scss';
-import '../../tiptap-ui-primitive/card/card.scss';
-
 export interface ListDropdownProps extends Omit<ButtonProps, 'type'> {
   /**
    * The Tiptap editor instance.

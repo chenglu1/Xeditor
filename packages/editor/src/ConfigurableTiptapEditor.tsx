@@ -1,4 +1,3 @@
-import './TiptapMarkdownEditor.scss';
 import 'katex/dist/katex.min.css';
 
 import { useEditor } from '@tiptap/react';

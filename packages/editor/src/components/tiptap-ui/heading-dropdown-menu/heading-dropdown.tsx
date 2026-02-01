@@ -15,9 +15,6 @@ import { ChevronDownIcon } from '../../tiptap-icons/chevron-down-icon';
 import type { ButtonProps } from '../../tiptap-ui-primitive/button';
 import { Button } from '../../tiptap-ui-primitive/button';
 import { HeadingButton } from '../heading-button';
-import '../../tiptap-ui-primitive/dropdown-menu/dropdown-menu.scss';
-import '../../tiptap-ui-primitive/card/card.scss';
-
 export interface HeadingDropdownProps
   extends Omit<ButtonProps, 'type'>, UseHeadingDropdownMenuConfig {
   onOpenChange?: (isOpen: boolean) => void;

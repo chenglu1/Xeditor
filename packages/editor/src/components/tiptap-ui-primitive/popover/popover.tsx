@@ -1,7 +1,6 @@
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 
 import { cn } from '../../../lib/tiptap-utils';
-import './popover.scss';
 
 function Popover({
   ...props

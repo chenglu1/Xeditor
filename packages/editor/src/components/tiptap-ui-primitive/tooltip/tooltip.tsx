@@ -28,8 +28,6 @@ import {
   useState,
   version,
 } from 'react';
-import './tooltip.scss';
-
 interface TooltipProviderProps {
   children: React.ReactNode;
   initialOpen?: boolean;

@@ -2,8 +2,6 @@ import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { forwardRef } from 'react';
 
 import { cn } from '../../../lib/tiptap-utils';
-import './dropdown-menu.scss';
-
 function DropdownMenu({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {

@@ -4,12 +4,6 @@ import { forwardRef, Fragment, useMemo } from 'react';
 import { cn, parseShortcutKeys } from '../../../lib/tiptap-utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
 
-// --- Lib ---
-
-import './button-colors.scss';
-import './button-group.scss';
-import './button.scss';
-
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   showTooltip?: boolean;

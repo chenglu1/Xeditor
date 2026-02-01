@@ -16,8 +16,6 @@ import { Separator } from '../../tiptap-ui-primitive/separator';
 // --- Icons ---
 
 // --- Styles ---
-import './table-floating-toolbar.scss';
-
 export interface TableFloatingToolbarProps {
   editor?: Editor | null;
 }
