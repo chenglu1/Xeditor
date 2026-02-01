@@ -26,12 +26,24 @@ export function RichtextPage() {
           </Link>
           <Typography color="text.primary">纯富文本模式</Typography>
         </Breadcrumbs>
-        <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box
+          sx={{
+            mb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+          }}
+        >
           <Typography variant="h4" sx={{ fontWeight: 600 }}>
             纯富文本模式
           </Typography>
-          <Chip label="页面编辑" size="small" color="primary" variant="outlined" />
-          <Chip label="运营活动" size="small" variant="outlined" />
+          <Chip
+            label="页面编辑"
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
         </Box>
         <Typography
           variant="body2"
@@ -45,8 +57,14 @@ export function RichtextPage() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Paper
-              elevation={2}
-              sx={{ p: 2, borderRadius: 3, height: '100%', display: 'flex', flexDirection: 'column' }}
+              elevation={1}
+              sx={{
+                p: 2.5,
+                borderRadius: 3,
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
             >
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
                 富文本编辑体验
@@ -66,6 +84,12 @@ export function RichtextPage() {
                 bgcolor: 'grey.50',
                 border: '1px solid',
                 borderColor: 'grey.200',
+                transition: 'all 0.18s ease-out',
+                '&:hover': {
+                  borderColor: 'primary.light',
+                  boxShadow: 3,
+                  bgcolor: '#fff7ed',
+                },
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>

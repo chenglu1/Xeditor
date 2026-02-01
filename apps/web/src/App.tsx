@@ -24,23 +24,23 @@ const theme = createTheme({
       main: '#f97316',
     },
     background: {
-      default: '#f5f1eb',
+      default: '#f3f4f6',
       paper: '#ffffff',
     },
     text: {
-      primary: '#1f2933',
+      primary: '#111827',
       secondary: '#6b7280',
     },
   },
   shape: {
-    borderRadius: 18,
+    borderRadius: 12,
   },
   typography: {
     fontFamily: [
+      'system-ui',
       '-apple-system',
       'BlinkMacSystemFont',
       '"Segoe UI"',
-      'system-ui',
       'sans-serif',
     ].join(','),
     h3: {
@@ -54,6 +54,10 @@ const theme = createTheme({
     button: {
       textTransform: 'none',
       fontWeight: 600,
+    },
+    subtitle2: {
+      fontWeight: 600,
+      letterSpacing: 0,
     },
   },
   components: {
@@ -70,7 +74,14 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 24,
+          borderRadius: 16,
+        },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ffffff',
         },
       },
     },
@@ -89,17 +100,7 @@ export function App() {
           flexDirection: 'column',
         }}
       >
-        <AppBar
-          position="static"
-          color="inherit"
-          elevation={0}
-          sx={{
-            borderBottom: '1px solid',
-            borderColor: 'divider',
-            bgcolor: 'rgba(255, 250, 245, 0.9)',
-            backdropFilter: 'blur(12px)',
-          }}
-        >
+        <AppBar position="static" color="default" elevation={0}>
           <Toolbar sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 600 }}>
               <Button

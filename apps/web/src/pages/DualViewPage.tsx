@@ -26,12 +26,24 @@ export function DualViewPage() {
           </Link>
           <Typography color="text.primary">双视图模式</Typography>
         </Breadcrumbs>
-        <Box sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box
+          sx={{
+            mb: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+          }}
+        >
           <Typography variant="h4" sx={{ fontWeight: 600 }}>
             双视图模式
           </Typography>
-          <Chip label="双栏编辑" size="small" color="primary" variant="outlined" />
-          <Chip label="团队协作" size="small" variant="outlined" />
+          <Chip
+            label="双栏编辑"
+            size="small"
+            color="primary"
+            variant="outlined"
+          />
         </Box>
         <Typography
           variant="body2"
@@ -45,8 +57,14 @@ export function DualViewPage() {
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Paper
-              elevation={2}
-              sx={{ p: 2, borderRadius: 3, height: '100%', display: 'flex', flexDirection: 'column' }}
+              elevation={1}
+              sx={{
+                p: 2.5,
+                borderRadius: 3,
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
             >
               <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5 }}>
                 双视图联动编辑
@@ -66,6 +84,12 @@ export function DualViewPage() {
                 bgcolor: 'grey.50',
                 border: '1px solid',
                 borderColor: 'grey.200',
+                transition: 'all 0.18s ease-out',
+                '&:hover': {
+                  borderColor: 'primary.light',
+                  boxShadow: 3,
+                  bgcolor: '#fff7ed',
+                },
               }}
             >
               <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>

@@ -1,25 +1,46 @@
 import { useState } from 'react';
 import { ConfigurableTiptapEditor } from '@xeditor/editor';
-import { Container, Box, Grid, Paper, Typography, Stack, Button } from '@mui/material';
+import {
+  Container,
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Stack,
+  Button,
+  Chip,
+} from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 
 export function HomePage() {
   const [value, setValue] = useState('# Hello from monorepo editor');
 
   return (
-    <Box sx={{ bgcolor: 'background.paper', pb: 6 }}>
-      <Container maxWidth="lg">
+    <Box sx={{ bgcolor: 'background.default', pb: 6 }}>
+      <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 6 } }}>
         <Box
           sx={{
-            pt: { xs: 6, sm: 8 },
-            pb: { xs: 4, sm: 6 },
-            px: { xs: 2, sm: 4 },
+            py: { xs: 6, sm: 8 },
+            px: { xs: 3, sm: 5 },
             textAlign: { xs: 'center', md: 'left' },
             borderRadius: 4,
             backgroundImage:
               'linear-gradient(135deg, #fef3c7 0%, #fffbeb 40%, #ffffff 100%)',
+            border: '1px solid rgba(249, 250, 251, 0.8)',
           }}
         >
+          <Chip
+            label="面向内容创作者"
+            color="primary"
+            size="small"
+            sx={{
+              mb: 2,
+              bgcolor: 'rgba(249, 115, 22, 0.08)',
+              color: 'primary.main',
+              fontWeight: 600,
+              alignSelf: { xs: 'center', md: 'flex-start' },
+            }}
+          />
           <Typography
             component="h1"
             variant="h3"
@@ -40,7 +61,7 @@ export function HomePage() {
             spacing={2}
             sx={{ mt: 4, justifyContent: { xs: 'center', md: 'flex-start' } }}
           >
-            <Button variant="contained" size="large">
+            <Button variant="contained" size="large" sx={{ px: 3.5 }}>
               立即开始写作
             </Button>
           </Stack>
@@ -62,6 +83,7 @@ export function HomePage() {
                   size="small"
                   component={RouterLink}
                   to="/examples/richtext"
+                  sx={{ borderRadius: 999, px: 2.4 }}
                 >
                   纯富文本模式
                 </Button>
@@ -70,6 +92,7 @@ export function HomePage() {
                   size="small"
                   component={RouterLink}
                   to="/examples/markdown-sync"
+                  sx={{ borderRadius: 999, px: 2.4 }}
                 >
                   Markdown 联动模式
                 </Button>
@@ -78,6 +101,7 @@ export function HomePage() {
                   size="small"
                   component={RouterLink}
                   to="/examples/dual-view"
+                  sx={{ borderRadius: 999, px: 2.4 }}
                 >
                   双视图模式
                 </Button>
@@ -86,13 +110,12 @@ export function HomePage() {
           </Box>
         </Box>
 
-        <Grid container spacing={4} sx={{ pb: 4, mt: 2 }}>
+        <Grid container spacing={3} sx={{ pb: 4, mt: 4 }}>
           <Grid item xs={12} md={7}>
             <Paper
-              elevation={3}
+              elevation={1}
               sx={{
-                p: 2,
-                borderRadius: 3,
+                p: 2.5,
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -125,12 +148,13 @@ export function HomePage() {
 
           <Grid item xs={12} md={5}>
             <Paper
-              elevation={1}
+              elevation={0}
               sx={{
-                p: 2,
-                borderRadius: 3,
+                p: 2.5,
                 height: '100%',
                 bgcolor: 'grey.50',
+                border: '1px solid',
+                borderColor: 'grey.200',
               }}
             >
               <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
@@ -145,9 +169,9 @@ export function HomePage() {
               </Typography>
               <Box
                 component="pre"
-                className="rounded-xl border border-slate-200 bg-slate-50 shadow-inner"
                 sx={{
                   m: 0,
+                  mt: 1,
                   p: 2,
                   whiteSpace: 'pre-wrap',
                   fontFamily:
@@ -155,6 +179,10 @@ export function HomePage() {
                   fontSize: 14,
                   maxHeight: 420,
                   overflow: 'auto',
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'grey.200',
+                  bgcolor: 'grey.50',
                 }}
               >
                 {value}
@@ -163,7 +191,7 @@ export function HomePage() {
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: 5 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
             为不同创作场景设计
           </Typography>
@@ -178,6 +206,12 @@ export function HomePage() {
                   borderColor: 'grey.200',
                   bgcolor: 'grey.50',
                   height: '100%',
+                  transition: 'all 0.18s ease-out',
+                  '&:hover': {
+                    borderColor: 'primary.light',
+                    boxShadow: 3,
+                    bgcolor: '#fff7ed',
+                  },
                 }}
               >
                 <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
