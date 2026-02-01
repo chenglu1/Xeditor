@@ -13,7 +13,8 @@
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
     "build:editor": "pnpm --filter @xeditor/editor run build",
-    "publish:editor": "pnpm --filter @xeditor/editor publish --access public --no-git-checks"
+    "publish:editor": "pnpm --filter @xeditor/editor publish --access public --no-git-checks",
+    "test:bundle": "pnpm run build:editor && node scripts/test-bundle.mjs"
   },
   "engines": {
     "node": ">=18.0.0"

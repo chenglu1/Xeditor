@@ -8,8 +8,7 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'XEditor',
-      fileName: (format) =>
-        format === 'es' ? 'index.esm.js' : format === 'cjs' ? 'index.cjs.js' : 'index.umd.js',
+      fileName: (format) => (format === 'es' ? 'index.esm.js' : 'index.cjs'),
       formats: ['es', 'cjs'],
     },
     rollupOptions: {
@@ -53,4 +52,3 @@ export default defineConfig({
     emptyOutDir: false,
   },
 });
-
