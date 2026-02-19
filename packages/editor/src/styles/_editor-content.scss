@@ -1,0 +1,278 @@
+// ────────────────────────────────────────────────────────────
+// Scrollbar utilities (textarea + editor scroll area)
+// ────────────────────────────────────────────────────────────
+.markdown-editor-textarea,
+.tiptap-editor-scrollable {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// ConfigurableTiptapEditor wrapper & ProseMirror content styles
+// ────────────────────────────────────────────────────────────
+.configurable-tiptap-editor {
+  .ProseMirror {
+    color: #344054;
+    font-size: 14px;
+    line-height: 1.7;
+
+    /* 标题样式 */
+    h1, h2, h3, h4, h5, h6 {
+      color: #141414;
+      font-weight: 600;
+      line-height: 1.25;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+
+    h1 { font-size: 20px; }
+    h2 { font-size: 18px; }
+    h3 { font-size: 16px; }
+    h4 { font-size: 14px; }
+    h5 { font-size: 14px; }
+    h6 { font-size: 14px; color: #141414; }
+
+    /* 段落样式 */
+    p {
+      margin-top: 0.75em;
+      margin-bottom: 0.75em;
+    }
+
+    /* 列表样式 */
+    ul, ol {
+      padding-left: 1.5em;
+      margin-top: 0.75em;
+      margin-bottom: 0.75em;
+    }
+
+    &:focus,
+    &:focus-visible {
+      outline: none;
+      border: none;
+    }
+
+    ul:not([data-type="taskList"]) {
+      list-style-type: disc;
+    }
+
+    ol {
+      list-style-type: decimal;
+    }
+
+    li {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+
+    ul:not([data-type="taskList"]) > li,
+    ol > li {
+      display: list-item;
+    }
+
+    /* Task List */
+    ul[data-type="taskList"] {
+      list-style: none !important;
+      padding-left: 0.25em !important;
+
+      > li {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        list-style-type: none !important;
+        gap: 0.5em;
+      }
+    }
+
+    /* 引用样式 */
+    blockquote {
+      border-left: 3px solid #e5e7eb;
+      padding-left: 1em;
+      margin-left: 0;
+      margin-right: 0;
+      margin-top: 0.75em;
+      margin-bottom: 0.75em;
+      font-style: italic;
+      color: #6b7280;
+    }
+
+    /* 代码样式 */
+    code {
+      background-color: #f3f4f6;
+      padding: 0.125em 0.25em;
+      border-radius: 0.25em;
+      font-size: 0.875em;
+      font-family: 'Courier New', monospace;
+    }
+
+    pre {
+      background-color: #1f2937;
+      color: #f9fafb;
+      padding: 1em;
+      border-radius: 0.5em;
+      overflow-x: auto;
+      margin-top: 1em;
+      margin-bottom: 1em;
+
+      code {
+        background-color: transparent;
+        padding: 0;
+        color: inherit;
+      }
+    }
+
+    /* 链接样式 */
+    a {
+      color: #3b82f6;
+      text-decoration: underline;
+
+      &:hover {
+        color: #2563eb;
+      }
+    }
+
+    /* 加粗、斜体、删除线 */
+    strong { font-weight: 600; color: #141414; }
+    em { font-style: italic; }
+    s, del { text-decoration: line-through; }
+    sub { vertical-align: sub; font-size: smaller; }
+    sup { vertical-align: super; font-size: smaller; }
+
+    /* 水平线 */
+    hr {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 2em;
+      margin-bottom: 2em;
+    }
+
+    /* 表格样式 */
+    table {
+      width: 100%;
+      max-width: 100%;
+      border-collapse: collapse;
+      margin-top: 1em;
+      margin-bottom: 1em;
+      display: table;
+      table-layout: fixed;
+    }
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 0.5em 0.75em;
+      text-align: left;
+      white-space: normal;
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover { background-color: #f9fafb; }
+    td:hover { background-color: #f3f4f6; }
+    th { background-color: #f9fafb; font-weight: 600; }
+
+    /* 图片样式 */
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.5em;
+      margin-top: 1em;
+      margin-bottom: 1em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        opacity: 0.9;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
+
+    .image-node-wrapper {
+      display: inline-block;
+      width: 100%;
+    }
+
+    /* 数学公式样式 */
+    .katex-display {
+      margin: 1.5em 0 !important;
+      padding: 0.5em 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .katex {
+      font-size: 1.1em;
+      line-height: 1.8;
+    }
+
+    .katex-inline {
+      display: inline-block;
+      margin: 0 0.2em;
+      vertical-align: middle;
+    }
+
+    .katex-block {
+      display: block;
+      margin: 1em 0;
+      padding: 0.75em 0;
+      text-align: center;
+    }
+
+    p:has(.katex) {
+      line-height: 2;
+      margin: 1em 0;
+    }
+
+    .katex + .katex { margin-left: 1em; }
+
+    /* 数学公式错误样式 */
+    .block-math-error,
+    .tiptap-mathematics-render.block-math-error,
+    .katex-error {
+      color: #cc0000 !important;
+    }
+
+    .block-math-error *,
+    .tiptap-mathematics-render.block-math-error * {
+      color: #cc0000 !important;
+    }
+
+    /* 文本对齐 */
+    .text-left    { text-align: left; }
+    .text-center  { text-align: center; }
+    .text-right   { text-align: right; }
+    .text-justify { text-align: justify; }
+
+    /* 高亮 */
+    mark {
+      background-color: #fef08a;
+      border-radius: 0.25em;
+      padding: 0.125em 0;
+    }
+
+    /* 占位符 */
+    p.is-editor-empty:first-child::before {
+      content: attr(data-placeholder);
+      float: left;
+      color: #9ca3af;
+      pointer-events: none;
+      height: 0;
+    }
+  }
+}
