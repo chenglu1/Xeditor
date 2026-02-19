@@ -38,7 +38,8 @@ pnpm build
 pnpm preview
 ```
 
-> `pnpm dev` / `pnpm build` 会自动先编译 `packages/editor`，再启动 / 构建 `apps/web`。
+> `pnpm dev` 会通过 Vite alias 直接引用 `packages/editor/src/` 源码，修改 editor 后即时热更新，**无需** `build:editor`。
+> `pnpm build` 同样走源码 bundle，能获得更好的 tree-shaking。
 
 ---
 
@@ -178,7 +179,7 @@ function MyEditor() {
 | `value` | `string` | `''` | 受控内容（Markdown / HTML）|
 | `contentType` | `'markdown' \| 'html'` | `'markdown'` | 内容格式 |
 | `placeholder` | `string` | `'开始输入...'` | 占位文本 |
-| `readOnly` | `boolean` | `false` | 只读模式 |
+| `readOnly` | `boolean` | `false` | 只读模式：内容区不可编辑，同时 toolbar 所有按钮自动置灰且不可点击 |
 | `showToolbar` | `boolean` | `true` | 显示工具栏 |
 | `toolbarButtons` | `ToolbarButton[]` | 全量 | 限制工具栏按钮，不传则显示全部 |
 | `dualView` | `boolean` | `false` | 双视图（富文本 + Markdown 源码）|
@@ -264,7 +265,41 @@ export const MyExtension = Extension.create({
 });
 ```
 
-### 样式开发规范
+### readOnly 工具栏禁用
+
+传入 `readOnly={true}` 后：
+
+- 内容区变为只读（Tiptap `editable: false`）
+- toolbar 包裹层自动应用 `filter: grayscale(1)` + `pointerEvents: none`，所有按钮视觉置灰且不可点击
+
+```tsx
+<ConfigurableTiptapEditor
+  value={content}
+  readOnly={readOnly}   // ← 传入即可，无需手动处理按钮状态
+  onChange={…}
+/>
+```
+
+### 开发环境 Vite Alias
+
+`apps/web/vite.config.ts` 配置了 alias，让 `@chenglu1/xeditor-editor` 在开发时解析到
+`packages/editor/src/index.ts` 源码，修改 editor 代码后 Vite 即时热更新，无需 `pnpm build:editor`：
+
+```ts
+resolve: {
+  alias: [
+    // CSS 子路径放前面（精确优先）
+    { find: '@chenglu1/xeditor-editor/dist/xeditor-editor.css',
+      replacement: path.resolve(__dirname, '../../packages/editor/dist/xeditor-editor.css') },
+    // JS 主入口指向源码
+    { find: '@chenglu1/xeditor-editor',
+      replacement: path.resolve(__dirname, '../../packages/editor/src/index.ts') },
+  ],
+}
+```
+
+---
+
 
 - **禁止在 scss 文件中使用 `@import`**（已废弃，Dart Sass 3.0 将移除）
 - 使用 `@use` 替代，在 `styles/index.scss` 集中汇总

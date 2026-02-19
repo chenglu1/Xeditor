@@ -111,6 +111,34 @@ const shouldShowButton = (button: ToolbarButton) => {
 };
 ```
 
+### 4. readOnly 工具栏禁用机制
+
+`ConfigurableTiptapEditor` 接收 `readOnly?: boolean` prop，传递给 `SingleViewEditor` 和 `DualViewEditor`。
+当 `readOnly=true` 时：
+
+- Tiptap editor 设置 `editable: false`（内容区不可编辑）
+- toolbar 包裹层应用 CSS filter 实现视觉置灰 + 禁止交互：
+
+```tsx
+// SingleViewEditor.tsx / DualViewEditor.tsx
+<div
+  style={{
+    position: 'relative',
+    ...(readOnly && {
+      filter: 'grayscale(1)',   // 视觉置灰
+      opacity: 0.45,           // 淡化
+      pointerEvents: 'none',   // 禁止所有鼠标交互（子元素继承）
+      userSelect: 'none',
+    }),
+  }}
+>
+  <EditorToolbar ... />
+</div>
+```
+
+> ⚠️ 不要用独立的 overlay div + `pointerEvents: 'none'`——那样 overlay 自身不拦截事件，鼠标会穿透到按钮。
+> 正确做法是 **在 toolbar 包裹层本身** 设置 `pointerEvents: 'none'`。
+
 ---
 
 ## 文件目录速查
@@ -190,10 +218,10 @@ type ImageUploadHandler = (
 ## 构建命令
 
 ```bash
-# 开发
-pnpm dev                    # 先 build:editor，再启动 web dev server
+# 开发（alias 模式：直接引用 editor 源码，HMR 无需 rebuild）
+pnpm dev
 
-# 组件库打包
+# 组件库打包（修改 packages/editor 后、发布前必须执行）
 pnpm build:editor           # 输出 dist/*.d.ts + dist/xeditor-editor.css + dist/index.esm.js + dist/index.cjs
 
 # 验证 bundle
@@ -202,6 +230,28 @@ pnpm test:bundle            # build:editor + node 导入验证
 # 发布
 pnpm publish:editor         # build + npm publish --access public
 ```
+
+## 开发环境配置（apps/web Vite alias）
+
+`apps/web/vite.config.ts` 通过 alias 在开发时直接引用 `packages/editor/src/index.ts`，
+修改 editor 源码后 Vite 会热重载，**无需手动 `pnpm build:editor`**。
+
+```ts
+resolve: {
+  alias: [
+    // CSS 子路径排前面（更具体优先）
+    { find: '@chenglu1/xeditor-editor/dist/xeditor-editor.css',
+      replacement: '../../packages/editor/dist/xeditor-editor.css' },
+    // JS 主入口指向源码
+    { find: '@chenglu1/xeditor-editor',
+      replacement: '../../packages/editor/src/index.ts' },
+  ],
+}
+```
+
+> ⚠️ 生产环境（`vite build`）同样走源码，能获得更好的 tree-shaking 效果，但需确保构建时
+> TypeScript 依赖能正常解析（通常已满足）。如需生产走 dist，在 alias 数组前加
+> `command === 'serve'` 条件判断即可。
 
 ## 样式规范
 

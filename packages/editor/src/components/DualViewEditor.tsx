@@ -161,17 +161,29 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
                   style={{ border: 'none', borderRadius: 0 }}
                 >
                   <EditorContext.Provider value={{ editor }}>
-                    <EditorToolbar
-                      config={toolbarConfig}
-                      isMobile={isMobile}
-                      additionalContent={
-                        <ModeSwitchButtons
-                          activeMode={activeMode}
-                          onRichtextClick={handleRichtextClick}
-                          onMarkdownClick={handleMarkdownClick}
-                        />
-                      }
-                    />
+                    <div
+                      style={{
+                        position: 'relative',
+                        ...(readOnly && {
+                          filter: 'grayscale(1)',
+                          opacity: 0.45,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        }),
+                      }}
+                    >
+                      <EditorToolbar
+                        config={toolbarConfig}
+                        isMobile={isMobile}
+                        additionalContent={
+                          <ModeSwitchButtons
+                            activeMode={activeMode}
+                            onRichtextClick={handleRichtextClick}
+                            onMarkdownClick={handleMarkdownClick}
+                          />
+                        }
+                      />
+                    </div>
                     <div
                       style={{
                         padding: '12px',

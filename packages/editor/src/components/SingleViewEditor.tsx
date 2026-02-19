@@ -15,6 +15,7 @@ interface SingleViewEditorProps {
   toolbarConfig: ToolbarConfig;
   isMobile: boolean;
   className?: string;
+  readOnly?: boolean;
 }
 
 export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
@@ -26,6 +27,7 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
   toolbarConfig,
   isMobile,
   className = '',
+  readOnly = false,
 }) => {
   return (
     <div
@@ -43,7 +45,20 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
       >
         <EditorContext.Provider value={{ editor }}>
           {showToolbar && (
-            <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+            <div
+              style={{
+                position: 'relative',
+                ...(readOnly && {
+                  filter: 'grayscale(1)',
+                  opacity: 0.45,
+                  pointerEvents: 'none',
+                  userSelect: 'none',
+                  cursor: 'not-allowed',
+                }),
+              }}
+            >
+              <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+            </div>
           )}
 
           <div

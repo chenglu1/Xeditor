@@ -229,6 +229,7 @@ const ConfigurableTiptapEditor: React.FC<ConfigurableTiptapEditorProps> = ({
       toolbarConfig={toolbarConfig}
       isMobile={isMobile}
       className={className}
+      readOnly={readOnly}
     />
   );
 };
