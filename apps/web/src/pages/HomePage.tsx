@@ -140,7 +140,7 @@ export function HomePage() {
               <Button
                 variant="outlined"
                 size="large"
-                href="https://github.com/chenglu1/"
+                href="https://github.com/chenglu1/Xeditor"
                 target="_blank"
                 sx={{
                   px: 4,
