@@ -51,7 +51,7 @@ Xeditor/                        # pnpm workspace 根目录
 │   └── web/                    # 演示 Web 应用 (React 18 + Vite + MUI)
 │       └── src/
 │           ├── App.tsx          # 路由 + MUI 主题
-│           └── pages/           # HomePage / RichtextPage / MarkdownSyncPage / DualViewPage
+│           └── pages/           # HomePage / RichtextPage / MarkdownSyncPage / DualViewPage / StreamingPage
 └── packages/
     └── editor/                 # @chenglu1/xeditor-editor 组件库
         └── src/
@@ -223,6 +223,38 @@ const uploadHandler = async (file, onProgress, abortSignal) => {
 };
 
 <ConfigurableTiptapEditor uploadHandler={uploadHandler} />;
+```
+
+### 流式输出 / 只读预览
+
+模拟 AI 流式输出场景，逐步追加 Markdown 内容到编辑器：
+
+```tsx
+import FULL_MARKDOWN from './content.md?raw';  // Vite ?raw 导入
+
+function StreamingPreview() {
+  const [content, setContent] = useState('');
+
+  useEffect(() => {
+    let pos = 0;
+    const timer = setInterval(() => {
+      pos = Math.min(pos + 4, FULL_MARKDOWN.length);
+      setContent(FULL_MARKDOWN.slice(0, pos));
+      if (pos >= FULL_MARKDOWN.length) clearInterval(timer);
+    }, 30);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <ConfigurableTiptapEditor
+      value={content}
+      contentType="markdown"
+      readOnly
+      showToolbar={false}
+      onChange={() => {}}
+    />
+  );
+}
 ```
 
 ---

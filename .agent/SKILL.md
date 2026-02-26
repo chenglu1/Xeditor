@@ -213,6 +213,26 @@ type ImageUploadHandler = (
 2. 在 `apps/web/src/App.tsx` 增加 `<Route>` 条目
 3. 在 `AppBar` 的 `Toolbar` 里加导航按钮（可选）
 
+### E.1 流式输出 / 只读预览页面模式
+
+`StreamingPage.tsx` 展示了如何模拟 AI 流式输出到编辑器：
+
+1. 使用 Vite `?raw` 后缀导入 `.md` 文件作为纯文本字符串：
+   ```ts
+   import FULL_MARKDOWN from './streaming-demo.md?raw';
+   ```
+2. 通过 `setInterval` 定时器逐字追加到 `content` state
+3. 编辑器使用 `readOnly` + `showToolbar={false}` 呈现纯预览模式：
+   ```tsx
+   <ConfigurableTiptapEditor
+     value={content}
+     contentType="markdown"
+     readOnly
+     showToolbar={false}
+     onChange={() => {}}
+   />
+   ```
+
 ---
 
 ## 构建命令

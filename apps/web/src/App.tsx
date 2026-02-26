@@ -14,6 +14,7 @@ import { HomePage } from './pages/HomePage';
 import { RichtextPage } from './pages/RichtextPage';
 import { MarkdownSyncPage } from './pages/MarkdownSyncPage';
 import { DualViewPage } from './pages/DualViewPage';
+import { StreamingPage } from './pages/StreamingPage';
 
 const GITHUB_REPO_URL = 'https://github.com/chenglu1/Xeditor';
 
@@ -144,6 +145,7 @@ function NavBar() {
               { label: '富文本', to: '/examples/richtext' },
               { label: 'Markdown', to: '/examples/markdown-sync' },
               { label: '双视图', to: '/examples/dual-view' },
+              { label: '流式输出', to: '/examples/streaming' },
             ].map(({ label, to }) => (
               <Button
                 key={to}
@@ -196,6 +198,7 @@ export function App() {
             <Route path="/examples/richtext" element={<RichtextPage />} />
             <Route path="/examples/markdown-sync" element={<MarkdownSyncPage />} />
             <Route path="/examples/dual-view" element={<DualViewPage />} />
+            <Route path="/examples/streaming" element={<StreamingPage />} />
           </Routes>
         </Box>
 
