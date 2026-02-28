@@ -1,3 +1,6 @@
+// 自动导入样式，使用方无需手动引入
+import './styles/index.scss';
+
 export { default as ConfigurableTiptapEditor } from './ConfigurableTiptapEditor';
 export type {
   ConfigurableTiptapEditorProps,

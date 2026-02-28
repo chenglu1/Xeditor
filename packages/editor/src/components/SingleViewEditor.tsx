@@ -33,34 +33,43 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
     <div
       className={`configurable-tiptap-editor ${compact ? 'compact-mode' : ''} ${className}`}
     >
-      <div
-        className="editor-wrapper"
-        style={{
-          border: compact ? 'none' : '1px solid #e5e7eb',
-          borderRadius: compact ? '0' : '8px',
-          overflow: 'hidden',
-          backgroundColor: compact ? 'transparent' : 'white',
-          boxShadow: compact ? 'none' : undefined,
-        }}
-      >
-        <EditorContext.Provider value={{ editor }}>
-          {showToolbar && (
-            <div
-              style={{
-                position: 'relative',
-                ...(readOnly && {
-                  filter: 'grayscale(1)',
-                  opacity: 0.45,
-                  pointerEvents: 'none',
-                  userSelect: 'none',
-                  cursor: 'not-allowed',
-                }),
-              }}
-            >
-              <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
-            </div>
-          )}
+      <EditorContext.Provider value={{ editor }}>
+        {showToolbar && (
+          <div
+            style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 10,
+              backgroundColor: compact ? 'transparent' : 'white',
+              borderTopLeftRadius: compact ? '0' : '8px',
+              borderTopRightRadius: compact ? '0' : '8px',
+              border: compact ? 'none' : '1px solid #e5e7eb',
+              borderBottom: compact ? 'none' : '1px solid #e5e7eb',
+              ...(readOnly && {
+                filter: 'grayscale(1)',
+                opacity: 0.45,
+                pointerEvents: 'none',
+                userSelect: 'none',
+                cursor: 'not-allowed',
+              }),
+            }}
+          >
+            <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+          </div>
+        )}
 
+        <div
+          className="editor-wrapper"
+          style={{
+            border: compact ? 'none' : '1px solid #e5e7eb',
+            borderTop: showToolbar && !compact ? 'none' : compact ? 'none' : '1px solid #e5e7eb',
+            borderBottomLeftRadius: compact ? '0' : '8px',
+            borderBottomRightRadius: compact ? '0' : '8px',
+            overflow: 'hidden',
+            backgroundColor: compact ? 'transparent' : 'white',
+            boxShadow: compact ? 'none' : undefined,
+          }}
+        >
           <div
             style={{
               minHeight,
@@ -74,8 +83,8 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
           </div>
 
           <TableFloatingToolbar editor={editor} />
-        </EditorContext.Provider>
-      </div>
+        </div>
+      </EditorContext.Provider>
     </div>
   );
 };

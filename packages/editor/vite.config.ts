@@ -4,6 +4,14 @@ import path from 'node:path';
 
 export default defineConfig({
   plugins: [react()],
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 确保 SCSS 能正确编译
+        api: 'modern-compiler',
+      },
+    },
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
@@ -46,6 +54,8 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
         },
+        // 确保 CSS 被提取到单独文件
+        assetFileNames: 'xeditor-editor.[ext]',
       },
     },
     sourcemap: false,

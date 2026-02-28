@@ -147,11 +147,7 @@ npm install @chenglu1/xeditor-editor
 pnpm add @chenglu1/xeditor-editor
 ```
 
-引入样式（在项目入口导入一次）：
-
-```ts
-import '@chenglu1/xeditor-editor/dist/xeditor-editor.css';
-```
+> ✅ **样式已自动包含**：从 v0.0.2 起，CSS 已内置到组件中，无需手动导入样式文件。
 
 ### 基础用法
 

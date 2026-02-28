@@ -151,39 +151,46 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
               height: '450px',
             }}
           >
-            <div
-              style={{ flex: 1, minHeight: 0, overflow: 'auto' }}
-              className="tiptap-editor-scrollable"
-            >
-              <div className="configurable-tiptap-editor">
-                <div
-                  className="editor-wrapper"
-                  style={{ border: 'none', borderRadius: 0 }}
-                >
-                  <EditorContext.Provider value={{ editor }}>
-                    <div
-                      style={{
-                        position: 'relative',
-                        ...(readOnly && {
-                          filter: 'grayscale(1)',
-                          opacity: 0.45,
-                          pointerEvents: 'none',
-                          userSelect: 'none',
-                        }),
-                      }}
-                    >
-                      <EditorToolbar
-                        config={toolbarConfig}
-                        isMobile={isMobile}
-                        additionalContent={
-                          <ModeSwitchButtons
-                            activeMode={activeMode}
-                            onRichtextClick={handleRichtextClick}
-                            onMarkdownClick={handleMarkdownClick}
-                          />
-                        }
-                      />
-                    </div>
+            <EditorContext.Provider value={{ editor }}>
+              {/* 工具栏固定在顶部 */}
+              <div
+                style={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 10,
+                  backgroundColor: 'white',
+                  borderBottom: '1px solid #e5e7eb',
+                  ...(readOnly && {
+                    filter: 'grayscale(1)',
+                    opacity: 0.45,
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                  }),
+                }}
+              >
+                <EditorToolbar
+                  config={toolbarConfig}
+                  isMobile={isMobile}
+                  additionalContent={
+                    <ModeSwitchButtons
+                      activeMode={activeMode}
+                      onRichtextClick={handleRichtextClick}
+                      onMarkdownClick={handleMarkdownClick}
+                    />
+                  }
+                />
+              </div>
+
+              {/* 可滚动的编辑器内容区 */}
+              <div
+                style={{ flex: 1, minHeight: 0, overflow: 'auto' }}
+                className="tiptap-editor-scrollable"
+              >
+                <div className="configurable-tiptap-editor">
+                  <div
+                    className="editor-wrapper"
+                    style={{ border: 'none', borderRadius: 0, overflow: 'visible' }}
+                  >
                     <div
                       style={{
                         padding: '12px',
@@ -194,10 +201,10 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
                       <EditorContent editor={editor} className="tiptap" />
                     </div>
                     <TableFloatingToolbar editor={editor} />
-                  </EditorContext.Provider>
+                  </div>
                 </div>
               </div>
-            </div>
+            </EditorContext.Provider>
           </div>
         )}
       </div>
