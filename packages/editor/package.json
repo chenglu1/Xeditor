@@ -1,6 +1,6 @@
 {
   "name": "@chenglu1/xeditor-editor",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
   "type": "module",
   "main": "dist/index.cjs",
@@ -9,6 +9,15 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chenglu1/Xeditor.git",
+    "directory": "packages/editor"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
@@ -56,8 +65,5 @@
     "build": "pnpm run build:types && pnpm run build:css && pnpm run build:lib",
     "prepublishOnly": "pnpm run build",
     "publish:public": "pnpm run build && pnpm publish --access public --no-git-checks"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
