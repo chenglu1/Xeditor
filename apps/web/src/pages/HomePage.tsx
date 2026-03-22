@@ -310,6 +310,7 @@ export function HomePage() {
                   <ConfigurableTiptapEditor
                     value={value}
                     valueType="markdown"
+                    presets={['base', 'formatting', 'table', 'math', 'media', 'details', 'markdownDialect']}
                     dualView
                     disabled={demoDisabled}
                     uploadHandler={handleDemoImageUpload}

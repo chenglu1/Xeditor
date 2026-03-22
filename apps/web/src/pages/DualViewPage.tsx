@@ -130,6 +130,7 @@ export function DualViewPage() {
                 <ConfigurableTiptapEditor
                   value={content}
                   valueType="markdown"
+                  presets={['base', 'formatting', 'table', 'math', 'media', 'markdownDialect']}
                   dualView
                   disabled={disabled}
                   uploadHandler={handleDemoImageUpload}

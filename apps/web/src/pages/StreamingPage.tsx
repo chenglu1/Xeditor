@@ -342,6 +342,7 @@ export function StreamingPage() {
                 <ConfigurableTiptapEditor
                   value={content}
                   valueType="markdown"
+                  presets={['base', 'formatting', 'table', 'math', 'markdownDialect']}
                   readOnly
                   showToolbar={false}
                 />
