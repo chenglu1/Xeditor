@@ -11,7 +11,10 @@ import {
   Button,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
+import {
+  ConfigurableTiptapEditor,
+  type EditorUpdateEvent,
+} from '@chenglu1/xeditor-editor';
 
 const USE_CASES = ['需要导出 Markdown 的知识库系统', '产品/设计/研发协同撰写的规格文档', '需要严格版本管理和审阅的说明文档'];
 
@@ -20,6 +23,12 @@ export function DualViewPage() {
   const [content, setContent] = useState(
     `# 双视图演示\n\n左侧为富文本编辑器，右侧为 Markdown 源码，实时联动。\n\n## 特性\n\n- 富文本操作实时同步到 Markdown\n- Markdown 编辑实时同步到富文本\n- 支持数学公式：$f(x) = x^2 + 1$`,
   );
+
+  const handleContentUpdate = (event: EditorUpdateEvent) => {
+    if (event.valueType === 'markdown') {
+      setContent(event.value as string);
+    }
+  };
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
@@ -120,10 +129,10 @@ export function DualViewPage() {
                 </Typography>
                 <ConfigurableTiptapEditor
                   value={content}
-                  contentType="markdown"
+                  valueType="markdown"
                   dualView
                   readOnly={readOnly}
-                  onChange={(next: string) => setContent(next)}
+                  onUpdate={handleContentUpdate}
                 />
               </Box>
             </Paper>

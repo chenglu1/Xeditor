@@ -16,17 +16,17 @@ export const CustomReactComponent = ({
     <NodeViewWrapper className="custom-react-node">
       <div
         style={{
-          border: '2px solid #3b82f6',
+          border: '2px solid var(--xeditor-control-active-border)',
           borderRadius: '8px',
           padding: '16px',
           margin: '8px 0',
-          backgroundColor: '#eff6ff',
+          backgroundColor: 'var(--xeditor-control-active-bg)',
         }}
       >
-        <h4 style={{ margin: '0 0 8px 0', color: '#1e40af' }}>
+        <h4 style={{ margin: '0 0 8px 0', color: 'var(--xeditor-control-active-text)' }}>
           Custom React Component
         </h4>
-        <p style={{ margin: 0, color: '#374151' }}>
+        <p style={{ margin: 0, color: 'var(--xeditor-text-color)' }}>
           {String(node.attrs.content || 'This is a custom React node view!')}
         </p>
         <div>

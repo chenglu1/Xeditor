@@ -11,7 +11,10 @@ import {
   Button,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
+import {
+  ConfigurableTiptapEditor,
+  type EditorUpdateEvent,
+} from '@chenglu1/xeditor-editor';
 
 const USE_CASES = ['API 文档、技术 RFC', '技术博客、知识库文章', '需要长期维护的项目说明'];
 
@@ -20,6 +23,12 @@ export function MarkdownSyncPage() {
   const [content, setContent] = useState(
     `# Markdown 联动演示\n\n在左侧编辑器输入内容，右侧可查看 Markdown 源码。\n\n## 支持的特性\n\n- **加粗**、*斜体*、~~删除线~~\n- 代码块与行内代码\n- 表格与任务清单`,
   );
+
+  const handleContentUpdate = (event: EditorUpdateEvent) => {
+    if (event.valueType === 'markdown') {
+      setContent(event.value as string);
+    }
+  };
 
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
@@ -120,9 +129,9 @@ export function MarkdownSyncPage() {
                 </Typography>
                 <ConfigurableTiptapEditor
                   value={content}
-                  contentType="markdown"
+                  valueType="markdown"
                   readOnly={readOnly}
-                  onChange={(next: string) => setContent(next)}
+                  onUpdate={handleContentUpdate}
                 />
               </Box>
             </Paper>

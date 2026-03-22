@@ -5,7 +5,9 @@ import {
   type ReactNodeViewProps,
 } from '@tiptap/react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
+
+import type { EditorLogger } from '../../types';
 
 const PreviewModal = styled.div`
   display: flex;
@@ -16,8 +18,8 @@ const PreviewModal = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85);
-  z-index: 9999;
+  background-color: var(--xeditor-backdrop-color);
+  z-index: var(--xeditor-overlay-z-index);
   overflow: hidden;
 `;
 
@@ -50,27 +52,27 @@ const Toolbar = styled.div`
   display: flex;
   gap: 12px;
   padding: 12px 20px;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--xeditor-overlay-surface);
   border-radius: 8px;
   backdrop-filter: blur(10px);
-  z-index: 10000;
+  z-index: calc(var(--xeditor-overlay-z-index) + 1);
 `;
 
 const ToolButton = styled.button`
   width: 36px;
   height: 36px;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--xeditor-overlay-control-bg);
   border-radius: 6px;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   transition: all 0.2s ease;
-  color: #fff;
+  color: var(--xeditor-overlay-text);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--xeditor-overlay-control-hover-bg);
     transform: scale(1.1);
   }
 
@@ -92,17 +94,17 @@ const CloseButton = styled.button`
   height: 40px;
   border-radius: 50%;
   border: none;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--xeditor-overlay-surface);
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10001;
+  z-index: calc(var(--xeditor-overlay-z-index) + 2);
   transition: all 0.2s ease;
-  color: #fff;
+  color: var(--xeditor-overlay-text);
 
   &:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--xeditor-overlay-surface-strong);
     transform: scale(1.1);
   }
 
@@ -118,15 +120,19 @@ const ZoomInfo = styled.div`
   left: 50%;
   transform: translateX(-50%);
   padding: 8px 16px;
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
+  background: var(--xeditor-overlay-surface);
+  color: var(--xeditor-overlay-text);
   border-radius: 6px;
   font-size: 14px;
-  z-index: 10000;
+  z-index: calc(var(--xeditor-overlay-z-index) + 1);
   backdrop-filter: blur(10px);
 `;
 
-const ImageView: React.FC<ReactNodeViewProps> = ({ node }) => {
+interface ImageViewProps extends ReactNodeViewProps {
+  logger?: EditorLogger;
+}
+
+const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
   const [showPreview, setShowPreview] = useState(false);
   const [scale, setScale] = useState(1);
   const [rotate, setRotate] = useState(0);
@@ -180,7 +186,10 @@ const ImageView: React.FC<ReactNodeViewProps> = ({ node }) => {
       document.exitFullscreen();
     } else {
       modal.requestFullscreen().catch((err) => {
-        console.error('Error attempting to enable fullscreen:', err);
+        logger?.error('Failed to enter image fullscreen preview.', {
+          phase: 'viewer',
+          error: err,
+        });
       });
     }
   };
@@ -355,7 +364,24 @@ const ImageView: React.FC<ReactNodeViewProps> = ({ node }) => {
 };
 
 export const CustomImage = Image.extend({
+  addOptions() {
+    const parentOptions = this.parent?.();
+
+    return {
+      ...parentOptions,
+      logger: undefined as EditorLogger | undefined,
+    } as any;
+  },
+
   addNodeView() {
-    return ReactNodeViewRenderer(ImageView);
+    const logger = (
+      this.options as typeof this.options & {
+        logger?: EditorLogger;
+      }
+    ).logger;
+
+    return ReactNodeViewRenderer((props) => (
+      <ImageView {...props} logger={logger} />
+    ));
   },
 });

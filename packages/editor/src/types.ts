@@ -1,6 +1,10 @@
+import type { AnyExtension, JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
+import type { ReactNode, Ref } from 'react';
 
 export type ContentType = 'markdown' | 'html';
+export type EditorValueType = 'json' | 'markdown' | 'html';
+export type EditorValue = string | JSONContent;
 
 export type ToolbarButton =
   | 'undo'
@@ -25,42 +29,175 @@ export type ToolbarButton =
   | 'alignJustify'
   | 'image';
 
-/** 图片上传函数类型 */
-export type ImageUploadHandler = (
+export interface ToolbarCustomItem {
+  type: 'custom';
+  id: string;
+}
+
+export type ToolbarItem = ToolbarButton | ToolbarCustomItem;
+export type ToolbarSchema = ToolbarItem[][];
+
+export type EditorExtensionPlacement =
+  | 'append'
+  | 'prepend'
+  | 'before'
+  | 'after'
+  | 'replace';
+
+export interface EditorExtensionCompositionItem {
+  key: string;
+  extension: AnyExtension | AnyExtension[];
+  placement?: EditorExtensionPlacement;
+  target?: string;
+}
+
+export type ToolbarRenderItem = (context: {
+  item: ToolbarItem;
+  isMobile: boolean;
+  supportedToolbarButtons: ToolbarButton[];
+}) => ReactNode;
+
+export type EditorPresetName =
+  | 'base'
+  | 'formatting'
+  | 'table'
+  | 'math'
+  | 'media'
+  | 'details'
+  | 'markdownDialect';
+
+export interface MarkdownDialectOptions {
+  normalizeListIndentation?: boolean;
+  normalizeTables?: boolean;
+  preserveOrderedListStart?: boolean;
+  textAlignSyntax?: 'disabled' | 'directive';
+  standaloneImageSpacing?: boolean;
+}
+
+export interface EditorUpdateEvent {
+  value: EditorValue;
+  valueType: EditorValueType;
+  characterCount: number;
+  wordCount?: number;
+  source: 'user' | 'external-sync' | 'mode-switch';
+}
+
+export interface EditorErrorEvent {
+  phase:
+    | 'init'
+    | 'parse'
+    | 'serialize'
+    | 'upload'
+    | 'viewer'
+    | 'mode-switch';
+  error: Error;
+  recoverable: boolean;
+}
+
+export interface EditorLogger {
+  warn: (message: string, context?: Record<string, unknown>) => void;
+  error: (message: string, context?: Record<string, unknown>) => void;
+}
+
+export interface EditorHtmlSanitizeContext {
+  source: 'static-viewer';
+  valueType: EditorValueType;
+  value: EditorValue;
+}
+
+export type EditorHtmlSanitizer = (
+  html: string,
+  context: EditorHtmlSanitizeContext,
+) => string;
+
+export interface UploadedAsset {
+  src: string;
+  alt?: string;
+  title?: string;
+  width?: number;
+  height?: number;
+  mimeType?: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface AssetUploadContext {
+  onProgress?: (event: { progress: number }) => void;
+  abortSignal?: AbortSignal;
+}
+
+export type AssetUploadResult = string | UploadedAsset;
+
+export type AssetUploadHandler = (
   file: File,
-  onProgress?: (event: { progress: number }) => void,
-  abortSignal?: AbortSignal,
-) => Promise<string>;
+  context?: AssetUploadContext,
+) => Promise<AssetUploadResult>;
+
+export type ImageUploadHandler = AssetUploadHandler;
+
+export interface MediaUploadHooks {
+  beforeUpload?: (files: File[]) => Promise<File[] | void> | File[] | void;
+  validateFile?: (file: File) => Error | null | void;
+  transformFile?: (file: File) => Promise<File> | File;
+  onUploadStart?: (file: File) => void;
+  onUploadProgress?: (file: File, progress: number) => void;
+  onUploadSuccess?: (file: File, asset: UploadedAsset) => void;
+  onUploadError?: (file: File, error: Error) => void;
+}
+
+export interface EditorMessages {
+  loading: string;
+  modeRichText: string;
+  modeMarkdown: string;
+  uploadClickOrDrop: string;
+  uploadLimit: (context: { limit: number; maxSizeMB: number }) => string;
+  uploadInProgress: (context: { count: number }) => string;
+  clearAllUploads: string;
+}
 
 export interface ConfigurableTiptapEditorProps {
-  // 内容相关
-  value?: string; // 编辑器内容
-  contentType?: ContentType; // 内容格式类型：'markdown' 或 'html'
-  placeholder?: string; // 占位符
-  readOnly?: boolean; // 是否只读
-  maxLength?: number; // 最大字符数限制
+  value?: EditorValue;
+  defaultValue?: EditorValue;
+  valueType?: EditorValueType;
+  contentType?: ContentType;
+  placeholder?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
+  maxLength?: number;
 
-  // 工具栏相关
-  showToolbar?: boolean; // 是否显示工具栏
-  toolbarButtons?: ToolbarButton[]; // 显示哪些工具栏按钮，不传则显示全部
-  dualView?: boolean; // 是否启用双视图模式（左侧源码，右侧编辑器）
+  showToolbar?: boolean;
+  toolbarButtons?: ToolbarButton[];
+  supportedToolbarButtons?: ToolbarButton[];
+  toolbarSchema?: ToolbarSchema;
+  renderToolbarItem?: ToolbarRenderItem;
+  dualView?: boolean;
 
-  // 样式相关
-  className?: string; // 自定义类名
-  minHeight?: string; // 最小高度
-  compact?: boolean; // 紧凑模式 - 用于卡片内嵌入显示,移除边框和内边距
+  className?: string;
+  minHeight?: string;
+  compact?: boolean;
+  viewerMode?: 'static' | 'editor-shell';
+  messages?: Partial<EditorMessages>;
+  sanitizeHtml?: EditorHtmlSanitizer;
+  logger?: Partial<EditorLogger>;
 
-  // 上传相关
-  uploadHandler?: ImageUploadHandler; // 自定义图片上传函数
-  uploadUrl?: string; // 自定义上传接口 URL
-  maxFileSize?: number; // 最大文件大小，默认 5MB
+  uploadHandler?: AssetUploadHandler;
+  uploadUrl?: string;
+  maxFileSize?: number;
+  mediaUpload?: MediaUploadHooks;
 
-  // 回调函数
+  presets?: EditorPresetName[];
+  extensions?: AnyExtension[];
+  extensionComposition?: EditorExtensionCompositionItem[];
+  disableBuiltIns?: string[];
+  markdownDialect?: MarkdownDialectOptions;
+
+  editorRef?: Ref<Editor | null>;
+  onUpdate?: (event: EditorUpdateEvent) => void;
+  onError?: (event: EditorErrorEvent) => void;
   onChange?: (
     content: string,
     contentType: ContentType,
     characterCount?: number,
-  ) => void; // 内容变化回调
+  ) => void;
 }
 
 export interface ToolbarConfig {
@@ -70,11 +207,25 @@ export interface ToolbarConfig {
   showScript: boolean;
   showAlign: boolean;
   showImage: boolean;
+  supportedToolbarButtons: ToolbarButton[];
+  toolbarSchema: ToolbarSchema;
+  renderToolbarItem?: ToolbarRenderItem;
   shouldShowButton: (button: ToolbarButton) => boolean;
 }
 
 export interface EditorContextType {
   editor: Editor;
 }
+
+export const DEFAULT_EDITOR_MESSAGES: EditorMessages = {
+  loading: 'Loading editor...',
+  modeRichText: 'Rich text mode',
+  modeMarkdown: 'Markdown mode',
+  uploadClickOrDrop: 'Click to upload or drag and drop',
+  uploadLimit: ({ limit, maxSizeMB }) =>
+    `Maximum ${limit} file${limit === 1 ? '' : 's'}, ${maxSizeMB}MB each.`,
+  uploadInProgress: ({ count }) => `Uploading ${count} file${count === 1 ? '' : 's'}`,
+  clearAllUploads: 'Clear All',
+};
 
 declare module '@tiptap/react';

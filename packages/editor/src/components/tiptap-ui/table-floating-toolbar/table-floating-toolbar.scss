@@ -1,11 +1,11 @@
 @use "../../../styles/variables" as *;
 
 .table-floating-toolbar {
-  z-index: 10;
+  z-index: var(--xeditor-floating-z-index);
   animation: fadeInDown 0.2s ease-out;
   
   .table-toolbar-card {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--xeditor-accent-shadow);
     backdrop-filter: blur(8px);
     
     .card-body {
@@ -42,7 +42,7 @@
   }
   
   &:hover {
-    background: var(--hover-bg-color, rgba(99, 102, 241, 0.1));
+    background: var(--hover-bg-color, var(--xeditor-accent-bg-soft));
     transform: translateY(-1px);
   }
   
@@ -53,8 +53,8 @@
 
 .table-delete-btn {
   &:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: rgb(239, 68, 68);
+    background: var(--xeditor-danger-bg-soft);
+    color: var(--xeditor-danger-text);
   }
 }
 
@@ -69,7 +69,7 @@
   }
   
   &:hover {
-    background: rgba(239, 68, 68, 0.1);
-    color: rgb(239, 68, 68);
+    background: var(--xeditor-danger-bg-soft);
+    color: var(--xeditor-danger-text);
   }
 }

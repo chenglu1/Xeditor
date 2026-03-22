@@ -294,3 +294,124 @@
   --tt-color-highlight-orange-contrast: rgba(233, 126, 37, 0.2);
   --tt-color-highlight-pink-contrast: rgba(220, 76, 145, 0.22);
 }
+
+/* XEditor semantic theme tokens */
+:root {
+  --xeditor-shell-bg: var(--tt-card-bg-color);
+  --xeditor-shell-muted-bg: var(--tt-gray-light-50);
+  --xeditor-shell-border: var(--tt-border-color);
+  --xeditor-shell-border-strong: var(--tt-gray-light-a-300);
+  --xeditor-shell-radius: var(--tt-radius-md);
+  --xeditor-shell-shadow: none;
+  --xeditor-shell-gap: 0.5rem;
+  --xeditor-shell-padding: 0.75rem;
+  --xeditor-toolbar-height: 2.75rem;
+  --xeditor-toolbar-bg: var(--xeditor-shell-muted-bg);
+  --xeditor-toolbar-border: var(--tt-toolbar-border-color, var(--tt-border-color-tint));
+  --xeditor-toolbar-sticky-z-index: 10;
+  --xeditor-floating-z-index: 1000;
+  --xeditor-overlay-z-index: 9999;
+
+  --xeditor-control-bg: var(--white);
+  --xeditor-control-border: var(--tt-gray-light-300);
+  --xeditor-control-text: var(--tt-gray-light-700);
+  --xeditor-control-active-bg: #eff6ff;
+  --xeditor-control-active-border: #3b82f6;
+  --xeditor-control-active-text: #1d4ed8;
+  --xeditor-control-disabled-opacity: 0.5;
+
+  --xeditor-scrollbar-track: #f1f1f1;
+  --xeditor-scrollbar-thumb: #c1c1c1;
+  --xeditor-scrollbar-thumb-hover: #a8a8a8;
+
+  --xeditor-text-color: #344054;
+  --xeditor-heading-color: #141414;
+  --xeditor-blockquote-border: #e5e7eb;
+  --xeditor-blockquote-text: #6b7280;
+  --xeditor-inline-code-bg: #f3f4f6;
+  --xeditor-inline-code-text: #111827;
+  --xeditor-code-block-bg: #1f2937;
+  --xeditor-code-block-text: #f9fafb;
+  --xeditor-link-color: #3b82f6;
+  --xeditor-link-hover-color: #2563eb;
+  --xeditor-strong-color: var(--xeditor-heading-color);
+  --xeditor-divider-color: #e5e7eb;
+  --xeditor-table-border: #e5e7eb;
+  --xeditor-table-header-bg: #f9fafb;
+  --xeditor-table-row-hover-bg: #f9fafb;
+  --xeditor-table-cell-hover-bg: #f3f4f6;
+  --xeditor-image-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --xeditor-math-error-color: #cc0000;
+  --xeditor-mark-bg: #fef08a;
+  --xeditor-placeholder-color: #9ca3af;
+  --xeditor-markdown-textarea-bg: var(--xeditor-shell-bg);
+  --xeditor-markdown-text-color: #1f2937;
+  --xeditor-backdrop-color: rgba(0, 0, 0, 0.85);
+  --xeditor-overlay-surface: rgba(0, 0, 0, 0.7);
+  --xeditor-overlay-surface-strong: rgba(0, 0, 0, 0.8);
+  --xeditor-overlay-control-bg: rgba(255, 255, 255, 0.1);
+  --xeditor-overlay-control-hover-bg: rgba(255, 255, 255, 0.2);
+  --xeditor-overlay-text: var(--white);
+
+  --xeditor-danger-bg-soft: rgba(239, 68, 68, 0.1);
+  --xeditor-danger-text: rgb(239, 68, 68);
+  --xeditor-accent-bg-soft: rgba(99, 102, 241, 0.1);
+  --xeditor-accent-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+
+  --tiptap-image-upload-active-soft: rgba(98, 41, 255, 0.05);
+  --tiptap-image-upload-active-strong: rgba(98, 41, 255, 0.1);
+}
+
+.dark {
+  --xeditor-shell-bg: var(--tt-card-bg-color);
+  --xeditor-shell-muted-bg: var(--tt-gray-dark-100);
+  --xeditor-shell-border: var(--tt-border-color);
+  --xeditor-shell-border-strong: var(--tt-gray-dark-a-300);
+  --xeditor-toolbar-bg: var(--xeditor-shell-bg);
+
+  --xeditor-control-bg: var(--tt-gray-dark-50);
+  --xeditor-control-border: var(--tt-gray-dark-300);
+  --xeditor-control-text: var(--tt-gray-dark-800);
+  --xeditor-control-active-bg: rgba(59, 130, 246, 0.18);
+  --xeditor-control-active-border: #60a5fa;
+  --xeditor-control-active-text: #bfdbfe;
+
+  --xeditor-scrollbar-track: rgba(255, 255, 255, 0.08);
+  --xeditor-scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --xeditor-scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
+
+  --xeditor-text-color: var(--tt-gray-dark-800);
+  --xeditor-heading-color: var(--tt-gray-dark-900);
+  --xeditor-blockquote-border: var(--tt-gray-dark-a-300);
+  --xeditor-blockquote-text: var(--tt-gray-dark-600);
+  --xeditor-inline-code-bg: rgba(255, 255, 255, 0.08);
+  --xeditor-inline-code-text: var(--tt-gray-dark-900);
+  --xeditor-code-block-bg: #111827;
+  --xeditor-code-block-text: #f9fafb;
+  --xeditor-link-color: #60a5fa;
+  --xeditor-link-hover-color: #93c5fd;
+  --xeditor-divider-color: var(--tt-gray-dark-a-300);
+  --xeditor-table-border: var(--tt-gray-dark-a-300);
+  --xeditor-table-header-bg: rgba(255, 255, 255, 0.04);
+  --xeditor-table-row-hover-bg: rgba(255, 255, 255, 0.03);
+  --xeditor-table-cell-hover-bg: rgba(255, 255, 255, 0.05);
+  --xeditor-image-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --xeditor-markdown-textarea-bg: var(--xeditor-shell-bg);
+  --xeditor-markdown-text-color: var(--tt-gray-dark-900);
+  --xeditor-backdrop-color: rgba(0, 0, 0, 0.9);
+  --xeditor-overlay-surface: rgba(17, 24, 39, 0.78);
+  --xeditor-overlay-surface-strong: rgba(17, 24, 39, 0.9);
+  --xeditor-overlay-control-bg: rgba(255, 255, 255, 0.08);
+  --xeditor-overlay-control-hover-bg: rgba(255, 255, 255, 0.14);
+  --xeditor-danger-bg-soft: rgba(248, 113, 113, 0.14);
+  --xeditor-danger-text: rgb(252, 165, 165);
+  --xeditor-accent-bg-soft: rgba(129, 140, 248, 0.16);
+  --xeditor-accent-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.18);
+
+  --tiptap-image-upload-active-soft: rgba(122, 82, 255, 0.12);
+  --tiptap-image-upload-active-strong: rgba(122, 82, 255, 0.18);
+}

@@ -14,9 +14,15 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        advanced: path.resolve(__dirname, 'src/advanced.ts'),
+      },
       name: 'XEditor',
-      fileName: (format) => (format === 'es' ? 'index.esm.js' : 'index.cjs'),
+      fileName: (format, entryName) => {
+        const basename = entryName === 'advanced' ? 'advanced' : 'index';
+        return format === 'es' ? `${basename}.esm.js` : `${basename}.cjs`;
+      },
       formats: ['es', 'cjs'],
     },
     rollupOptions: {

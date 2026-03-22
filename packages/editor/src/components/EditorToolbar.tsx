@@ -1,6 +1,6 @@
 import React from 'react';
 
-import type { ToolbarConfig } from '../types';
+import type { ToolbarConfig, ToolbarItem } from '../types';
 import { BlockquoteButton } from './tiptap-ui/blockquote-button';
 import { CodeBlockButton } from './tiptap-ui/code-block-button';
 import { ColorHighlightPopover } from './tiptap-ui/color-highlight-popover';
@@ -24,112 +24,107 @@ interface EditorToolbarProps {
   additionalContent?: React.ReactNode;
 }
 
+function renderBuiltInToolbarItem(item: ToolbarItem) {
+  if (typeof item !== 'string') {
+    return null;
+  }
+
+  switch (item) {
+    case 'undo':
+      return <UndoRedoButton action="undo" />;
+    case 'redo':
+      return <UndoRedoButton action="redo" />;
+    case 'heading':
+      return <HeadingDropdownMenu levels={[1, 2, 3, 4]} />;
+    case 'list':
+      return (
+        <ListDropdownMenu types={['bulletList', 'orderedList', 'taskList']} />
+      );
+    case 'blockquote':
+      return <BlockquoteButton />;
+    case 'codeBlock':
+      return <CodeBlockButton />;
+    case 'table':
+      return <TableDropdownMenu />;
+    case 'bold':
+      return <MarkButton type="bold" />;
+    case 'italic':
+      return <MarkButton type="italic" />;
+    case 'strike':
+      return <MarkButton type="strike" />;
+    case 'code':
+      return <MarkButton type="code" />;
+    case 'underline':
+      return <MarkButton type="underline" />;
+    case 'highlight':
+      return <ColorHighlightPopover />;
+    case 'link':
+      return <LinkPopover />;
+    case 'superscript':
+      return <MarkButton type="superscript" />;
+    case 'subscript':
+      return <MarkButton type="subscript" />;
+    case 'alignLeft':
+      return <TextAlignButton align="left" />;
+    case 'alignCenter':
+      return <TextAlignButton align="center" />;
+    case 'alignRight':
+      return <TextAlignButton align="right" />;
+    case 'alignJustify':
+      return <TextAlignButton align="justify" />;
+    case 'image':
+      return <ImageUploadButton text="Add" />;
+    default:
+      return null;
+  }
+}
+
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   config,
   isMobile,
   additionalContent,
 }) => {
-  const {
-    showUndoRedo,
-    showStructure,
-    showFormatting,
-    showScript,
-    showAlign,
-    showImage,
-    shouldShowButton,
-  } = config;
+  const { toolbarSchema, renderToolbarItem, supportedToolbarButtons } = config;
 
   return (
     <Toolbar>
-      {/* 撤销重做 */}
-      {showUndoRedo && (
-        <>
+      {toolbarSchema.map((group, groupIndex) => (
+        <React.Fragment key={`toolbar-group-${groupIndex}`}>
           <ToolbarGroup>
-            {shouldShowButton('undo') && <UndoRedoButton action="undo" />}
-            {shouldShowButton('redo') && <UndoRedoButton action="redo" />}
-          </ToolbarGroup>
-          <ToolbarSeparator />
-        </>
-      )}
+            {group.map((item) => {
+              const customRendered = renderToolbarItem?.({
+                item,
+                isMobile,
+                supportedToolbarButtons,
+              });
 
-      {/* 结构化元素 */}
-      {showStructure && (
-        <>
-          <ToolbarGroup>
-            {shouldShowButton('heading') && (
-              <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
-            )}
-            {shouldShowButton('list') && (
-              <ListDropdownMenu
-                types={['bulletList', 'orderedList', 'taskList']}
-              />
-            )}
-            {shouldShowButton('blockquote') && <BlockquoteButton />}
-            {shouldShowButton('codeBlock') && <CodeBlockButton />}
-            {shouldShowButton('table') && <TableDropdownMenu />}
-          </ToolbarGroup>
-          <ToolbarSeparator />
-        </>
-      )}
+              if (customRendered !== undefined && customRendered !== null) {
+                return (
+                  <React.Fragment
+                    key={typeof item === 'string' ? item : item.id}
+                  >
+                    {customRendered}
+                  </React.Fragment>
+                );
+              }
 
-      {/* 文本格式化 */}
-      {showFormatting && (
-        <>
-          <ToolbarGroup>
-            {shouldShowButton('bold') && <MarkButton type="bold" />}
-            {shouldShowButton('italic') && <MarkButton type="italic" />}
-            {shouldShowButton('strike') && <MarkButton type="strike" />}
-            {shouldShowButton('code') && <MarkButton type="code" />}
-            {shouldShowButton('underline') && <MarkButton type="underline" />}
-            {shouldShowButton('highlight') && <ColorHighlightPopover />}
-            {shouldShowButton('link') && <LinkPopover />}
-          </ToolbarGroup>
-          <ToolbarSeparator />
-        </>
-      )}
+              const builtInElement = renderBuiltInToolbarItem(item);
+              if (!builtInElement) {
+                return null;
+              }
 
-      {/* 上标下标 */}
-      {showScript && (
-        <>
-          <ToolbarGroup>
-            {shouldShowButton('superscript') && (
-              <MarkButton type="superscript" />
-            )}
-            {shouldShowButton('subscript') && <MarkButton type="subscript" />}
+              return (
+                <React.Fragment
+                  key={typeof item === 'string' ? item : item.id}
+                >
+                  {builtInElement}
+                </React.Fragment>
+              );
+            })}
           </ToolbarGroup>
-          <ToolbarSeparator />
-        </>
-      )}
-
-      {/* 对齐 */}
-      {showAlign && (
-        <>
-          <ToolbarGroup>
-            {shouldShowButton('alignLeft') && <TextAlignButton align="left" />}
-            {shouldShowButton('alignCenter') && (
-              <TextAlignButton align="center" />
-            )}
-            {shouldShowButton('alignRight') && (
-              <TextAlignButton align="right" />
-            )}
-            {shouldShowButton('alignJustify') && (
-              <TextAlignButton align="justify" />
-            )}
-          </ToolbarGroup>
-          <ToolbarSeparator />
-        </>
-      )}
-
-      {/* 图片 */}
-      {showImage && (
-        <>
-          <ToolbarGroup>
-            <ImageUploadButton text="Add" />
-          </ToolbarGroup>
-        </>
-      )}
-
-      {/* 额外内容（如模式切换按钮） */}
+          {groupIndex < toolbarSchema.length - 1 && <ToolbarSeparator />}
+        </React.Fragment>
+      ))}
       {additionalContent}
     </Toolbar>
   );

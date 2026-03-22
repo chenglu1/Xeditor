@@ -11,13 +11,22 @@ import {
   Button,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
+import {
+  ConfigurableTiptapEditor,
+  type EditorUpdateEvent,
+} from '@chenglu1/xeditor-editor';
 
 const USE_CASES = ['活动落地页、产品介绍页', '帮助中心、公告通知', '不需保留 Markdown 的常规文案'];
 
 export function RichtextPage() {
   const [readOnly, setReadOnly] = useState(false);
   const [content, setContent] = useState('# 页面标题\n\n在这里开始你的内容，例如产品介绍或活动说明。');
+  const handleContentUpdate = (event: EditorUpdateEvent) => {
+    if (event.valueType === 'markdown') {
+      setContent(event.value as string);
+    }
+  };
+
   return (
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
       <Container maxWidth="lg" sx={{ py: 5 }}>
@@ -120,9 +129,9 @@ export function RichtextPage() {
                 </Typography>
                 <ConfigurableTiptapEditor
                   value={content}
-                  contentType="markdown"
+                  valueType="markdown"
                   readOnly={readOnly}
-                  onChange={(next: string) => setContent(next)}
+                  onUpdate={handleContentUpdate}
                 />
               </Box>
             </Paper>

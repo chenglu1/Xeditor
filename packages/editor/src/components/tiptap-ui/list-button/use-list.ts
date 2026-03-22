@@ -2,7 +2,7 @@
 
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import { type Editor } from '@tiptap/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
@@ -288,25 +288,9 @@ export function useList(config: UseListConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
-  const [isVisible, setIsVisible] = useState<boolean>(true);
   const canToggle = canToggleList(editor, type);
   const isActive = isListActive(editor, type);
-
-  useEffect(() => {
-    if (!editor) return;
-
-    const handleSelectionUpdate = () => {
-      setIsVisible(shouldShowButton({ editor, type, hideWhenUnavailable }));
-    };
-
-    handleSelectionUpdate();
-
-    editor.on('selectionUpdate', handleSelectionUpdate);
-
-    return () => {
-      editor.off('selectionUpdate', handleSelectionUpdate);
-    };
-  }, [editor, type, hideWhenUnavailable]);
+  const isVisible = shouldShowButton({ editor, type, hideWhenUnavailable });
 
   const handleToggle = useCallback(() => {
     if (!editor) return false;

@@ -10,11 +10,13 @@ import {
   Container,
 } from '@mui/material';
 import { Routes, Route, Link as RouterLink, useLocation } from 'react-router-dom';
+
 import { HomePage } from './pages/HomePage';
 import { RichtextPage } from './pages/RichtextPage';
 import { MarkdownSyncPage } from './pages/MarkdownSyncPage';
 import { DualViewPage } from './pages/DualViewPage';
 import { StreamingPage } from './pages/StreamingPage';
+import { GeneralizationPage } from './pages/GeneralizationPage';
 
 const GITHUB_REPO_URL = 'https://github.com/chenglu1/Xeditor';
 
@@ -73,7 +75,8 @@ const theme = createTheme({
       styleOverrides: {
         root: { borderRadius: 16 },
         elevation1: {
-          boxShadow: '0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.06)',
+          boxShadow:
+            '0 1px 3px 0 rgba(0,0,0,.06), 0 1px 2px -1px rgba(0,0,0,.06)',
         },
       },
     },
@@ -89,20 +92,29 @@ function NavBar() {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
+  const navItems = [
+    { label: 'Rich Text', to: '/examples/richtext' },
+    { label: 'Markdown', to: '/examples/markdown-sync' },
+    { label: 'Dual View', to: '/examples/dual-view' },
+    { label: 'Streaming', to: '/examples/streaming' },
+    { label: 'Generalized API', to: '/examples/generalized-api' },
+  ];
+
   return (
     <AppBar
       position="sticky"
       elevation={0}
       sx={{
         backdropFilter: 'blur(12px)',
-        backgroundColor: isHome ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.95)',
+        backgroundColor: isHome
+          ? 'rgba(255,255,255,0.85)'
+          : 'rgba(255,255,255,0.95)',
         borderBottom: '1px solid rgba(148,163,184,0.15)',
         color: 'text.primary',
       }}
     >
       <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ gap: 1 }}>
-          {/* Logo */}
           <Box
             component={RouterLink}
             to="/"
@@ -139,24 +151,22 @@ function NavBar() {
             </Typography>
           </Box>
 
-          {/* Nav links */}
           <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 0.5 }}>
-            {[
-              { label: '富文本', to: '/examples/richtext' },
-              { label: 'Markdown', to: '/examples/markdown-sync' },
-              { label: '双视图', to: '/examples/dual-view' },
-              { label: '流式输出', to: '/examples/streaming' },
-            ].map(({ label, to }) => (
+            {navItems.map(({ label, to }) => (
               <Button
                 key={to}
                 component={RouterLink}
                 to={to}
                 size="small"
                 sx={{
-                  color: location.pathname === to ? 'primary.main' : 'text.secondary',
+                  color:
+                    location.pathname === to ? 'primary.main' : 'text.secondary',
                   fontWeight: location.pathname === to ? 700 : 500,
                   px: 1.5,
-                  '&:hover': { color: 'primary.main', bgcolor: 'rgba(124,58,237,0.06)' },
+                  '&:hover': {
+                    color: 'primary.main',
+                    bgcolor: 'rgba(124,58,237,0.06)',
+                  },
                 }}
               >
                 {label}
@@ -184,7 +194,6 @@ export function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      {/* Google Fonts */}
       <link
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
@@ -196,13 +205,19 @@ export function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/examples/richtext" element={<RichtextPage />} />
-            <Route path="/examples/markdown-sync" element={<MarkdownSyncPage />} />
+            <Route
+              path="/examples/markdown-sync"
+              element={<MarkdownSyncPage />}
+            />
             <Route path="/examples/dual-view" element={<DualViewPage />} />
             <Route path="/examples/streaming" element={<StreamingPage />} />
+            <Route
+              path="/examples/generalized-api"
+              element={<GeneralizationPage />}
+            />
           </Routes>
         </Box>
 
-        {/* Footer */}
         <Box
           component="footer"
           sx={{
@@ -238,8 +253,12 @@ export function App() {
                 >
                   X
                 </Box>
-                <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                  Xeditor · 面向内容创作者的在线编辑器
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
+                  Xeditor · A reusable editor playground
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.disabled">

@@ -9,16 +9,16 @@
   }
 
   &::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--xeditor-scrollbar-track);
     border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
+    background: var(--xeditor-scrollbar-thumb);
     border-radius: 3px;
 
     &:hover {
-      background: #a8a8a8;
+      background: var(--xeditor-scrollbar-thumb-hover);
     }
   }
 }
@@ -28,13 +28,13 @@
 // ────────────────────────────────────────────────────────────
 .configurable-tiptap-editor {
   .ProseMirror {
-    color: #344054;
+    color: var(--xeditor-text-color);
     font-size: 14px;
     line-height: 1.7;
 
     /* 标题样式 */
     h1, h2, h3, h4, h5, h6 {
-      color: #141414;
+      color: var(--xeditor-heading-color);
       font-weight: 600;
       line-height: 1.25;
       margin-top: 0.5em;
@@ -46,7 +46,7 @@
     h3 { font-size: 16px; }
     h4 { font-size: 14px; }
     h5 { font-size: 14px; }
-    h6 { font-size: 14px; color: #141414; }
+    h6 { font-size: 14px; color: var(--xeditor-heading-color); }
 
     /* 段落样式 */
     p {
@@ -101,19 +101,20 @@
 
     /* 引用样式 */
     blockquote {
-      border-left: 3px solid #e5e7eb;
+      border-left: 3px solid var(--xeditor-blockquote-border);
       padding-left: 1em;
       margin-left: 0;
       margin-right: 0;
       margin-top: 0.75em;
       margin-bottom: 0.75em;
       font-style: italic;
-      color: #6b7280;
+      color: var(--xeditor-blockquote-text);
     }
 
     /* 代码样式 */
     code {
-      background-color: #f3f4f6;
+      background-color: var(--xeditor-inline-code-bg);
+      color: var(--xeditor-inline-code-text);
       padding: 0.125em 0.25em;
       border-radius: 0.25em;
       font-size: 0.875em;
@@ -121,8 +122,8 @@
     }
 
     pre {
-      background-color: #1f2937;
-      color: #f9fafb;
+      background-color: var(--xeditor-code-block-bg);
+      color: var(--xeditor-code-block-text);
       padding: 1em;
       border-radius: 0.5em;
       overflow-x: auto;
@@ -138,16 +139,16 @@
 
     /* 链接样式 */
     a {
-      color: #3b82f6;
+      color: var(--xeditor-link-color);
       text-decoration: underline;
 
       &:hover {
-        color: #2563eb;
+        color: var(--xeditor-link-hover-color);
       }
     }
 
     /* 加粗、斜体、删除线 */
-    strong { font-weight: 600; color: #141414; }
+    strong { font-weight: 600; color: var(--xeditor-strong-color); }
     em { font-style: italic; }
     s, del { text-decoration: line-through; }
     sub { vertical-align: sub; font-size: smaller; }
@@ -156,7 +157,7 @@
     /* 水平线 */
     hr {
       border: none;
-      border-top: 1px solid #e5e7eb;
+      border-top: 1px solid var(--xeditor-divider-color);
       margin-top: 2em;
       margin-bottom: 2em;
     }
@@ -173,7 +174,7 @@
     }
 
     th, td {
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--xeditor-table-border);
       padding: 0.5em 0.75em;
       text-align: left;
       white-space: normal;
@@ -183,9 +184,9 @@
       transition: background-color 0.2s ease;
     }
 
-    tbody tr:hover { background-color: #f9fafb; }
-    td:hover { background-color: #f3f4f6; }
-    th { background-color: #f9fafb; font-weight: 600; }
+    tbody tr:hover { background-color: var(--xeditor-table-row-hover-bg); }
+    td:hover { background-color: var(--xeditor-table-cell-hover-bg); }
+    th { background-color: var(--xeditor-table-header-bg); font-weight: 600; }
 
     /* 图片样式 */
     img {
@@ -199,7 +200,7 @@
 
       &:hover {
         opacity: 0.9;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: var(--xeditor-image-shadow-hover);
       }
     }
 
@@ -245,12 +246,12 @@
     .block-math-error,
     .tiptap-mathematics-render.block-math-error,
     .katex-error {
-      color: #cc0000 !important;
+      color: var(--xeditor-math-error-color) !important;
     }
 
     .block-math-error *,
     .tiptap-mathematics-render.block-math-error * {
-      color: #cc0000 !important;
+      color: var(--xeditor-math-error-color) !important;
     }
 
     /* 文本对齐 */
@@ -261,7 +262,7 @@
 
     /* 高亮 */
     mark {
-      background-color: #fef08a;
+      background-color: var(--xeditor-mark-bg);
       border-radius: 0.25em;
       padding: 0.125em 0;
     }
@@ -270,7 +271,7 @@
     p.is-editor-empty:first-child::before {
       content: attr(data-placeholder);
       float: left;
-      color: #9ca3af;
+      color: var(--xeditor-placeholder-color);
       pointer-events: none;
       height: 0;
     }

@@ -13,6 +13,7 @@
     "build": "pnpm --filter web build",
     "preview": "pnpm --filter web preview",
     "build:editor": "pnpm --filter @chenglu1/xeditor-editor run build",
+    "test:editor": "pnpm --filter @chenglu1/xeditor-editor test",
     "publish:editor": "pnpm --filter @chenglu1/xeditor-editor publish --access public --no-git-checks",
     "test:bundle": "pnpm run build:editor && node scripts/test-bundle.mjs"
   },

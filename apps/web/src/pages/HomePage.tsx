@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
+import {
+  ConfigurableTiptapEditor,
+  type EditorUpdateEvent,
+} from '@chenglu1/xeditor-editor';
 import {
   Container,
   Box,
@@ -46,6 +49,12 @@ export function HomePage() {
     `# 欢迎使用 Xeditor\n\n这里是一个**实时编辑**演示，试着修改内容看看效果。\n\n## 支持的功能\n\n- 标题、列表、表格\n- LaTeX 数学公式：$E = mc^2$\n- 图片上传与链接\n- 文本高亮与对齐\n\n> 从这里开始创作你的内容吧！`,
   );
   const [demoReadOnly, setDemoReadOnly] = useState(false);
+
+  const handleDemoUpdate = (event: EditorUpdateEvent) => {
+    if (event.valueType === 'markdown') {
+      setValue(event.value as string);
+    }
+  };
 
   return (
     <Box>
@@ -300,10 +309,10 @@ export function HomePage() {
                 <Box sx={{ p: 2 }}>
                   <ConfigurableTiptapEditor
                     value={value}
-                    contentType="markdown"
+                    valueType="markdown"
                     dualView
                     readOnly={demoReadOnly}
-                    onChange={(content: string) => setValue(content)}
+                    onUpdate={handleDemoUpdate}
                   />
                 </Box>
               </Paper>

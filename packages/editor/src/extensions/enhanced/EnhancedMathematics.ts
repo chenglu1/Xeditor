@@ -11,6 +11,8 @@ import { BlockMath, InlineMath } from '@tiptap/extension-mathematics';
 import type { KatexOptions } from 'katex';
 import katex from 'katex';
 
+import type { EditorLogger } from '../../types';
+
 /**
  * 规范化 LaTeX 语法，移除不必要的空格
  */
@@ -33,7 +35,22 @@ export function normalizeLatexSyntax(latex: string): string {
  * 在渲染时自动修复 LaTeX 语法问题
  */
 export const EnhancedBlockMath = BlockMath.extend({
+  addOptions() {
+    const parentOptions = this.parent?.();
+
+    return {
+      ...parentOptions,
+      logger: undefined as EditorLogger | undefined,
+    } as any;
+  },
+
   addNodeView() {
+    const logger = (
+      this.options as typeof this.options & {
+        logger?: EditorLogger;
+      }
+    ).logger;
+
     return ({ node, getPos }) => {
       const wrapper = document.createElement('div');
       const innerWrapper = document.createElement('div');
@@ -64,7 +81,11 @@ export const EnhancedBlockMath = BlockMath.extend({
           // 渲染失败时显示原始文本
           wrapper.textContent = node.attrs.latex;
           wrapper.classList.add('block-math-error');
-          console.warn('LaTeX render error:', error);
+          logger?.warn('Failed to render block LaTeX expression.', {
+            phase: 'viewer',
+            error,
+            mode: 'block-math',
+          });
         }
       };
 
@@ -104,7 +125,22 @@ export const EnhancedBlockMath = BlockMath.extend({
  * 在渲染时自动修复 LaTeX 语法问题
  */
 export const EnhancedInlineMath = InlineMath.extend({
+  addOptions() {
+    const parentOptions = this.parent?.();
+
+    return {
+      ...parentOptions,
+      logger: undefined as EditorLogger | undefined,
+    } as any;
+  },
+
   addNodeView() {
+    const logger = (
+      this.options as typeof this.options & {
+        logger?: EditorLogger;
+      }
+    ).logger;
+
     return ({ node, getPos }) => {
       const wrapper = document.createElement('span');
       wrapper.className = 'tiptap-mathematics-render';
@@ -132,7 +168,11 @@ export const EnhancedInlineMath = InlineMath.extend({
           // 渲染失败时显示原始文本
           wrapper.textContent = node.attrs.latex;
           wrapper.classList.add('inline-math-error');
-          console.warn('LaTeX render error:', error);
+          logger?.warn('Failed to render inline LaTeX expression.', {
+            phase: 'viewer',
+            error,
+            mode: 'inline-math',
+          });
         }
       };
 

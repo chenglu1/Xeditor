@@ -2,13 +2,54 @@
   "name": "@chenglu1/xeditor-editor",
   "version": "0.0.5",
   "private": false,
+  "description": "Reusable React rich text and Markdown editor built with Tiptap.",
+  "homepage": "https://github.com/chenglu1/Xeditor#readme",
+  "bugs": {
+    "url": "https://github.com/chenglu1/Xeditor/issues"
+  },
+  "keywords": [
+    "editor",
+    "react",
+    "tiptap",
+    "markdown",
+    "rich-text"
+  ],
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "dist"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.esm.js"
+    },
+    "./advanced": {
+      "types": "./dist/advanced.d.ts",
+      "import": "./dist/advanced.esm.js",
+      "require": "./dist/advanced.cjs",
+      "default": "./dist/advanced.esm.js"
+    },
+    "./styles.css": "./dist/xeditor-editor.css",
+    "./styles/core.css": "./dist/styles/core.css",
+    "./styles/content.css": "./dist/styles/content.css",
+    "./styles/ui.css": "./dist/styles/ui.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "**/*.css",
+    "**/*.scss"
   ],
+  "files": [
+    "dist",
+    "README.md",
+    "MIGRATION.md",
+    "USAGE.md"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/chenglu1/Xeditor.git",
@@ -50,19 +91,26 @@
     "styled-components": "^6.0.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.10.2",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.3",
-    "@types/node": "^22.10.2",
     "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^29.0.1",
     "sass": "^1.79.0",
     "typescript": "^5.6.3",
-    "vite": "^5.4.21"
+    "vite": "^5.4.21",
+    "vitest": "^2.1.9"
   },
   "scripts": {
     "build:types": "tsc -p tsconfig.build.json",
-    "build:css": "sass src/styles/index.scss dist/xeditor-editor.css --no-source-map",
+    "build:css": "node ./scripts/build-css.mjs",
     "build:lib": "vite build",
     "build": "pnpm run build:types && pnpm run build:css && pnpm run build:lib",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
     "prepublishOnly": "pnpm run build",
     "publish:public": "pnpm run build && pnpm publish --access public --no-git-checks"
   }

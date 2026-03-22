@@ -2,32 +2,30 @@ import React from 'react';
 
 interface ModeSwitchButtonsProps {
   activeMode: 'richtext' | 'markdown';
+  disabled?: boolean;
+  richTextLabel: string;
+  markdownLabel: string;
   onRichtextClick: () => void;
   onMarkdownClick: () => void;
 }
 
 export const ModeSwitchButtons: React.FC<ModeSwitchButtonsProps> = ({
   activeMode,
+  disabled = false,
+  richTextLabel,
+  markdownLabel,
   onRichtextClick,
   onMarkdownClick,
 }) => (
-  <div style={{ display: 'flex', gap: '4px', marginLeft: 'auto' }}>
+  <div className="xeditor-mode-switch">
     <button
+      type="button"
+      aria-label={richTextLabel}
+      title={richTextLabel}
+      disabled={disabled}
       onClick={onRichtextClick}
-      style={{
-        width: '32px',
-        height: '32px',
-        padding: '6px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border:
-          activeMode === 'richtext' ? '2px solid #3b82f6' : '1px solid #d1d5db',
-        borderRadius: '6px',
-        backgroundColor: activeMode === 'richtext' ? '#eff6ff' : 'white',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-      }}
+      className="xeditor-mode-switch__button"
+      data-active={activeMode === 'richtext'}
     >
       <svg
         width="16"
@@ -47,21 +45,13 @@ export const ModeSwitchButtons: React.FC<ModeSwitchButtonsProps> = ({
       </svg>
     </button>
     <button
+      type="button"
+      aria-label={markdownLabel}
+      title={markdownLabel}
+      disabled={disabled}
       onClick={onMarkdownClick}
-      style={{
-        width: '32px',
-        height: '32px',
-        padding: '6px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        border:
-          activeMode === 'markdown' ? '2px solid #3b82f6' : '1px solid #d1d5db',
-        borderRadius: '6px',
-        backgroundColor: activeMode === 'markdown' ? '#eff6ff' : 'white',
-        cursor: 'pointer',
-        transition: 'all 0.2s',
-      }}
+      className="xeditor-mode-switch__button"
+      data-active={activeMode === 'markdown'}
     >
       <svg
         width="16"

@@ -8,5 +8,6 @@
     "outDir": "dist",
     "sourceMap": false
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/dist/**"]
 }

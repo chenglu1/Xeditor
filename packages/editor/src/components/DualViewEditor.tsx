@@ -1,213 +1,141 @@
 import type { Editor } from '@tiptap/react';
 import { EditorContent, EditorContext } from '@tiptap/react';
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 
+import {
+  DEFAULT_EDITOR_MESSAGES,
+  type EditorMessages,
+  type ToolbarConfig,
+} from '../types';
+import { ToolbarStateProvider } from '../features/toolbar/toolbar-state-context';
+import { EditorFrame } from '../views/EditorFrame';
+import { EditorPane } from '../views/EditorPane';
 import { EditorToolbar } from './EditorToolbar';
 import { ModeSwitchButtons } from './ModeSwitchButtons';
-import type { ToolbarConfig, ContentType } from '../types';
 import { TableFloatingToolbar } from './tiptap-ui/table-floating-toolbar/table-floating-toolbar';
 
 interface DualViewEditorProps {
   editor: Editor;
   activeMode: 'richtext' | 'markdown';
   placeholder: string;
+  markdownValue: string;
   readOnly: boolean;
-  contentType: ContentType;
   toolbarConfig: ToolbarConfig;
+  showToolbar: boolean;
+  minHeight: string;
+  compact: boolean;
+  className?: string;
   isMobile: boolean;
-  onModeChange: (mode: 'richtext' | 'markdown') => void;
+  disabled?: boolean;
+  messages: EditorMessages;
+  onMarkdownChange: (nextValue: string) => void;
+  onSwitchToMarkdown: () => void;
+  onSwitchToRichtext: () => void;
 }
 
 export const DualViewEditor: React.FC<DualViewEditorProps> = ({
   editor,
   activeMode,
   placeholder,
+  markdownValue,
   readOnly,
-  contentType,
   toolbarConfig,
+  showToolbar,
+  minHeight,
+  compact,
+  className = '',
   isMobile,
-  onModeChange,
+  disabled = false,
+  messages = DEFAULT_EDITOR_MESSAGES,
+  onMarkdownChange,
+  onSwitchToMarkdown,
+  onSwitchToRichtext,
 }) => {
-  // 使用本地状态管理 textarea 的值
-  const [textareaValue, setTextareaValue] = useState(editor.getMarkdown());
+  const isToolbarDisabled = readOnly || disabled;
 
-  // 当切换到 markdown 模式时，同步到 textarea
-  useEffect(() => {
-    if (activeMode === 'markdown') {
-      setTextareaValue(editor.getMarkdown());
-    }
-  }, [activeMode]); // 移除 editor 依赖，避免不必要的重渲染
+  const modeSwitchButtons = (
+    <ModeSwitchButtons
+      activeMode={activeMode}
+      disabled={disabled}
+      richTextLabel={messages.modeRichText}
+      markdownLabel={messages.modeMarkdown}
+      onRichtextClick={onSwitchToRichtext}
+      onMarkdownClick={onSwitchToMarkdown}
+    />
+  );
 
-  const handleRichtextClick = useCallback(() => {
-    // 切换到富文本前，将 textarea 的内容更新到 editor
-    editor?.commands.setContent(textareaValue, {
-      emitUpdate: false,
-      ...(contentType === 'markdown' && { contentType: 'markdown' }),
-    });
-    onModeChange('richtext');
-  }, [textareaValue, contentType, editor, onModeChange]);
-
-  const handleMarkdownClick = useCallback(() => {
-    // 切换到 markdown 时，从 editor 获取最新内容
-    setTextareaValue(editor.getMarkdown());
-    onModeChange('markdown');
-  }, [editor, onModeChange]);
-
-  const handleTextareaChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const newContent = e.target.value;
-      setTextareaValue(newContent);
-
-      // 实时更新到 editor 并触发 onChange 回调，更新外部状态
-      editor?.commands.setContent(newContent, {
-        emitUpdate: true,
-        ...(contentType === 'markdown' && { contentType: 'markdown' }),
-      });
-    },
-    [contentType, editor],
+  const richtextHeader = showToolbar ? (
+    <div className="xeditor-toolbar-slot">
+      <div
+        className={[
+          'xeditor-toolbar-slot__main',
+          isToolbarDisabled ? 'is-disabled' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+      </div>
+      {modeSwitchButtons}
+    </div>
+  ) : (
+    <div className="xeditor-toolbar-slot xeditor-toolbar-slot--mode-only">
+      {modeSwitchButtons}
+    </div>
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* 主内容区域：根据 activeMode 显示对应编辑器 */}
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          minHeight: 0,
-        }}
-      >
-        {/* Markdown 源码编辑 */}
+    <EditorFrame className={className} compact={compact} fillHeight>
+      <div className="xeditor-layout">
         {activeMode === 'markdown' && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              backgroundColor: 'white',
-              flex: 1,
-              minHeight: 0,
-              height: '450px',
-            }}
+          <EditorPane
+            compact={compact}
+            minHeight={minHeight}
+            headerClassName="xeditor-pane__header--muted"
+            header={
+              <div className="xeditor-toolbar-slot xeditor-toolbar-slot--mode-only xeditor-toolbar-slot--muted">
+                {modeSwitchButtons}
+              </div>
+            }
+            bodyStyle={{
+              '--xeditor-markdown-padding': compact ? '0px' : '16px',
+            } as React.CSSProperties}
+            bodyClassName="xeditor-pane__body--flex"
           >
-            {/* 工具栏 - 包含模式切换按钮 */}
-            <div
-              style={{
-                backgroundColor: '#f9fafb',
-                padding: '8px 12px',
-                borderBottom: '1px solid #e5e7eb',
-                minHeight: '44px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <ModeSwitchButtons
-                activeMode={activeMode}
-                onRichtextClick={handleRichtextClick}
-                onMarkdownClick={handleMarkdownClick}
-              />
-            </div>
-
             <textarea
-              value={textareaValue}
-              onChange={handleTextareaChange}
+              value={markdownValue}
+              onChange={(event) => onMarkdownChange(event.target.value)}
               placeholder={placeholder}
-              readOnly={readOnly}
-              className="markdown-editor-textarea"
-              style={{
-                flex: 1,
-                padding: '16px',
-                border: 'none',
-                outline: 'none',
-                fontFamily:
-                  'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
-                fontSize: '14px',
-                lineHeight: '1.6',
-                resize: 'none',
-                backgroundColor: 'white',
-                color: '#1f2937',
-                overflow: 'auto',
-                minHeight: 0,
-              }}
+              readOnly={readOnly || disabled}
+              className="markdown-editor-textarea xeditor-markdown-textarea"
             />
-          </div>
+          </EditorPane>
         )}
 
-        {/* TipTap 富文本编辑器 */}
         {activeMode === 'richtext' && (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              backgroundColor: 'white',
-              flex: 1,
-              minHeight: 0,
-              height: '450px',
-            }}
-          >
-            <EditorContext.Provider value={{ editor }}>
-              {/* 工具栏固定在顶部 */}
-              <div
-                style={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 10,
-                  backgroundColor: 'white',
-                  borderBottom: '1px solid #e5e7eb',
-                  ...(readOnly && {
-                    filter: 'grayscale(1)',
-                    opacity: 0.45,
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                  }),
-                }}
+          <EditorContext.Provider value={{ editor }}>
+            <ToolbarStateProvider editor={editor}>
+              <EditorPane
+                compact={compact}
+                minHeight={minHeight}
+                header={richtextHeader}
+                headerClassName="xeditor-pane__header--sticky"
+                bodyClassName="tiptap-editor-scrollable xeditor-pane__body--scrollable"
+                bodyStyle={{
+                  '--xeditor-pane-body-padding': compact ? '0px' : '12px',
+                } as React.CSSProperties}
               >
-                <EditorToolbar
-                  config={toolbarConfig}
-                  isMobile={isMobile}
-                  additionalContent={
-                    <ModeSwitchButtons
-                      activeMode={activeMode}
-                      onRichtextClick={handleRichtextClick}
-                      onMarkdownClick={handleMarkdownClick}
-                    />
-                  }
-                />
-              </div>
-
-              {/* 可滚动的编辑器内容区 */}
-              <div
-                style={{ flex: 1, minHeight: 0, overflow: 'auto' }}
-                className="tiptap-editor-scrollable"
-              >
-                <div className="configurable-tiptap-editor">
-                  <div
-                    className="editor-wrapper"
-                    style={{ border: 'none', borderRadius: 0, overflow: 'visible' }}
-                  >
-                    <div
-                      style={{
-                        padding: '12px',
-                        width: '100%',
-                        maxWidth: '100%',
-                      }}
-                    >
-                      <EditorContent editor={editor} className="tiptap" />
-                    </div>
-                    <TableFloatingToolbar editor={editor} />
+                <div className="editor-wrapper xeditor-richtext-wrapper">
+                  <div className="xeditor-pane__body--padded">
+                    <EditorContent editor={editor} className="tiptap" />
                   </div>
+                  <TableFloatingToolbar editor={editor} />
                 </div>
-              </div>
-            </EditorContext.Provider>
-          </div>
+              </EditorPane>
+            </ToolbarStateProvider>
+          </EditorContext.Provider>
         )}
       </div>
-    </div>
+    </EditorFrame>
   );
 };

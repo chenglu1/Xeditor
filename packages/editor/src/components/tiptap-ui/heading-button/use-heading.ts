@@ -2,7 +2,7 @@
 
 import { NodeSelection, TextSelection } from '@tiptap/pm/state';
 import { type Editor } from '@tiptap/react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
@@ -279,25 +279,13 @@ export function useHeading(config: UseHeadingConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
-  const [isVisible, setIsVisible] = useState<boolean>(true);
   const canToggleState = canToggle(editor, level);
   const isActive = isHeadingActive(editor, level);
-
-  useEffect(() => {
-    if (!editor) return;
-
-    const handleSelectionUpdate = () => {
-      setIsVisible(shouldShowButton({ editor, level, hideWhenUnavailable }));
-    };
-
-    handleSelectionUpdate();
-
-    editor.on('selectionUpdate', handleSelectionUpdate);
-
-    return () => {
-      editor.off('selectionUpdate', handleSelectionUpdate);
-    };
-  }, [editor, level, hideWhenUnavailable]);
+  const isVisible = shouldShowButton({
+    editor,
+    level,
+    hideWhenUnavailable,
+  });
 
   const handleToggle = useCallback(() => {
     if (!editor) return false;

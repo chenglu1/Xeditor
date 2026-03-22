@@ -1,53 +1,24 @@
 import type { NodeType } from '@tiptap/pm/model';
 import { mergeAttributes, Node, ReactNodeViewRenderer } from '@tiptap/react';
 
+import type {
+  AssetUploadHandler,
+  EditorMessages,
+  UploadedAsset,
+} from '../../../types';
 import { ImageUploadNode as ImageUploadNodeComponent } from './image-upload-node';
 
-export type UploadFunction = (
-  file: File,
-  onProgress?: (event: { progress: number }) => void,
-  abortSignal?: AbortSignal,
-) => Promise<string>;
+export type UploadFunction = AssetUploadHandler;
 
 export interface ImageUploadNodeOptions {
-  /**
-   * The type of the node.
-   * @default 'image'
-   */
   type?: string | NodeType | undefined;
-  /**
-   * Acceptable file types for upload.
-   * @default 'image/*'
-   */
   accept?: string;
-  /**
-   * Maximum number of files that can be uploaded.
-   * @default 1
-   */
   limit?: number;
-  /**
-   * Maximum file size in bytes (0 for unlimited).
-   * @default 0
-   */
   maxSize?: number;
-  /**
-   * Function to handle the upload process.
-   */
+  messages?: EditorMessages;
   upload?: UploadFunction;
-  /**
-   * Callback for upload errors.
-   */
   onError?: (error: Error) => void;
-  /**
-   * Callback for successful uploads.
-   */
-  onSuccess?: (url: string) => void;
-  /**
-   * HTML attributes to add to the image element.
-   * @default {}
-   * @example { class: 'foo' }
-   */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSuccess?: (asset: UploadedAsset) => void;
   HTMLAttributes: Record<string, any>;
 }
 
@@ -59,19 +30,12 @@ declare module '@tiptap/react' {
   }
 }
 
-/**
- * A Tiptap node extension that creates an image upload component.
- * @see registry/tiptap-node/image-upload-node/image-upload-node
- */
 export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
   name: 'imageUpload',
 
   group: 'block',
-
   draggable: true,
-
   selectable: true,
-
   atom: true,
 
   addOptions() {
@@ -129,9 +93,6 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
     };
   },
 
-  /**
-   * Adds Enter key handler to trigger the upload component when it's selected.
-   */
   addKeyboardShortcuts() {
     return {
       Enter: ({ editor }) => {
@@ -145,7 +106,6 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
         ) {
           const nodeEl = editor.view.nodeDOM(selection.$from.pos);
           if (nodeEl && nodeEl instanceof HTMLElement) {
-            // Since NodeViewWrapper is wrapped with a div, we need to click the first child
             const firstChild = nodeEl.firstChild;
             if (firstChild && firstChild instanceof HTMLElement) {
               firstChild.click();
@@ -153,6 +113,7 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
             }
           }
         }
+
         return false;
       },
     };

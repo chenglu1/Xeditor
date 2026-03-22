@@ -340,10 +340,9 @@ export function StreamingPage() {
               <Box sx={{ p: 2.5 }}>
                 <ConfigurableTiptapEditor
                   value={content}
-                  contentType="markdown"
+                  valueType="markdown"
                   readOnly
                   showToolbar={false}
-                  onChange={() => {}}
                 />
               </Box>
             </Paper>

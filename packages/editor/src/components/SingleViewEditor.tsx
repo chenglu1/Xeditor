@@ -2,8 +2,12 @@ import type { Editor } from '@tiptap/react';
 import { EditorContent, EditorContext } from '@tiptap/react';
 import React from 'react';
 
+import type { EditorMessages, ToolbarConfig } from '../types';
+import { DEFAULT_EDITOR_MESSAGES } from '../types';
+import { EditorFrame } from '../views/EditorFrame';
+import { EditorPane } from '../views/EditorPane';
+import { ToolbarStateProvider } from '../features/toolbar/toolbar-state-context';
 import { EditorToolbar } from './EditorToolbar';
-import type { ToolbarConfig } from '../types';
 import { TableFloatingToolbar } from './tiptap-ui/table-floating-toolbar/table-floating-toolbar';
 
 interface SingleViewEditorProps {
@@ -16,11 +20,12 @@ interface SingleViewEditorProps {
   isMobile: boolean;
   className?: string;
   readOnly?: boolean;
+  disabled?: boolean;
+  messages: EditorMessages;
 }
 
 export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
   editor,
-  placeholder,
   minHeight,
   compact,
   showToolbar,
@@ -28,63 +33,49 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
   isMobile,
   className = '',
   readOnly = false,
+  disabled = false,
+  messages = DEFAULT_EDITOR_MESSAGES,
 }) => {
+  const isToolbarDisabled = readOnly || disabled;
+
   return (
-    <div
-      className={`configurable-tiptap-editor ${compact ? 'compact-mode' : ''} ${className}`}
-    >
+    <EditorFrame className={className} compact={compact}>
       <EditorContext.Provider value={{ editor }}>
-        {showToolbar && (
-          <div
-            style={{
-              position: 'sticky',
-              top: 0,
-              zIndex: 10,
-              backgroundColor: compact ? 'transparent' : 'white',
-              borderTopLeftRadius: compact ? '0' : '8px',
-              borderTopRightRadius: compact ? '0' : '8px',
-              border: compact ? 'none' : '1px solid #e5e7eb',
-              borderBottom: compact ? 'none' : '1px solid #e5e7eb',
-              ...(readOnly && {
-                filter: 'grayscale(1)',
-                opacity: 0.45,
-                pointerEvents: 'none',
-                userSelect: 'none',
-                cursor: 'not-allowed',
-              }),
-            }}
+        <ToolbarStateProvider editor={editor}>
+          <EditorPane
+            compact={compact}
+            minHeight={minHeight}
+            paneClassName="editor-wrapper"
+            headerClassName="xeditor-pane__header--sticky"
+            header={
+              showToolbar ? (
+                <div className="xeditor-toolbar-slot">
+                  <div
+                    className={[
+                      'xeditor-toolbar-slot__main',
+                      isToolbarDisabled ? 'is-disabled' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                  <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+                  </div>
+                </div>
+              ) : null
+            }
+            bodyStyle={{
+              '--xeditor-pane-body-padding': compact ? '0px' : '12px',
+            } as React.CSSProperties}
+            bodyClassName="xeditor-pane__body--padded"
           >
-            <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
-          </div>
-        )}
-
-        <div
-          className="editor-wrapper"
-          style={{
-            border: compact ? 'none' : '1px solid #e5e7eb',
-            borderTop: showToolbar && !compact ? 'none' : compact ? 'none' : '1px solid #e5e7eb',
-            borderBottomLeftRadius: compact ? '0' : '8px',
-            borderBottomRightRadius: compact ? '0' : '8px',
-            overflow: 'hidden',
-            backgroundColor: compact ? 'transparent' : 'white',
-            boxShadow: compact ? 'none' : undefined,
-          }}
-        >
-          <div
-            style={{
-              minHeight,
-              padding: compact ? '0' : '12px',
-              width: '100%',
-              maxWidth: '100%',
-            }}
-            className={compact ? 'compact-mode' : ''}
-          >
-            <EditorContent editor={editor} className="tiptap" />
-          </div>
-
-          <TableFloatingToolbar editor={editor} />
-        </div>
+            <EditorContent
+              editor={editor}
+              className={`tiptap ${compact ? 'compact-mode' : ''}`.trim()}
+            />
+            <TableFloatingToolbar editor={editor} />
+          </EditorPane>
+        </ToolbarStateProvider>
       </EditorContext.Provider>
-    </div>
+    </EditorFrame>
   );
 };

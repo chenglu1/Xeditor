@@ -2,138 +2,171 @@ import type { NodeViewProps } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useRef, useState } from 'react';
 
+import type { EditorMessages, UploadedAsset } from '../../../types';
+import { DEFAULT_EDITOR_MESSAGES } from '../../../types';
+import { focusNextNode, isValidPosition } from '../../../lib/tiptap-utils';
 import { CloseIcon } from '../../tiptap-icons/close-icon';
 import { Button } from '../../tiptap-ui-primitive/button';
-import { focusNextNode, isValidPosition } from '../../../lib/tiptap-utils';
 
 export interface FileItem {
-  /**
-   * Unique identifier for the file item
-   */
   id: string;
-  /**
-   * The actual File object being uploaded
-   */
   file: File;
-  /**
-   * Current upload progress as a percentage (0-100)
-   */
   progress: number;
-  /**
-   * Current status of the file upload process
-   * @default "uploading"
-   */
   status: 'uploading' | 'success' | 'error';
-
-  /**
-   * URL to the uploaded file, available after successful upload
-   * @optional
-   */
-  url?: string;
-  /**
-   * Controller that can be used to abort the upload process
-   * @optional
-   */
+  asset?: UploadedAsset;
   abortController?: AbortController;
 }
 
+interface UploadSuccessResult {
+  file: File;
+  asset: UploadedAsset;
+}
+
 export interface UploadOptions {
-  /**
-   * Maximum allowed file size in bytes
-   */
   maxSize: number;
-  /**
-   * Maximum number of files that can be uploaded
-   */
   limit: number;
-  /**
-   * String specifying acceptable file types (MIME types or extensions)
-   * @example ".jpg,.png,image/jpeg" or "image/*"
-   */
   accept: string;
-  /**
-   * Function that handles the actual file upload process
-   * @param {File} file - The file to be uploaded
-   * @param {Function} onProgress - Callback function to report upload progress
-   * @param {AbortSignal} signal - Signal that can be used to abort the upload
-   * @returns {Promise<string>} Promise resolving to the URL of the uploaded file
-   */
-  upload: (
+  messages: EditorMessages;
+  upload?: (
     file: File,
-    onProgress: (event: { progress: number }) => void,
-    signal: AbortSignal,
-  ) => Promise<string>;
-  /**
-   * Callback triggered when a file is uploaded successfully
-   * @param {string} url - URL of the successfully uploaded file
-   * @optional
-   */
-  onSuccess?: (url: string) => void;
-  /**
-   * Callback triggered when an error occurs during upload
-   * @param {Error} error - The error that occurred
-   * @optional
-   */
+    context?: {
+      onProgress?: (event: { progress: number }) => void;
+      abortSignal?: AbortSignal;
+    },
+  ) => Promise<string | UploadedAsset>;
+  onSuccess?: (asset: UploadedAsset) => void;
   onError?: (error: Error) => void;
 }
 
-/**
- * Custom hook for managing multiple file uploads with progress tracking and cancellation
- */
+function getFileItemId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `upload-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getFileBaseName(file: File) {
+  return file.name.replace(/\.[^/.]+$/, '') || 'unknown';
+}
+
+export function normalizeUploadedAsset(
+  result: string | UploadedAsset,
+  file: File,
+): UploadedAsset {
+  if (typeof result === 'string') {
+    const name = getFileBaseName(file);
+
+    return {
+      src: result,
+      alt: name,
+      title: name,
+    };
+  }
+
+  return {
+    ...result,
+    alt: result.alt ?? getFileBaseName(file),
+    title: result.title ?? getFileBaseName(file),
+  };
+}
+
+export function fileMatchesAccept(file: File, accept: string) {
+  if (!accept.trim()) {
+    return true;
+  }
+
+  const acceptedTypes = accept
+    .split(',')
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (acceptedTypes.length === 0) {
+    return true;
+  }
+
+  const fileName = file.name.toLowerCase();
+  const mimeType = file.type.toLowerCase();
+
+  return acceptedTypes.some((acceptedType) => {
+    if (acceptedType.startsWith('.')) {
+      return fileName.endsWith(acceptedType);
+    }
+
+    if (acceptedType.endsWith('/*')) {
+      const mimeGroup = acceptedType.slice(0, -1);
+      return mimeType.startsWith(mimeGroup);
+    }
+
+    return mimeType === acceptedType;
+  });
+}
+
 function useFileUpload(options: UploadOptions) {
   const [fileItems, setFileItems] = useState<FileItem[]>([]);
 
-  const uploadFile = async (file: File): Promise<string | null> => {
-    if (file.size > options.maxSize) {
-      const error = new Error(
-        `File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`,
+  const uploadFile = async (file: File): Promise<UploadSuccessResult | null> => {
+    if (options.maxSize > 0 && file.size > options.maxSize) {
+      options.onError?.(
+        new Error(
+          `File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`,
+        ),
       );
-      options.onError?.(error);
+      return null;
+    }
+
+    if (!fileMatchesAccept(file, options.accept)) {
+      options.onError?.(new Error(`File type not accepted: ${file.name}`));
+      return null;
+    }
+
+    if (!options.upload) {
+      options.onError?.(new Error('Upload function is not defined'));
       return null;
     }
 
     const abortController = new AbortController();
-    const fileId = crypto.randomUUID();
+    const fileId = getFileItemId();
 
-    const newFileItem: FileItem = {
-      id: fileId,
-      file,
-      progress: 0,
-      status: 'uploading',
-      abortController,
-    };
-
-    setFileItems((prev) => [...prev, newFileItem]);
+    setFileItems((prev) => [
+      ...prev,
+      {
+        id: fileId,
+        file,
+        progress: 0,
+        status: 'uploading',
+        abortController,
+      },
+    ]);
 
     try {
-      if (!options.upload) {
-        throw new Error('Upload function is not defined');
-      }
-
-      const url = await options.upload(
-        file,
-        (event: { progress: number }) => {
+      const result = await options.upload(file, {
+        onProgress: (event) => {
           setFileItems((prev) =>
             prev.map((item) =>
               item.id === fileId ? { ...item, progress: event.progress } : item,
             ),
           );
         },
-        abortController.signal,
-      );
+        abortSignal: abortController.signal,
+      });
 
-      if (!url) throw new Error('Upload failed: No URL returned');
+      if (!result) {
+        throw new Error('Upload failed: No asset returned');
+      }
+
+      const asset = normalizeUploadedAsset(result, file);
 
       if (!abortController.signal.aborted) {
         setFileItems((prev) =>
           prev.map((item) =>
             item.id === fileId
-              ? { ...item, status: 'success', url, progress: 100 }
+              ? { ...item, status: 'success', asset, progress: 100 }
               : item,
           ),
         );
-        options.onSuccess?.(url);
-        return url;
+        options.onSuccess?.(asset);
+        return { file, asset };
       }
 
       return null;
@@ -150,17 +183,18 @@ function useFileUpload(options: UploadOptions) {
           error instanceof Error ? error : new Error('Upload failed'),
         );
       }
+
       return null;
     }
   };
 
-  const uploadFiles = async (files: File[]): Promise<string[]> => {
+  const uploadFiles = async (files: File[]): Promise<UploadSuccessResult[]> => {
     if (!files || files.length === 0) {
       options.onError?.(new Error('No files to upload'));
       return [];
     }
 
-    if (options.limit && files.length > options.limit) {
+    if (options.limit > 0 && files.length > options.limit) {
       options.onError?.(
         new Error(
           `Maximum ${options.limit} file${options.limit === 1 ? '' : 's'} allowed`,
@@ -169,37 +203,26 @@ function useFileUpload(options: UploadOptions) {
       return [];
     }
 
-    // Upload all files concurrently
-    const uploadPromises = files.map((file) => uploadFile(file));
-    const results = await Promise.all(uploadPromises);
+    const results = await Promise.all(files.map((file) => uploadFile(file)));
 
-    // Filter out null results (failed uploads)
-    return results.filter((url): url is string => url !== null);
+    return results.filter(
+      (result): result is UploadSuccessResult => result !== null,
+    );
   };
 
   const removeFileItem = (fileId: string) => {
     setFileItems((prev) => {
       const fileToRemove = prev.find((item) => item.id === fileId);
-      if (fileToRemove?.abortController) {
-        fileToRemove.abortController.abort();
-      }
-      if (fileToRemove?.url) {
-        URL.revokeObjectURL(fileToRemove.url);
-      }
+      fileToRemove?.abortController?.abort();
       return prev.filter((item) => item.id !== fileId);
     });
   };
 
   const clearAllFiles = () => {
-    fileItems.forEach((item) => {
-      if (item.abortController) {
-        item.abortController.abort();
-      }
-      if (item.url) {
-        URL.revokeObjectURL(item.url);
-      }
+    setFileItems((prev) => {
+      prev.forEach((item) => item.abortController?.abort());
+      return [];
     });
-    setFileItems([]);
   };
 
   return {
@@ -266,22 +289,10 @@ const FileCornerIcon: React.FC = () => (
 );
 
 interface ImageUploadDragAreaProps {
-  /**
-   * Callback function triggered when files are dropped or selected
-   * @param {File[]} files - Array of File objects that were dropped or selected
-   */
   onFile: (files: File[]) => void;
-  /**
-   * Optional child elements to render inside the drag area
-   * @optional
-   * @default undefined
-   */
   children?: React.ReactNode;
 }
 
-/**
- * A component that creates a drag-and-drop area for image uploads
- */
 const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
   onFile,
   children,
@@ -289,34 +300,35 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
 
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDragEnter = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setIsDragActive(true);
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!event.currentTarget.contains(event.relatedTarget as Node)) {
       setIsDragActive(false);
       setIsDragOver(false);
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setIsDragOver(true);
   };
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
     setIsDragActive(false);
     setIsDragOver(false);
 
-    const files = Array.from(e.dataTransfer.files);
+    const files = Array.from(event.dataTransfer.files);
     if (files.length > 0) {
       onFile(files);
     }
@@ -336,29 +348,24 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
 };
 
 interface ImageUploadPreviewProps {
-  /**
-   * The file item to preview
-   */
   fileItem: FileItem;
-  /**
-   * Callback to remove this file from upload queue
-   */
   onRemove: () => void;
 }
 
-/**
- * Component that displays a preview of an uploading file with progress
- */
 const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   fileItem,
   onRemove,
 }) => {
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
+
+    const unit = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+    const index = Math.floor(Math.log(bytes) / Math.log(unit));
+
+    return `${parseFloat((bytes / Math.pow(unit, index)).toFixed(2))} ${sizes[index]}`;
   };
 
   return (
@@ -376,9 +383,7 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
             <CloudUploadIcon />
           </div>
           <div className="tiptap-image-upload-details">
-            <span className="tiptap-image-upload-text">
-              {fileItem.file.name}
-            </span>
+            <span className="tiptap-image-upload-text">{fileItem.file.name}</span>
             <span className="tiptap-image-upload-subtext">
               {formatFileSize(fileItem.file.size)}
             </span>
@@ -393,8 +398,8 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
           <Button
             type="button"
             data-style="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={(event) => {
+              event.stopPropagation();
               onRemove();
             }}
           >
@@ -406,10 +411,11 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   );
 };
 
-const DropZoneContent: React.FC<{ maxSize: number; limit: number }> = ({
-  maxSize,
-  limit,
-}) => (
+const DropZoneContent: React.FC<{
+  maxSize: number;
+  limit: number;
+  messages: EditorMessages;
+}> = ({ maxSize, limit, messages }) => (
   <>
     <div className="tiptap-image-upload-dropzone">
       <FileIcon />
@@ -421,80 +427,94 @@ const DropZoneContent: React.FC<{ maxSize: number; limit: number }> = ({
 
     <div className="tiptap-image-upload-content">
       <span className="tiptap-image-upload-text">
-        <em>Click to upload</em> or drag and drop
+        <em>{messages.uploadClickOrDrop}</em>
       </span>
       <span className="tiptap-image-upload-subtext">
-        Maximum {limit} file{limit === 1 ? '' : 's'}, {maxSize / 1024 / 1024}MB
-        each.
+        {messages.uploadLimit({
+          limit,
+          maxSizeMB: maxSize / 1024 / 1024,
+        })}
       </span>
     </div>
   </>
 );
 
 export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
-  const { accept, limit, maxSize } = props.node.attrs;
+  const { accept, limit, maxSize } = props.node.attrs as {
+    accept: string;
+    limit: number;
+    maxSize: number;
+  };
   const inputRef = useRef<HTMLInputElement>(null);
-  const extension = props.extension;
+  const extensionOptions = props.extension.options as {
+    type?: string;
+    messages?: EditorMessages;
+    upload?: UploadOptions['upload'];
+    onSuccess?: (asset: UploadedAsset) => void;
+    onError?: (error: Error) => void;
+  };
+  const messages = extensionOptions.messages ?? DEFAULT_EDITOR_MESSAGES;
 
-  const uploadOptions: UploadOptions = {
+  const { fileItems, uploadFiles, removeFileItem, clearAllFiles } = useFileUpload({
     maxSize,
     limit,
     accept,
-    upload: extension.options.upload,
-    onSuccess: extension.options.onSuccess,
-    onError: extension.options.onError,
-  };
-
-  const { fileItems, uploadFiles, removeFileItem, clearAllFiles } =
-    useFileUpload(uploadOptions);
+    messages,
+    upload: extensionOptions.upload,
+    onSuccess: extensionOptions.onSuccess,
+    onError: extensionOptions.onError,
+  });
 
   const handleUpload = async (files: File[]) => {
-    const urls = await uploadFiles(files);
+    const uploadedAssets = await uploadFiles(files);
 
-    if (urls.length > 0) {
-      const pos = props.getPos();
-
-      if (isValidPosition(pos)) {
-        const imageNodes = urls.map((url, index) => {
-          const filename =
-            files[index]?.name.replace(/\.[^/.]+$/, '') || 'unknown';
-          return {
-            type: extension.options.type,
-            attrs: {
-              ...extension.options,
-              src: url,
-              alt: filename,
-              title: filename,
-            },
-          };
-        });
-
-        props.editor
-          .chain()
-          .focus()
-          .deleteRange({ from: pos, to: pos + props.node.nodeSize })
-          .insertContentAt(pos, imageNodes)
-          .run();
-
-        focusNextNode(props.editor);
-      }
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) {
-      extension.options.onError?.(new Error('No file selected'));
+    if (uploadedAssets.length === 0) {
       return;
     }
-    handleUpload(Array.from(files));
+
+    const pos = props.getPos();
+
+    if (!isValidPosition(pos)) {
+      return;
+    }
+
+    const imageNodes = uploadedAssets.map(({ file, asset }) => ({
+      type: extensionOptions.type,
+      attrs: {
+        src: asset.src,
+        alt: asset.alt ?? getFileBaseName(file),
+        title: asset.title ?? getFileBaseName(file),
+      },
+    }));
+
+    props.editor
+      .chain()
+      .focus()
+      .deleteRange({ from: pos, to: pos + props.node.nodeSize })
+      .insertContentAt(pos, imageNodes)
+      .run();
+
+    focusNextNode(props.editor);
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+
+    if (!files || files.length === 0) {
+      extensionOptions.onError?.(new Error('No file selected'));
+      return;
+    }
+
+    void handleUpload(Array.from(files));
   };
 
   const handleClick = () => {
-    if (inputRef.current && fileItems.length === 0) {
-      inputRef.current.value = '';
-      inputRef.current.click();
+    if (!inputRef.current || fileItems.length > 0) {
+      return;
     }
+
+    inputRef.current.value = '';
+    inputRef.current.click();
   };
 
   const hasFiles = fileItems.length > 0;
@@ -506,8 +526,8 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       onClick={handleClick}
     >
       {!hasFiles && (
-        <ImageUploadDragArea onFile={handleUpload}>
-          <DropZoneContent maxSize={maxSize} limit={limit} />
+        <ImageUploadDragArea onFile={(files) => void handleUpload(files)}>
+          <DropZoneContent maxSize={maxSize} limit={limit} messages={messages} />
         </ImageUploadDragArea>
       )}
 
@@ -515,16 +535,16 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
         <div className="tiptap-image-upload-previews">
           {fileItems.length > 1 && (
             <div className="tiptap-image-upload-header">
-              <span>Uploading {fileItems.length} files</span>
+              <span>{messages.uploadInProgress({ count: fileItems.length })}</span>
               <Button
                 type="button"
                 data-style="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   clearAllFiles();
                 }}
               >
-                Clear All
+                {messages.clearAllUploads}
               </Button>
             </div>
           )}
@@ -545,7 +565,9 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
         type="file"
         multiple={limit > 1}
         onChange={handleChange}
-        onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
+        onClick={(event: React.MouseEvent<HTMLInputElement>) => {
+          event.stopPropagation();
+        }}
       />
     </NodeViewWrapper>
   );

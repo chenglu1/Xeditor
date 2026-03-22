@@ -113,7 +113,7 @@ export const HeadingDropdown = forwardRef<
     };
 
     return (
-      <div style={{ position: 'relative', display: 'inline-block' }}>
+      <div className="xeditor-overlay-anchor">
         <Button
           ref={(node) => {
             buttonRef.current = node;
@@ -143,13 +143,11 @@ export const HeadingDropdown = forwardRef<
           createPortal(
             <div
               ref={dropdownRef}
-              className="tiptap-dropdown-menu tiptap-card"
+              className="tiptap-dropdown-menu tiptap-card xeditor-overlay-panel"
               data-state="open"
               style={{
-                position: 'fixed',
                 top: `${position.top}px`,
                 left: `${position.left}px`,
-                zIndex: 9999,
               }}
             >
               <div className="tiptap-card-body">

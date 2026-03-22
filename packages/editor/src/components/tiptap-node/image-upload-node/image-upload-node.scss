@@ -116,18 +116,12 @@
 
     &.drag-active {
       border-color: var(--tiptap-image-upload-border-active);
-      background-color: rgba(
-        var(--tiptap-image-upload-active-rgb, 0, 123, 255),
-        0.05
-      );
+      background-color: var(--tiptap-image-upload-active-soft);
     }
 
     &.drag-over {
       border-color: var(--tiptap-image-upload-border-active);
-      background-color: rgba(
-        var(--tiptap-image-upload-active-rgb, 0, 123, 255),
-        0.1
-      );
+      background-color: var(--tiptap-image-upload-active-strong);
     }
   }
 
