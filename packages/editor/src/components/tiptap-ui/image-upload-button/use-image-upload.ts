@@ -7,6 +7,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 // --- Hooks ---
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import {
@@ -56,7 +57,7 @@ export function canInsertImage(editor: Editor | null): boolean {
  * Checks if image is currently active
  */
 export function isImageActive(editor: Editor | null): boolean {
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
   return editor.isActive('imageUpload');
 }
 
@@ -89,7 +90,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable } = props;
 
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
   if (!isExtensionAvailable(editor, 'imageUpload')) return false;
 
   if (hideWhenUnavailable && !editor.isActive('code')) {
@@ -144,6 +145,7 @@ export function useImageUpload(config?: UseImageUploadConfig) {
 
   const { editor } = useTiptapEditor(providedEditor);
   const isMobile = useIsMobile();
+  const messages = useEditorMessages();
   const canInsert = canInsertImage(editor);
   const isActive = isImageActive(editor);
   const isVisible = shouldShowButton({ editor, hideWhenUnavailable });
@@ -176,7 +178,7 @@ export function useImageUpload(config?: UseImageUploadConfig) {
     isActive,
     handleImage,
     canInsert,
-    label: 'Add image',
+    label: messages.toolbarAddImage,
     shortcutKeys: IMAGE_UPLOAD_SHORTCUT_KEY,
     Icon: ImagePlusIcon,
   };

@@ -31,6 +31,12 @@
       "require": "./dist/advanced.cjs",
       "default": "./dist/advanced.esm.js"
     },
+    "./react-i18next": {
+      "types": "./dist/react-i18next.d.ts",
+      "import": "./dist/react-i18next.esm.js",
+      "require": "./dist/react-i18next.cjs",
+      "default": "./dist/react-i18next.esm.js"
+    },
     "./styles.css": "./dist/xeditor-editor.css",
     "./styles/core.css": "./dist/styles/core.css",
     "./styles/content.css": "./dist/styles/content.css",
@@ -60,8 +66,18 @@
     "registry": "https://registry.npmjs.org"
   },
   "peerDependencies": {
+    "i18next": ">=23.0.0",
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "react-i18next": ">=13.0.0"
+  },
+  "peerDependenciesMeta": {
+    "i18next": {
+      "optional": true
+    },
+    "react-i18next": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.24",
@@ -98,7 +114,9 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.3",
     "@vitejs/plugin-react": "^4.7.0",
+    "i18next": "^25.10.3",
     "jsdom": "^29.0.1",
+    "react-i18next": "^16.6.0",
     "sass": "^1.79.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.21",

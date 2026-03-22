@@ -24,6 +24,7 @@ function createMockEditor(initialMarkdown = '# initial') {
   let markdown = initialMarkdown;
 
   const editor = {
+    setEditable: vi.fn(),
     getMarkdown: vi.fn(() => markdown),
     getHTML: vi.fn(() => `<p>${markdown}</p>`),
     getJSON: vi.fn(() => ({
@@ -134,6 +135,58 @@ describe('useConfigurableEditor', () => {
     return waitFor(() => {
       expect(result.current.markdownValue).toBe('## from editor update');
     });
+  });
+
+  it('updates the editor editable state when readOnly changes after mount', () => {
+    const mockEditor = createMockEditor('# initial');
+
+    mockUseEditor.mockImplementation(() => mockEditor);
+
+    const { rerender } = renderHook(
+      ({ readOnly }) =>
+        useConfigurableEditor({
+          value: '# initial',
+          valueType: 'markdown',
+          readOnly,
+        }),
+      {
+        initialProps: {
+          readOnly: false,
+        },
+      },
+    );
+
+    expect(mockEditor.setEditable).toHaveBeenLastCalledWith(true);
+
+    rerender({ readOnly: true });
+
+    expect(mockEditor.setEditable).toHaveBeenLastCalledWith(false);
+  });
+
+  it('updates the editor editable state when disabled changes after mount', () => {
+    const mockEditor = createMockEditor('# initial');
+
+    mockUseEditor.mockImplementation(() => mockEditor);
+
+    const { rerender } = renderHook(
+      ({ disabled }) =>
+        useConfigurableEditor({
+          value: '# initial',
+          valueType: 'markdown',
+          disabled,
+        }),
+      {
+        initialProps: {
+          disabled: false,
+        },
+      },
+    );
+
+    expect(mockEditor.setEditable).toHaveBeenLastCalledWith(true);
+
+    rerender({ disabled: true });
+
+    expect(mockEditor.setEditable).toHaveBeenLastCalledWith(false);
   });
 
   it('emits structured update events for json mode', () => {
@@ -256,5 +309,95 @@ describe('useConfigurableEditor', () => {
         recoverable: true,
       }),
     );
+  });
+
+  it('truncates pasted plain text to maxLength', () => {
+    const mockEditor = createMockEditor('hello');
+    let latestOptions: any;
+    const insertText = vi.fn(() => 'tr');
+    const dispatch = vi.fn();
+
+    mockUseEditor.mockImplementation((options) => {
+      latestOptions = options;
+      return mockEditor;
+    });
+
+    renderHook(() =>
+      useConfigurableEditor({
+        defaultValue: 'hello',
+        valueType: 'markdown',
+        maxLength: 8,
+      }),
+    );
+
+    const handled = latestOptions.editorProps.handlePaste(
+      {
+        state: {
+          doc: { textContent: 'hello' },
+          selection: {
+            from: 5,
+            to: 5,
+            $from: { pos: 5 },
+            $to: { pos: 5 },
+          },
+          tr: { insertText },
+        },
+        dispatch,
+      },
+      {
+        clipboardData: {
+          getData: () => ' world',
+        },
+      },
+    );
+
+    expect(handled).toBe(true);
+    expect(insertText).toHaveBeenCalledWith(' wo', 5, 5);
+    expect(dispatch).toHaveBeenCalledWith('tr');
+  });
+
+  it('does not block text input while an IME composition session is active', () => {
+    const mockEditor = createMockEditor('hello');
+    let latestOptions: any;
+
+    mockUseEditor.mockImplementation((options) => {
+      latestOptions = options;
+      return mockEditor;
+    });
+
+    renderHook(() =>
+      useConfigurableEditor({
+        defaultValue: 'hello',
+        valueType: 'markdown',
+        maxLength: 5,
+      }),
+    );
+
+    latestOptions.editorProps.handleDOMEvents.compositionstart();
+    const duringComposition = latestOptions.editorProps.handleTextInput(
+      {
+        state: {
+          doc: { textContent: 'hello' },
+        },
+      },
+      5,
+      5,
+      '!',
+    );
+
+    latestOptions.editorProps.handleDOMEvents.compositionend();
+    const afterComposition = latestOptions.editorProps.handleTextInput(
+      {
+        state: {
+          doc: { textContent: 'hello' },
+        },
+      },
+      5,
+      5,
+      '!',
+    );
+
+    expect(duringComposition).toBe(false);
+    expect(afterComposition).toBe(true);
   });
 });

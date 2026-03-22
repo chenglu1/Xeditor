@@ -7,6 +7,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 // --- Hooks ---
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import {
@@ -163,7 +164,7 @@ export function isColorHighlightActive(
   highlightColor?: string,
   mode: HighlightMode = 'mark',
 ): boolean {
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
 
   if (mode === 'mark') {
     return highlightColor
@@ -249,6 +250,7 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
 
   const { editor } = useTiptapEditor(providedEditor);
   const isMobile = useIsMobile();
+  const messages = useEditorMessages();
   const canColorHighlightState = canColorHighlight(editor, mode);
   const isActive = isColorHighlightActive(editor, highlightColor, mode);
   const isVisible = shouldShowButton({ editor, hideWhenUnavailable, mode });
@@ -298,10 +300,10 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
   const handleRemoveHighlight = useCallback(() => {
     const success = removeHighlight(editor, mode);
     if (success) {
-      onApplied?.({ color: '', label: 'Remove highlight', mode });
+      onApplied?.({ color: '', label: messages.toolbarRemoveHighlight, mode });
     }
     return success;
-  }, [editor, onApplied, mode]);
+  }, [editor, messages.toolbarRemoveHighlight, onApplied, mode]);
 
   useHotkeys(
     COLOR_HIGHLIGHT_SHORTCUT_KEY,
@@ -322,7 +324,7 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
     handleColorHighlight,
     handleRemoveHighlight,
     canColorHighlight: canColorHighlightState,
-    label: label || `Highlight`,
+    label: label || messages.toolbarHighlight,
     shortcutKeys: COLOR_HIGHLIGHT_SHORTCUT_KEY,
     Icon: HighlighterIcon,
     mode,

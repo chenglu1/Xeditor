@@ -1,9 +1,13 @@
-import { forwardRef, useState, useRef, useEffect } from 'react';
+import { forwardRef, useState, useRef, useEffect, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 
 // --- Icons ---
 
 // --- Hooks ---
+import {
+  getHeadingLevelLabel,
+  useEditorMessages,
+} from '../../../core/editor-messages-context';
 
 // --- Tiptap UI ---
 import type { UseHeadingDropdownMenuConfig } from './index';
@@ -15,10 +19,63 @@ import { ChevronDownIcon } from '../../tiptap-icons/chevron-down-icon';
 import type { ButtonProps } from '../../tiptap-ui-primitive/button';
 import { Button } from '../../tiptap-ui-primitive/button';
 import { HeadingButton } from '../heading-button';
+
 export interface HeadingDropdownProps
   extends Omit<ButtonProps, 'type'>, UseHeadingDropdownMenuConfig {
   onOpenChange?: (isOpen: boolean) => void;
 }
+
+const DROPDOWN_OFFSET = 4;
+const VIEWPORT_PADDING = 8;
+
+function getOverlayPosition(
+  anchorElement: HTMLButtonElement,
+  panelElement: HTMLDivElement | null,
+) {
+  const anchorRect = anchorElement.getBoundingClientRect();
+  const panelWidth = panelElement?.offsetWidth ?? 0;
+  const panelHeight = panelElement?.offsetHeight ?? 0;
+
+  let left = anchorRect.left;
+  if (panelWidth > 0) {
+    const maxLeft = Math.max(
+      VIEWPORT_PADDING,
+      window.innerWidth - panelWidth - VIEWPORT_PADDING,
+    );
+    left = Math.min(left, maxLeft);
+  }
+  left = Math.max(VIEWPORT_PADDING, left);
+
+  let top = anchorRect.bottom + DROPDOWN_OFFSET;
+  if (panelHeight > 0) {
+    const canPlaceAbove =
+      anchorRect.top - panelHeight - DROPDOWN_OFFSET >= VIEWPORT_PADDING;
+    const wouldOverflowBelow =
+      top + panelHeight > window.innerHeight - VIEWPORT_PADDING;
+
+    if (wouldOverflowBelow && canPlaceAbove) {
+      top = anchorRect.top - panelHeight - DROPDOWN_OFFSET;
+    } else {
+      const maxTop = Math.max(
+        VIEWPORT_PADDING,
+        window.innerHeight - panelHeight - VIEWPORT_PADDING,
+      );
+      top = Math.min(top, maxTop);
+    }
+  }
+  top = Math.max(VIEWPORT_PADDING, top);
+
+  return { top, left };
+}
+
+const HEADING_PREVIEW_STYLES: Record<1 | 2 | 3 | 4 | 5 | 6, CSSProperties> = {
+  1: { fontSize: '1.25rem', fontWeight: 700, lineHeight: 1.2 },
+  2: { fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.25 },
+  3: { fontSize: '1rem', fontWeight: 600, lineHeight: 1.3 },
+  4: { fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.35 },
+  5: { fontSize: '0.875rem', fontWeight: 600, lineHeight: 1.4 },
+  6: { fontSize: '0.8125rem', fontWeight: 600, lineHeight: 1.45 },
+};
 
 /**
  * 简化版标题下拉菜单 - 不依赖 Radix UI
@@ -38,7 +95,8 @@ export const HeadingDropdown = forwardRef<
     ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
-    const { isVisible, isActive, canToggle, Icon } = useHeadingDropdownMenu({
+    const messages = useEditorMessages();
+    const { isVisible, isActive, Icon } = useHeadingDropdownMenu({
       editor,
       levels,
       hideWhenUnavailable,
@@ -87,6 +145,31 @@ export const HeadingDropdown = forwardRef<
       return () => document.removeEventListener('keydown', handleEscape);
     }, [isOpen, onOpenChange]);
 
+    useEffect(() => {
+      if (!isOpen || !buttonRef.current) {
+        return;
+      }
+
+      const syncPosition = () => {
+        if (!buttonRef.current) {
+          return;
+        }
+
+        setPosition(getOverlayPosition(buttonRef.current, dropdownRef.current));
+      };
+
+      syncPosition();
+      const frameId = window.requestAnimationFrame(syncPosition);
+      window.addEventListener('resize', syncPosition);
+      window.addEventListener('scroll', syncPosition, true);
+
+      return () => {
+        window.cancelAnimationFrame(frameId);
+        window.removeEventListener('resize', syncPosition);
+        window.removeEventListener('scroll', syncPosition, true);
+      };
+    }, [isOpen]);
+
     if (!isVisible) {
       return null;
     }
@@ -94,11 +177,7 @@ export const HeadingDropdown = forwardRef<
     const handleToggle = () => {
       const newState = !isOpen;
       if (newState && buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        setPosition({
-          top: rect.bottom + 4,
-          left: rect.left,
-        });
+        setPosition(getOverlayPosition(buttonRef.current, dropdownRef.current));
       }
       setIsOpen(newState);
       onOpenChange?.(newState);
@@ -128,10 +207,10 @@ export const HeadingDropdown = forwardRef<
           data-active-state={isActive ? 'on' : 'off'}
           role="button"
           tabIndex={-1}
-          aria-label="Format text as heading"
+          aria-label={messages.toolbarFormatHeading}
           aria-pressed={isActive}
           aria-expanded={isOpen}
-          tooltip="Heading"
+          tooltip={messages.toolbarHeading}
           onClick={handleToggle}
           {...buttonProps}
         >
@@ -146,6 +225,7 @@ export const HeadingDropdown = forwardRef<
               className="tiptap-dropdown-menu tiptap-card xeditor-overlay-panel"
               data-state="open"
               style={{
+                position: 'fixed',
                 top: `${position.top}px`,
                 left: `${position.left}px`,
               }}
@@ -160,7 +240,8 @@ export const HeadingDropdown = forwardRef<
                       key={`heading-${level}`}
                       editor={editor}
                       level={level as 1 | 2 | 3 | 4 | 5 | 6}
-                      text={`Heading ${level}`}
+                      style={HEADING_PREVIEW_STYLES[level as 1 | 2 | 3 | 4 | 5 | 6]}
+                      text={getHeadingLevelLabel(messages, level)}
                       onToggled={() => handleSelectLevel(level)}
                       tooltip=""
                     />

@@ -11,15 +11,15 @@ import {
   Button,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import {
-  ConfigurableTiptapEditor,
-  type EditorUpdateEvent,
-} from '@chenglu1/xeditor-editor';
+import type { EditorUpdateEvent } from '@chenglu1/xeditor-editor';
+
+import { ConfigurableTiptapEditor } from '../components/LocalizedEditor';
+import { handleDemoImageUpload } from '../lib/demo-upload';
 
 const USE_CASES = ['活动落地页、产品介绍页', '帮助中心、公告通知', '不需保留 Markdown 的常规文案'];
 
 export function RichtextPage() {
-  const [readOnly, setReadOnly] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [content, setContent] = useState('# 页面标题\n\n在这里开始你的内容，例如产品介绍或活动说明。');
   const handleContentUpdate = (event: EditorUpdateEvent) => {
     if (event.valueType === 'markdown') {
@@ -110,16 +110,16 @@ export function RichtextPage() {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Typography variant="caption" color="text.secondary">
-                    {readOnly ? '只读模式' : '编辑模式'}
+                    {disabled ? '禁用模式' : '编辑模式'}
                   </Typography>
                   <Button
                     size="small"
-                    variant={readOnly ? 'contained' : 'outlined'}
-                    color={readOnly ? 'error' : 'primary'}
-                    onClick={() => setReadOnly((v: boolean) => !v)}
+                    variant={disabled ? 'contained' : 'outlined'}
+                    color={disabled ? 'error' : 'primary'}
+                    onClick={() => setDisabled((v: boolean) => !v)}
                     sx={{ borderRadius: 999, px: 2, minWidth: 80 }}
                   >
-                    {readOnly ? '启用编辑' : '禁用编辑'}
+                    {disabled ? '启用编辑' : '禁用编辑'}
                   </Button>
                 </Box>
               </Box>
@@ -130,7 +130,8 @@ export function RichtextPage() {
                 <ConfigurableTiptapEditor
                   value={content}
                   valueType="markdown"
-                  readOnly={readOnly}
+                  disabled={disabled}
+                  uploadHandler={handleDemoImageUpload}
                   onUpdate={handleContentUpdate}
                 />
               </Box>

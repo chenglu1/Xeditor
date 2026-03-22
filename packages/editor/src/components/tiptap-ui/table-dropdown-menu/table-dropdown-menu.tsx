@@ -2,6 +2,7 @@ import type { Editor } from '@tiptap/react';
 import { forwardRef, useCallback } from 'react';
 
 // --- Icons ---
+import { useEditorMessages } from '../../../core/editor-messages-context';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
 import { TableIcon } from '../../tiptap-icons/table-icon';
 
@@ -58,6 +59,7 @@ export const TableDropdownMenu = forwardRef<
     ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
+    const messages = useEditorMessages();
 
     const canInsert =
       editor?.can().insertTable({ rows, cols, withHeaderRow }) ?? false;
@@ -79,8 +81,8 @@ export const TableDropdownMenu = forwardRef<
         data-style="ghost"
         role="button"
         tabIndex={-1}
-        aria-label="Insert table"
-        tooltip="Insert Table"
+        aria-label={messages.toolbarInsertTable}
+        tooltip={messages.toolbarInsertTable}
         disabled={!canInsert}
         onClick={handleInsertTable}
         {...buttonProps}

@@ -149,4 +149,18 @@ describe('ImageUploadNode', () => {
     expect(upload).not.toHaveBeenCalled();
     expect(props.insertContentAt).not.toHaveBeenCalled();
   });
+
+  it('exposes keyboard and accessible labels for the upload surface', () => {
+    const props = createNodeViewProps();
+    const clickSpy = vi
+      .spyOn(HTMLInputElement.prototype, 'click')
+      .mockImplementation(() => {});
+    const { container, getByRole } = render(<ImageUploadNode {...props} />);
+    const uploadSurface = getByRole('button', { name: 'Upload files' });
+
+    fireEvent.keyDown(uploadSurface, { key: 'Enter' });
+
+    expect(container.querySelector('[role="button"]')).toBe(uploadSurface);
+    expect(clickSpy).toHaveBeenCalledTimes(1);
+  });
 });

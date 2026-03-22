@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  ConfigurableTiptapEditor,
-  type EditorUpdateEvent,
-} from '@chenglu1/xeditor-editor';
+import type { EditorUpdateEvent } from '@chenglu1/xeditor-editor';
 import {
   Container,
   Box,
@@ -14,6 +11,9 @@ import {
   Chip,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
+
+import { ConfigurableTiptapEditor } from '../components/LocalizedEditor';
+import { handleDemoImageUpload } from '../lib/demo-upload';
 
 const FEATURES = [
   {
@@ -48,7 +48,7 @@ export function HomePage() {
   const [value, setValue] = useState(
     `# 欢迎使用 Xeditor\n\n这里是一个**实时编辑**演示，试着修改内容看看效果。\n\n## 支持的功能\n\n- 标题、列表、表格\n- LaTeX 数学公式：$E = mc^2$\n- 图片上传与链接\n- 文本高亮与对齐\n\n> 从这里开始创作你的内容吧！`,
   );
-  const [demoReadOnly, setDemoReadOnly] = useState(false);
+  const [demoDisabled, setDemoDisabled] = useState(false);
 
   const handleDemoUpdate = (event: EditorUpdateEvent) => {
     if (event.valueType === 'markdown') {
@@ -293,16 +293,16 @@ export function HomePage() {
                   />
                   <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Typography variant="caption" color="text.secondary">
-                      {demoReadOnly ? '只读' : '编辑'}
+                      {demoDisabled ? '禁用' : '编辑'}
                     </Typography>
                     <Button
                       size="small"
-                      variant={demoReadOnly ? 'contained' : 'outlined'}
-                      color={demoReadOnly ? 'error' : 'primary'}
-                      onClick={() => setDemoReadOnly((v: boolean) => !v)}
+                      variant={demoDisabled ? 'contained' : 'outlined'}
+                      color={demoDisabled ? 'error' : 'primary'}
+                      onClick={() => setDemoDisabled((v: boolean) => !v)}
                       sx={{ borderRadius: 999, px: 1.5, py: 0.3, fontSize: '0.72rem', minWidth: 64 }}
                     >
-                      {demoReadOnly ? '启用' : '禁用'}
+                      {demoDisabled ? '启用' : '禁用'}
                     </Button>
                   </Box>
                 </Box>
@@ -311,7 +311,8 @@ export function HomePage() {
                     value={value}
                     valueType="markdown"
                     dualView
-                    readOnly={demoReadOnly}
+                    disabled={demoDisabled}
+                    uploadHandler={handleDemoImageUpload}
                     onUpdate={handleDemoUpdate}
                   />
                 </Box>

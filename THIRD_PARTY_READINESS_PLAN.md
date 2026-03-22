@@ -168,3 +168,13 @@ Improve confidence across host frameworks, browsers, and content scenarios.
 - 2026-03-22: Verified `corepack pnpm build` passes after P2 changes
 - 2026-03-22: Verified `node scripts/test-bundle.mjs` passes after P2 changes
 - 2026-03-22: Phase P2 complete
+- 2026-03-22: Phase P3 started with SSR-safe rendering fallbacks, input hardening, and consumer-visible a11y/i18n cleanup
+- 2026-03-22: Added SSR smoke coverage for read-only static rendering and editable loading-shell fallback in `ConfigurableTiptapEditor.ssr.test.tsx`
+- 2026-03-22: Added broader interaction coverage for paste truncation, IME composition-aware maxLength handling, upload keyboard affordances, and mobile toolbar rendering state in package tests
+- 2026-03-22: Introduced centralized editor message context so toolbar labels, table actions, upload affordances, mode labels, placeholders, and editor aria labels are consumer-localizable through `messages`
+- 2026-03-22: Added keyboard and aria affordances for markdown textarea, rich-text editor surface, upload node interactions, and floating table actions
+- 2026-03-22: Documented SSR behavior, localization hooks, viewer-mode guidance, heavy preset tradeoffs, and layered CSS performance strategy in `packages/editor/README.md`
+- 2026-03-22: Verified `pnpm --filter @chenglu1/xeditor-editor test` passes after P3 changes
+- 2026-03-22: Verified `corepack pnpm build` passes after P3 changes
+- 2026-03-22: Verified `node scripts/test-bundle.mjs` passes after P3 changes
+- 2026-03-22: Phase P3 complete

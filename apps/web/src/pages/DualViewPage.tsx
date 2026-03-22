@@ -11,15 +11,15 @@ import {
   Button,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import {
-  ConfigurableTiptapEditor,
-  type EditorUpdateEvent,
-} from '@chenglu1/xeditor-editor';
+import type { EditorUpdateEvent } from '@chenglu1/xeditor-editor';
+
+import { ConfigurableTiptapEditor } from '../components/LocalizedEditor';
+import { handleDemoImageUpload } from '../lib/demo-upload';
 
 const USE_CASES = ['需要导出 Markdown 的知识库系统', '产品/设计/研发协同撰写的规格文档', '需要严格版本管理和审阅的说明文档'];
 
 export function DualViewPage() {
-  const [readOnly, setReadOnly] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const [content, setContent] = useState(
     `# 双视图演示\n\n左侧为富文本编辑器，右侧为 Markdown 源码，实时联动。\n\n## 特性\n\n- 富文本操作实时同步到 Markdown\n- Markdown 编辑实时同步到富文本\n- 支持数学公式：$f(x) = x^2 + 1$`,
   );
@@ -110,16 +110,16 @@ export function DualViewPage() {
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                   <Typography variant="caption" color="text.secondary">
-                    {readOnly ? '只读模式' : '编辑模式'}
+                    {disabled ? '禁用模式' : '编辑模式'}
                   </Typography>
                   <Button
                     size="small"
-                    variant={readOnly ? 'contained' : 'outlined'}
-                    color={readOnly ? 'error' : 'primary'}
-                    onClick={() => setReadOnly((v: boolean) => !v)}
+                    variant={disabled ? 'contained' : 'outlined'}
+                    color={disabled ? 'error' : 'primary'}
+                    onClick={() => setDisabled((v: boolean) => !v)}
                     sx={{ borderRadius: 999, px: 2, minWidth: 80 }}
                   >
-                    {readOnly ? '启用编辑' : '禁用编辑'}
+                    {disabled ? '启用编辑' : '禁用编辑'}
                   </Button>
                 </Box>
               </Box>
@@ -131,7 +131,8 @@ export function DualViewPage() {
                   value={content}
                   valueType="markdown"
                   dualView
-                  readOnly={readOnly}
+                  disabled={disabled}
+                  uploadHandler={handleDemoImageUpload}
                   onUpdate={handleContentUpdate}
                 />
               </Box>

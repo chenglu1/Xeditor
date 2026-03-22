@@ -1,16 +1,19 @@
+import { useEffect } from 'react';
 import {
-  ThemeProvider,
-  createTheme,
-  CssBaseline,
   AppBar,
-  Toolbar,
-  Typography,
   Box,
   Button,
   Container,
+  CssBaseline,
+  ThemeProvider,
+  Toolbar,
+  Typography,
+  createTheme,
 } from '@mui/material';
-import { Routes, Route, Link as RouterLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Route, Routes, Link as RouterLink, useLocation } from 'react-router-dom';
 
+import { LanguageSwitcher } from './components/LanguageSwitcher';
 import { HomePage } from './pages/HomePage';
 import { RichtextPage } from './pages/RichtextPage';
 import { MarkdownSyncPage } from './pages/MarkdownSyncPage';
@@ -91,13 +94,14 @@ const theme = createTheme({
 function NavBar() {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const { t } = useTranslation();
 
   const navItems = [
-    { label: 'Rich Text', to: '/examples/richtext' },
-    { label: 'Markdown', to: '/examples/markdown-sync' },
-    { label: 'Dual View', to: '/examples/dual-view' },
-    { label: 'Streaming', to: '/examples/streaming' },
-    { label: 'Generalized API', to: '/examples/generalized-api' },
+    { label: t('app.nav.richtext'), to: '/examples/richtext' },
+    { label: t('app.nav.markdown'), to: '/examples/markdown-sync' },
+    { label: t('app.nav.dualView'), to: '/examples/dual-view' },
+    { label: t('app.nav.streaming'), to: '/examples/streaming' },
+    { label: t('app.nav.generalizedApi'), to: '/examples/generalized-api' },
   ];
 
   return (
@@ -174,6 +178,8 @@ function NavBar() {
             ))}
           </Box>
 
+          <LanguageSwitcher />
+
           <Button
             href={GITHUB_REPO_URL}
             target="_blank"
@@ -182,7 +188,7 @@ function NavBar() {
             size="small"
             sx={{ ml: 1, px: 2 }}
           >
-            GitHub
+            {t('app.nav.github')}
           </Button>
         </Toolbar>
       </Container>
@@ -191,6 +197,12 @@ function NavBar() {
 }
 
 export function App() {
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -258,11 +270,11 @@ export function App() {
                   color="text.secondary"
                   sx={{ fontWeight: 500 }}
                 >
-                  Xeditor · A reusable editor playground
+                  {t('app.footer.tagline')}
                 </Typography>
               </Box>
               <Typography variant="body2" color="text.disabled">
-                © {new Date().getFullYear()} MIT License
+                {new Date().getFullYear()} {t('app.footer.license')}
               </Typography>
             </Box>
           </Container>

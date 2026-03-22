@@ -89,13 +89,15 @@ export const CodeBlockButton = forwardRef<
     return (
       <Button
         type="button"
+        disabled={!canToggle}
         data-style="ghost"
         data-active-state={isActive ? 'on' : 'off'}
+        data-disabled={!canToggle}
         role="button"
         tabIndex={-1}
         aria-label={label}
         aria-pressed={isActive}
-        tooltip="Code Block"
+        tooltip={label}
         onClick={handleClick}
         {...buttonProps}
         ref={ref}

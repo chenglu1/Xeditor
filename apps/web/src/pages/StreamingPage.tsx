@@ -14,7 +14,8 @@ import {
   LinearProgress,
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor';
+
+import { ConfigurableTiptapEditor } from '../components/LocalizedEditor';
 import FULL_MARKDOWN from './streaming-demo.md?raw';
 
 // ── 速度预设 ─────────────────────────────────────────────────

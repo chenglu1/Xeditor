@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import { isNodeTypeSelected } from '../../../lib/tiptap-utils';
@@ -88,7 +89,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, hideWhenUnavailable, action } = props;
 
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
 
   if (hideWhenUnavailable && !editor.isActive('code')) {
     return canExecuteUndoRedoAction(editor, action);
@@ -142,6 +143,7 @@ export function useUndoRedo(config: UseUndoRedoConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canExecute = canExecuteUndoRedoAction(editor, action);
   const isVisible = shouldShowButton({ editor, hideWhenUnavailable, action });
 
@@ -159,7 +161,7 @@ export function useUndoRedo(config: UseUndoRedoConfig) {
     isVisible,
     handleAction,
     canExecute,
-    label: historyActionLabels[action],
+    label: action === 'undo' ? messages.toolbarUndo : messages.toolbarRedo,
     shortcutKeys: UNDO_REDO_SHORTCUT_KEYS[action],
     Icon: historyIcons[action],
   };

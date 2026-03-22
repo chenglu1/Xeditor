@@ -6,8 +6,8 @@ import { useIsMobile } from '../hooks/use-mobile';
 import { MAX_FILE_SIZE } from '../lib/tiptap-utils';
 import type {
   ConfigurableTiptapEditorProps,
-  EditorMessages,
   EditorErrorEvent,
+  EditorMessages,
   EditorUpdateEvent,
   EditorValue,
   EditorValueType,
@@ -51,7 +51,7 @@ export function useConfigurableEditor({
   defaultValue,
   valueType,
   contentType,
-  placeholder = '开始输入...',
+  placeholder,
   readOnly = false,
   disabled = false,
   toolbarButtons,
@@ -79,9 +79,11 @@ export function useConfigurableEditor({
   const isMobile = useIsMobile();
   const resolvedValueType = resolveEditorValueType(valueType, contentType);
   const resolvedMessages = createEditorMessages(messages);
+  const resolvedPlaceholder = placeholder ?? resolvedMessages.placeholder;
   const resolvedLogger = useMemo(() => createEditorLogger(logger), [logger]);
   const isControlled = value !== undefined;
   const hasWarnedInvalidDualViewRef = useRef(false);
+  const isComposingRef = useRef(false);
   const initialValueRef = useRef<EditorValue>(
     value ?? defaultValue ?? createEmptyEditorValue(resolvedValueType),
   );
@@ -110,7 +112,10 @@ export function useConfigurableEditor({
     explicitValueType: EditorValueType = resolvedValueType,
   ) => {
     try {
-      const nextValue = getSerializedEditorContent(editorInstance, explicitValueType);
+      const nextValue = getSerializedEditorContent(
+        editorInstance,
+        explicitValueType,
+      );
       const characterCount = getEditorCharacterCount(editorInstance);
       const wordCount = getEditorWordCount(editorInstance);
 
@@ -135,7 +140,9 @@ export function useConfigurableEditor({
       reportError({
         phase: 'serialize',
         error:
-          error instanceof Error ? error : new Error('Failed to serialize content'),
+          error instanceof Error
+            ? error
+            : new Error('Failed to serialize content'),
         recoverable: true,
       });
       return null;
@@ -160,7 +167,7 @@ export function useConfigurableEditor({
 
   const editor = useEditor({
     extensions: createEditorExtensions({
-      placeholder,
+      placeholder: resolvedPlaceholder,
       maxFileSize,
       maxLength,
       imageUploadHandler,
@@ -186,6 +193,10 @@ export function useConfigurableEditor({
         class: 'focus:outline-none',
       },
       handleTextInput: (view, from, to, text) => {
+        if (isComposingRef.current) {
+          return false;
+        }
+
         if (!maxLength) {
           return false;
         }
@@ -195,6 +206,16 @@ export function useConfigurableEditor({
         const newLength = currentCount - selectedLength + text.length;
 
         return newLength > maxLength;
+      },
+      handleDOMEvents: {
+        compositionstart: () => {
+          isComposingRef.current = true;
+          return false;
+        },
+        compositionend: () => {
+          isComposingRef.current = false;
+          return false;
+        },
       },
       handlePaste: (view, event) => {
         if (!maxLength) {
@@ -214,7 +235,9 @@ export function useConfigurableEditor({
         if (text.length > remaining) {
           const truncatedText = text.slice(0, remaining);
           const { tr } = view.state;
-          view.dispatch(tr.insertText(truncatedText, selection.from, selection.to));
+          view.dispatch(
+            tr.insertText(truncatedText, selection.from, selection.to),
+          );
           return true;
         }
 
@@ -302,6 +325,14 @@ export function useConfigurableEditor({
       lastSyncedExternalValueRef.current = value;
     }
   }, [editor, isControlled, resolvedValueType, value]);
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    editor.setEditable(!(readOnly || disabled));
+  }, [disabled, editor, readOnly]);
 
   useEffect(() => {
     if (

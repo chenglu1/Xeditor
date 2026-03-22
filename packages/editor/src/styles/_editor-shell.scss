@@ -193,6 +193,9 @@
 }
 
 .xeditor-overlay-panel {
-  position: fixed;
   z-index: var(--xeditor-overlay-z-index);
+}
+
+.tiptap-card.xeditor-overlay-panel {
+  position: fixed;
 }

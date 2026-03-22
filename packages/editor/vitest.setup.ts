@@ -5,7 +5,7 @@ afterEach(() => {
   cleanup();
 });
 
-if (!window.matchMedia) {
+if (typeof window !== 'undefined' && !window.matchMedia) {
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: vi.fn().mockImplementation((query: string) => ({
@@ -33,6 +33,9 @@ if (!globalThis.ResizeObserver) {
   globalThis.ResizeObserver = ResizeObserverMock;
 }
 
-if (!HTMLElement.prototype.scrollIntoView) {
+if (
+  typeof HTMLElement !== 'undefined' &&
+  !HTMLElement.prototype.scrollIntoView
+) {
   HTMLElement.prototype.scrollIntoView = vi.fn();
 }

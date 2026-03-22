@@ -3,6 +3,7 @@ import { forwardRef, useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 // --- Hooks ---
+import { useEditorMessages } from '../../../core/editor-messages-context';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
 
 // --- Icons ---
@@ -35,6 +36,49 @@ export interface ListDropdownProps extends Omit<ButtonProps, 'type'> {
   onOpenChange?: (isOpen: boolean) => void;
 }
 
+const DROPDOWN_OFFSET = 4;
+const VIEWPORT_PADDING = 8;
+
+function getOverlayPosition(
+  anchorElement: HTMLButtonElement,
+  panelElement: HTMLDivElement | null,
+) {
+  const anchorRect = anchorElement.getBoundingClientRect();
+  const panelWidth = panelElement?.offsetWidth ?? 0;
+  const panelHeight = panelElement?.offsetHeight ?? 0;
+
+  let left = anchorRect.left;
+  if (panelWidth > 0) {
+    const maxLeft = Math.max(
+      VIEWPORT_PADDING,
+      window.innerWidth - panelWidth - VIEWPORT_PADDING,
+    );
+    left = Math.min(left, maxLeft);
+  }
+  left = Math.max(VIEWPORT_PADDING, left);
+
+  let top = anchorRect.bottom + DROPDOWN_OFFSET;
+  if (panelHeight > 0) {
+    const canPlaceAbove =
+      anchorRect.top - panelHeight - DROPDOWN_OFFSET >= VIEWPORT_PADDING;
+    const wouldOverflowBelow =
+      top + panelHeight > window.innerHeight - VIEWPORT_PADDING;
+
+    if (wouldOverflowBelow && canPlaceAbove) {
+      top = anchorRect.top - panelHeight - DROPDOWN_OFFSET;
+    } else {
+      const maxTop = Math.max(
+        VIEWPORT_PADDING,
+        window.innerHeight - panelHeight - VIEWPORT_PADDING,
+      );
+      top = Math.min(top, maxTop);
+    }
+  }
+  top = Math.max(VIEWPORT_PADDING, top);
+
+  return { top, left };
+}
+
 /**
  * 原生实现的列表下拉菜单（不依赖 Radix UI）
  */
@@ -50,7 +94,8 @@ export const ListDropdown = forwardRef<HTMLButtonElement, ListDropdownProps>(
     ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
-    const { filteredLists, canToggle, isActive, isVisible, Icon } =
+    const messages = useEditorMessages();
+    const { filteredLists, isActive, isVisible, Icon } =
       useListDropdownMenu({
         editor,
         types,
@@ -100,18 +145,39 @@ export const ListDropdown = forwardRef<HTMLButtonElement, ListDropdownProps>(
       return () => document.removeEventListener('keydown', handleEscape);
     }, [isOpen, onOpenChange]);
 
-    if (!isVisible || !editor || !editor.isEditable) {
+    useEffect(() => {
+      if (!isOpen || !buttonRef.current) {
+        return;
+      }
+
+      const syncPosition = () => {
+        if (!buttonRef.current) {
+          return;
+        }
+
+        setPosition(getOverlayPosition(buttonRef.current, dropdownRef.current));
+      };
+
+      syncPosition();
+      const frameId = window.requestAnimationFrame(syncPosition);
+      window.addEventListener('resize', syncPosition);
+      window.addEventListener('scroll', syncPosition, true);
+
+      return () => {
+        window.cancelAnimationFrame(frameId);
+        window.removeEventListener('resize', syncPosition);
+        window.removeEventListener('scroll', syncPosition, true);
+      };
+    }, [isOpen]);
+
+    if (!isVisible || !editor) {
       return null;
     }
 
     const handleToggle = () => {
       const newState = !isOpen;
       if (newState && buttonRef.current) {
-        const rect = buttonRef.current.getBoundingClientRect();
-        setPosition({
-          top: rect.bottom + 4,
-          left: rect.left,
-        });
+        setPosition(getOverlayPosition(buttonRef.current, dropdownRef.current));
       }
       setIsOpen(newState);
       onOpenChange?.(newState);
@@ -141,10 +207,10 @@ export const ListDropdown = forwardRef<HTMLButtonElement, ListDropdownProps>(
           data-active-state={isActive ? 'on' : 'off'}
           role="button"
           tabIndex={-1}
-          aria-label="List options"
+          aria-label={messages.toolbarListOptions}
           aria-pressed={isActive}
           aria-expanded={isOpen}
-          tooltip="List"
+          tooltip={messages.toolbarList}
           onClick={handleToggle}
           {...buttonProps}
         >
@@ -159,6 +225,7 @@ export const ListDropdown = forwardRef<HTMLButtonElement, ListDropdownProps>(
               className="tiptap-dropdown-menu tiptap-card xeditor-overlay-panel"
               data-state="open"
               style={{
+                position: 'fixed',
                 top: `${position.top}px`,
                 left: `${position.left}px`,
               }}

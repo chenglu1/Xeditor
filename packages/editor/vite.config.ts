@@ -17,10 +17,16 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         advanced: path.resolve(__dirname, 'src/advanced.ts'),
+        'react-i18next': path.resolve(__dirname, 'src/react-i18next.tsx'),
       },
       name: 'XEditor',
       fileName: (format, entryName) => {
-        const basename = entryName === 'advanced' ? 'advanced' : 'index';
+        const basename =
+          entryName === 'advanced'
+            ? 'advanced'
+            : entryName === 'react-i18next'
+              ? 'react-i18next'
+              : 'index';
         return format === 'es' ? `${basename}.esm.js` : `${basename}.cjs`;
       },
       formats: ['es', 'cjs'],
@@ -51,8 +57,10 @@ export default defineConfig({
         '@radix-ui/react-popover',
         '@floating-ui/react',
         'katex',
+        'i18next',
         'lodash-es',
         'react-hotkeys-hook',
+        'react-i18next',
         'styled-components',
       ],
       output: {

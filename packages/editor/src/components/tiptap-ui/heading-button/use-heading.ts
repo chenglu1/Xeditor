@@ -6,6 +6,10 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import {
+  getHeadingLevelLabel,
+  useEditorMessages,
+} from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import {
@@ -116,7 +120,7 @@ export function isHeadingActive(
   editor: Editor | null,
   level?: Level | Level[],
 ): boolean {
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
 
   if (Array.isArray(level)) {
     return level.some((l) => editor.isActive('heading', { level: l }));
@@ -211,7 +215,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, level, hideWhenUnavailable } = props;
 
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
   if (!isNodeInSchema('heading', editor)) return false;
 
   if (hideWhenUnavailable && !editor.isActive('code')) {
@@ -279,6 +283,7 @@ export function useHeading(config: UseHeadingConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canToggleState = canToggle(editor, level);
   const isActive = isHeadingActive(editor, level);
   const isVisible = shouldShowButton({
@@ -302,7 +307,7 @@ export function useHeading(config: UseHeadingConfig) {
     isActive,
     handleToggle,
     canToggle: canToggleState,
-    label: `Heading ${level}`,
+    label: getHeadingLevelLabel(messages, level),
     shortcutKeys: HEADING_SHORTCUT_KEYS[level],
     Icon: headingIcons[level],
   };

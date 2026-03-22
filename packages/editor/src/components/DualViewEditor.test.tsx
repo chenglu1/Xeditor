@@ -201,4 +201,27 @@ describe('DualViewEditor', () => {
     expect(screen.queryByTestId('editor-toolbar')).toBeNull();
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
+
+  it('adds an accessible label to the markdown source textarea', () => {
+    render(
+      <DualViewEditor
+        editor={createMockEditor('# initial').editor}
+        activeMode="markdown"
+        placeholder="Type here"
+        markdownValue="# initial"
+        readOnly={false}
+        toolbarConfig={toolbarConfig}
+        showToolbar={true}
+        minHeight="320px"
+        compact={false}
+        isMobile={false}
+        messages={DEFAULT_EDITOR_MESSAGES}
+        onMarkdownChange={vi.fn()}
+        onSwitchToMarkdown={vi.fn()}
+        onSwitchToRichtext={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByLabelText('Markdown source')).not.toBeNull();
+  });
 });

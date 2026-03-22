@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import {
@@ -69,7 +70,7 @@ export function canSetTextAlign(
   editor: Editor | null,
   align: TextAlign,
 ): boolean {
-  if (!editor) return false;
+  if (!editor || !editor.isEditable) return false;
   if (
     !isExtensionAvailable(editor, 'textAlign') ||
     isNodeTypeSelected(editor, ['image', 'horizontalRule'])
@@ -191,6 +192,7 @@ export function useTextAlign(config: UseTextAlignConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canAlign = canSetTextAlign(editor, align);
   const isActive = isTextAlignActive(editor, align);
   const isVisible = shouldShowButton({
@@ -214,7 +216,14 @@ export function useTextAlign(config: UseTextAlignConfig) {
     isActive,
     handleTextAlign,
     canAlign,
-    label: textAlignLabels[align],
+    label:
+      align === 'left'
+        ? messages.toolbarAlignLeft
+        : align === 'center'
+          ? messages.toolbarAlignCenter
+          : align === 'right'
+            ? messages.toolbarAlignRight
+            : messages.toolbarAlignJustify,
     shortcutKeys: TEXT_ALIGN_SHORTCUT_KEYS[align],
     Icon: textAlignIcons[align],
   };

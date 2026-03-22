@@ -6,6 +6,10 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import {
+  getListTypeLabel,
+  useEditorMessages,
+} from '../../../core/editor-messages-context';
 
 // --- Icons ---
 import {
@@ -288,6 +292,7 @@ export function useList(config: UseListConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canToggle = canToggleList(editor, type);
   const isActive = isListActive(editor, type);
   const isVisible = shouldShowButton({ editor, type, hideWhenUnavailable });
@@ -307,7 +312,7 @@ export function useList(config: UseListConfig) {
     isActive,
     handleToggle,
     canToggle,
-    label: listLabels[type],
+    label: getListTypeLabel(messages, type),
     shortcutKeys: LIST_SHORTCUT_KEYS[type],
     Icon: listIcons[type],
   };

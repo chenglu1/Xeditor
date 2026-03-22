@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { getToolbarButtonLabel, useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import { isMarkInSchema, isNodeTypeSelected } from '../../../lib/tiptap-utils';
@@ -83,7 +84,7 @@ export function canToggleMark(editor: Editor | null, type: Mark): boolean {
  * Checks if a mark is currently active
  */
 export function isMarkActive(editor: Editor | null, type: Mark): boolean {
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
   return editor.isActive(type);
 }
 
@@ -107,7 +108,7 @@ export function shouldShowButton(props: {
 }): boolean {
   const { editor, type, hideWhenUnavailable } = props;
 
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
   if (!isMarkInSchema(type, editor)) return false;
 
   if (hideWhenUnavailable && !editor.isActive('code')) {
@@ -170,6 +171,7 @@ export function useMark(config: UseMarkConfig) {
   } = config;
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canToggle = canToggleMark(editor, type);
   const isActive = isMarkActive(editor, type);
   const isVisible = shouldShowButton({ editor, type, hideWhenUnavailable });
@@ -189,7 +191,7 @@ export function useMark(config: UseMarkConfig) {
     isActive,
     handleMark,
     canToggle,
-    label: getFormattedMarkName(type),
+    label: getToolbarButtonLabel(messages, type),
     shortcutKeys: MARK_SHORTCUT_KEYS[type],
     Icon: markIcons[type],
   };

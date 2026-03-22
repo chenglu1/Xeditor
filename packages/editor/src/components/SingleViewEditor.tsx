@@ -58,7 +58,11 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
                       .filter(Boolean)
                       .join(' ')}
                   >
-                  <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+                    <EditorToolbar
+                      config={toolbarConfig}
+                      isMobile={isMobile}
+                      disabled={isToolbarDisabled}
+                    />
                   </div>
                 </div>
               ) : null
@@ -71,6 +75,7 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
             <EditorContent
               editor={editor}
               className={`tiptap ${compact ? 'compact-mode' : ''}`.trim()}
+              aria-label={messages.richTextEditorLabel}
             />
             <TableFloatingToolbar editor={editor} />
           </EditorPane>

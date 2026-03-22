@@ -3,6 +3,7 @@
 import type { Editor } from '@tiptap/react';
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
 
+import { useEditorMessages } from '../../../core/editor-messages-context';
 import { useElementRect } from '../../../hooks/use-element-rect';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
 import { TrashIcon } from '../../tiptap-icons/trash-icon';
@@ -19,65 +20,38 @@ export const TableFloatingToolbar = forwardRef<
   TableFloatingToolbarProps
 >(({ editor: providedEditor }, ref) => {
   const { editor, editorState } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const [isVisible, setIsVisible] = useState(false);
   const [cellElement, setCellElement] = useState<HTMLElement | null>(null);
   const toolbarRef = useRef<HTMLDivElement>(null);
   const cellRect = useElementRect({ element: cellElement ?? undefined });
 
   const handleAddRowBefore = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().addRowBefore().run();
+    editor?.chain().focus().addRowBefore().run();
   }, [editor]);
 
   const handleAddRowAfter = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().addRowAfter().run();
+    editor?.chain().focus().addRowAfter().run();
   }, [editor]);
 
   const handleDeleteRow = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().deleteRow().run();
+    editor?.chain().focus().deleteRow().run();
   }, [editor]);
 
   const handleAddColumnBefore = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().addColumnBefore().run();
+    editor?.chain().focus().addColumnBefore().run();
   }, [editor]);
 
   const handleAddColumnAfter = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().addColumnAfter().run();
+    editor?.chain().focus().addColumnAfter().run();
   }, [editor]);
 
   const handleDeleteColumn = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().deleteColumn().run();
+    editor?.chain().focus().deleteColumn().run();
   }, [editor]);
 
   const handleDeleteTable = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    editor.chain().focus().deleteTable().run();
+    editor?.chain().focus().deleteTable().run();
   }, [editor]);
 
   useEffect(() => {
@@ -135,6 +109,7 @@ export const TableFloatingToolbar = forwardRef<
       ref={ref || toolbarRef}
       className="table-floating-toolbar"
       style={toolbarStyle}
+      aria-label={messages.tableToolbarLabel}
     >
       <Card className="table-toolbar-card">
         <CardBody>
@@ -143,31 +118,34 @@ export const TableFloatingToolbar = forwardRef<
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="在上方插入行"
+              aria-label={messages.tableAddRowBefore}
+              tooltip={messages.tableAddRowBefore}
               onClick={handleAddRowBefore}
               className="table-action-btn"
             >
-              <span className="tiptap-button-text">⬆ 行</span>
+              <span className="tiptap-button-text">{messages.tableAddRowBefore}</span>
             </Button>
             <Button
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="在下方插入行"
+              aria-label={messages.tableAddRowAfter}
+              tooltip={messages.tableAddRowAfter}
               onClick={handleAddRowAfter}
               className="table-action-btn"
             >
-              <span className="tiptap-button-text">⬇ 行</span>
+              <span className="tiptap-button-text">{messages.tableAddRowAfter}</span>
             </Button>
             <Button
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="删除当前行"
+              aria-label={messages.tableDeleteRow}
+              tooltip={messages.tableDeleteRow}
               onClick={handleDeleteRow}
               className="table-action-btn table-delete-btn"
             >
-              <span className="tiptap-button-text">✕ 行</span>
+              <span className="tiptap-button-text">{messages.tableDeleteRow}</span>
             </Button>
 
             <Separator
@@ -179,31 +157,38 @@ export const TableFloatingToolbar = forwardRef<
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="在左侧插入列"
+              aria-label={messages.tableAddColumnBefore}
+              tooltip={messages.tableAddColumnBefore}
               onClick={handleAddColumnBefore}
               className="table-action-btn"
             >
-              <span className="tiptap-button-text">⬅ 列</span>
+              <span className="tiptap-button-text">
+                {messages.tableAddColumnBefore}
+              </span>
             </Button>
             <Button
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="在右侧插入列"
+              aria-label={messages.tableAddColumnAfter}
+              tooltip={messages.tableAddColumnAfter}
               onClick={handleAddColumnAfter}
               className="table-action-btn"
             >
-              <span className="tiptap-button-text">➡ 列</span>
+              <span className="tiptap-button-text">
+                {messages.tableAddColumnAfter}
+              </span>
             </Button>
             <Button
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="删除当前列"
+              aria-label={messages.tableDeleteColumn}
+              tooltip={messages.tableDeleteColumn}
               onClick={handleDeleteColumn}
               className="table-action-btn table-delete-btn"
             >
-              <span className="tiptap-button-text">✕ 列</span>
+              <span className="tiptap-button-text">{messages.tableDeleteColumn}</span>
             </Button>
 
             <Separator
@@ -215,7 +200,8 @@ export const TableFloatingToolbar = forwardRef<
               type="button"
               data-style="ghost"
               data-size="small"
-              tooltip="删除整个表格"
+              aria-label={messages.tableDeleteTable}
+              tooltip={messages.tableDeleteTable}
               onClick={handleDeleteTable}
               className="table-action-btn table-delete-table-btn"
             >

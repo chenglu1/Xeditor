@@ -349,11 +349,13 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
 
 interface ImageUploadPreviewProps {
   fileItem: FileItem;
+  messages: EditorMessages;
   onRemove: () => void;
 }
 
 const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   fileItem,
+  messages,
   onRemove,
 }) => {
   const formatFileSize = (bytes: number) => {
@@ -398,6 +400,8 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
           <Button
             type="button"
             data-style="ghost"
+            aria-label={messages.uploadRemoveFile}
+            tooltip={messages.uploadRemoveFile}
             onClick={(event) => {
               event.stopPropagation();
               onRemove();
@@ -522,8 +526,20 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
   return (
     <NodeViewWrapper
       className="tiptap-image-upload"
-      tabIndex={0}
+      tabIndex={hasFiles ? -1 : 0}
+      role={hasFiles ? undefined : 'button'}
+      aria-label={messages.uploadDropzoneLabel}
       onClick={handleClick}
+      onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (hasFiles) {
+          return;
+        }
+
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleClick();
+        }
+      }}
     >
       {!hasFiles && (
         <ImageUploadDragArea onFile={(files) => void handleUpload(files)}>
@@ -539,6 +555,8 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
               <Button
                 type="button"
                 data-style="ghost"
+                aria-label={messages.clearAllUploads}
+                tooltip={messages.clearAllUploads}
                 onClick={(event) => {
                   event.stopPropagation();
                   clearAllFiles();
@@ -552,6 +570,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
             <ImageUploadPreview
               key={fileItem.id}
               fileItem={fileItem}
+              messages={messages}
               onRemove={() => removeFileItem(fileItem.id)}
             />
           ))}
@@ -564,6 +583,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
         accept={accept}
         type="file"
         multiple={limit > 1}
+        aria-label={messages.uploadDropzoneLabel}
         onChange={handleChange}
         onClick={(event: React.MouseEvent<HTMLInputElement>) => {
           event.stopPropagation();

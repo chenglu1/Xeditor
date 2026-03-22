@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Icons ---
 import {
@@ -208,6 +209,7 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
   } = config || {};
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canToggle = canToggleBlockquote(editor);
   const isActive = editor?.isActive('blockquote') || false;
   const isVisible = shouldShowButton({ editor, hideWhenUnavailable });
@@ -227,7 +229,7 @@ export function useBlockquote(config?: UseBlockquoteConfig) {
     isActive,
     handleToggle,
     canToggle,
-    label: 'Blockquote',
+    label: messages.toolbarBlockquote,
     shortcutKeys: BLOCKQUOTE_SHORTCUT_KEY,
     Icon: BlockquoteIcon,
   };

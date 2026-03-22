@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import {
@@ -214,6 +215,7 @@ export function useCodeBlock(config?: UseCodeBlockConfig) {
   } = config || {};
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const canToggleState = canToggle(editor);
   const isActive = editor?.isActive('codeBlock') || false;
   const isVisible = shouldShowButton({ editor, hideWhenUnavailable });
@@ -233,7 +235,7 @@ export function useCodeBlock(config?: UseCodeBlockConfig) {
     isActive,
     handleToggle,
     canToggle: canToggleState,
-    label: 'Code Block',
+    label: messages.toolbarCodeBlock,
     shortcutKeys: CODE_BLOCK_SHORTCUT_KEY,
     Icon: CodeBlockIcon,
   };

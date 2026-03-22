@@ -146,12 +146,61 @@ export interface MediaUploadHooks {
 
 export interface EditorMessages {
   loading: string;
+  placeholder: string;
+  toolbarRegionLabel: string;
+  richTextEditorLabel: string;
+  markdownInputLabel: string;
   modeRichText: string;
   modeMarkdown: string;
+  toolbarUndo: string;
+  toolbarRedo: string;
+  toolbarHeading: string;
+  toolbarHeadingLevel: (context: { level: number }) => string;
+  toolbarFormatHeading: string;
+  toolbarList: string;
+  toolbarListOptions: string;
+  toolbarBulletList: string;
+  toolbarOrderedList: string;
+  toolbarTaskList: string;
+  toolbarBlockquote: string;
+  toolbarCodeBlock: string;
+  toolbarBold: string;
+  toolbarItalic: string;
+  toolbarStrike: string;
+  toolbarCode: string;
+  toolbarUnderline: string;
+  toolbarHighlight: string;
+  toolbarRemoveHighlight: string;
+  toolbarHighlightColors: string;
+  toolbarHighlightColor: (context: { label: string }) => string;
+  toolbarLink: string;
+  toolbarLinkPlaceholder: string;
+  toolbarApplyLink: string;
+  toolbarOpenLink: string;
+  toolbarRemoveLink: string;
+  toolbarSuperscript: string;
+  toolbarSubscript: string;
+  toolbarAlignLeft: string;
+  toolbarAlignCenter: string;
+  toolbarAlignRight: string;
+  toolbarAlignJustify: string;
+  toolbarInsertTable: string;
+  toolbarAddImage: string;
+  toolbarAddImageText: string;
+  tableToolbarLabel: string;
+  tableAddRowBefore: string;
+  tableAddRowAfter: string;
+  tableDeleteRow: string;
+  tableAddColumnBefore: string;
+  tableAddColumnAfter: string;
+  tableDeleteColumn: string;
+  tableDeleteTable: string;
   uploadClickOrDrop: string;
+  uploadDropzoneLabel: string;
   uploadLimit: (context: { limit: number; maxSizeMB: number }) => string;
   uploadInProgress: (context: { count: number }) => string;
   clearAllUploads: string;
+  uploadRemoveFile: string;
 }
 
 export interface ConfigurableTiptapEditorProps {
@@ -219,13 +268,62 @@ export interface EditorContextType {
 
 export const DEFAULT_EDITOR_MESSAGES: EditorMessages = {
   loading: 'Loading editor...',
+  placeholder: 'Write something...',
+  toolbarRegionLabel: 'Editor toolbar',
+  richTextEditorLabel: 'Rich text editor',
+  markdownInputLabel: 'Markdown source',
   modeRichText: 'Rich text mode',
   modeMarkdown: 'Markdown mode',
+  toolbarUndo: 'Undo',
+  toolbarRedo: 'Redo',
+  toolbarHeading: 'Heading',
+  toolbarHeadingLevel: ({ level }) => `Heading ${level}`,
+  toolbarFormatHeading: 'Format text as heading',
+  toolbarList: 'List',
+  toolbarListOptions: 'List options',
+  toolbarBulletList: 'Bullet list',
+  toolbarOrderedList: 'Ordered list',
+  toolbarTaskList: 'Task list',
+  toolbarBlockquote: 'Blockquote',
+  toolbarCodeBlock: 'Code block',
+  toolbarBold: 'Bold',
+  toolbarItalic: 'Italic',
+  toolbarStrike: 'Strike',
+  toolbarCode: 'Code',
+  toolbarUnderline: 'Underline',
+  toolbarHighlight: 'Highlight',
+  toolbarRemoveHighlight: 'Remove highlight',
+  toolbarHighlightColors: 'Highlight colors',
+  toolbarHighlightColor: ({ label }) => `${label} highlight color`,
+  toolbarLink: 'Link',
+  toolbarLinkPlaceholder: 'Paste a link...',
+  toolbarApplyLink: 'Apply link',
+  toolbarOpenLink: 'Open in new window',
+  toolbarRemoveLink: 'Remove link',
+  toolbarSuperscript: 'Superscript',
+  toolbarSubscript: 'Subscript',
+  toolbarAlignLeft: 'Align left',
+  toolbarAlignCenter: 'Align center',
+  toolbarAlignRight: 'Align right',
+  toolbarAlignJustify: 'Align justify',
+  toolbarInsertTable: 'Insert table',
+  toolbarAddImage: 'Add image',
+  toolbarAddImageText: 'Add',
+  tableToolbarLabel: 'Table actions',
+  tableAddRowBefore: 'Add row above',
+  tableAddRowAfter: 'Add row below',
+  tableDeleteRow: 'Delete row',
+  tableAddColumnBefore: 'Add column before',
+  tableAddColumnAfter: 'Add column after',
+  tableDeleteColumn: 'Delete column',
+  tableDeleteTable: 'Delete table',
   uploadClickOrDrop: 'Click to upload or drag and drop',
+  uploadDropzoneLabel: 'Upload files',
   uploadLimit: ({ limit, maxSizeMB }) =>
     `Maximum ${limit} file${limit === 1 ? '' : 's'}, ${maxSizeMB}MB each.`,
   uploadInProgress: ({ count }) => `Uploading ${count} file${count === 1 ? '' : 's'}`,
   clearAllUploads: 'Clear All',
+  uploadRemoveFile: 'Remove file',
 };
 
 declare module '@tiptap/react';

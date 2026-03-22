@@ -74,7 +74,11 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
           .filter(Boolean)
           .join(' ')}
       >
-        <EditorToolbar config={toolbarConfig} isMobile={isMobile} />
+        <EditorToolbar
+          config={toolbarConfig}
+          isMobile={isMobile}
+          disabled={isToolbarDisabled}
+        />
       </div>
       {modeSwitchButtons}
     </div>
@@ -107,6 +111,7 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
               onChange={(event) => onMarkdownChange(event.target.value)}
               placeholder={placeholder}
               readOnly={readOnly || disabled}
+              aria-label={messages.markdownInputLabel}
               className="markdown-editor-textarea xeditor-markdown-textarea"
             />
           </EditorPane>
@@ -127,7 +132,11 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
               >
                 <div className="editor-wrapper xeditor-richtext-wrapper">
                   <div className="xeditor-pane__body--padded">
-                    <EditorContent editor={editor} className="tiptap" />
+                    <EditorContent
+                      editor={editor}
+                      className="tiptap"
+                      aria-label={messages.richTextEditorLabel}
+                    />
                   </div>
                   <TableFloatingToolbar editor={editor} />
                 </div>

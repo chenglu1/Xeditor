@@ -5,6 +5,15 @@ import { describe, expect, it, vi } from 'vitest';
 import { SingleViewEditor } from './SingleViewEditor';
 import type { ToolbarConfig } from '../types';
 
+const mockEditorToolbar = vi.fn(
+  ({ disabled }: { disabled?: boolean }) => (
+    <div
+      data-testid="editor-toolbar"
+      data-disabled={disabled ? 'true' : 'false'}
+    />
+  ),
+);
+
 vi.mock('@tiptap/react', () => ({
   EditorContent: ({ className }: { className?: string }) => (
     <div data-testid="editor-content" className={className} />
@@ -22,7 +31,7 @@ vi.mock('@tiptap/react', () => ({
 }));
 
 vi.mock('./EditorToolbar', () => ({
-  EditorToolbar: () => <div data-testid="editor-toolbar" />,
+  EditorToolbar: (props: { disabled?: boolean }) => mockEditorToolbar(props),
 }));
 
 vi.mock('./tiptap-ui/table-floating-toolbar/table-floating-toolbar', () => ({
@@ -42,6 +51,35 @@ const toolbarConfig: ToolbarConfig = {
 };
 
 describe('SingleViewEditor', () => {
+  it('keeps the formatting toolbar visible but disabled when the editor is disabled', () => {
+    const { container } = render(
+      <SingleViewEditor
+        editor={{} as any}
+        placeholder="Type here"
+        minHeight="320px"
+        compact={false}
+        showToolbar={true}
+        toolbarConfig={toolbarConfig}
+        isMobile={false}
+        readOnly={false}
+        disabled={true}
+      />,
+    );
+
+    const toolbar = screen.getByTestId('editor-toolbar');
+    const toolbarSlotMain = container.querySelector(
+      '.xeditor-toolbar-slot__main',
+    ) as HTMLElement | null;
+
+    expect(toolbar.getAttribute('data-disabled')).toBe('true');
+    expect(toolbarSlotMain?.className).toContain('is-disabled');
+    expect(mockEditorToolbar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        disabled: true,
+      }),
+    );
+  });
+
   it('applies the shared frame props and keeps the configured minHeight', () => {
     const { container } = render(
       <SingleViewEditor

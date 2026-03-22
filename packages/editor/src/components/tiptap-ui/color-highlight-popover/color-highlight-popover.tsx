@@ -2,6 +2,7 @@ import { type Editor } from '@tiptap/react';
 import { forwardRef, useMemo, useRef, useState } from 'react';
 
 // --- Hooks ---
+import { useEditorMessages } from '../../../core/editor-messages-context';
 import { useMenuNavigation } from '../../../hooks/use-menu-navigation';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
@@ -90,13 +91,14 @@ export function ColorHighlightPopoverContent({
     'var(--tt-color-highlight-yellow)',
   ]),
 }: ColorHighlightPopoverContentProps) {
+  const messages = useEditorMessages();
   const { handleRemoveHighlight } = useColorHighlight({ editor });
   const isMobile = useIsMobile();
   const containerRef = useRef<HTMLDivElement>(null);
 
   const menuItems = useMemo(
-    () => [...colors, { label: 'Remove highlight', value: 'none' }],
-    [colors],
+    () => [...colors, { label: messages.toolbarRemoveHighlight, value: 'none' }],
+    [colors, messages.toolbarRemoveHighlight],
   );
 
   const { selectedIndex } = useMenuNavigation({
@@ -130,7 +132,7 @@ export function ColorHighlightPopoverContent({
                 editor={editor}
                 highlightColor={color.value}
                 tooltip={color.label}
-                aria-label={`${color.label} highlight color`}
+                aria-label={messages.toolbarHighlightColor({ label: color.label })}
                 tabIndex={index === selectedIndex ? 0 : -1}
                 data-highlighted={selectedIndex === index}
               />
@@ -140,8 +142,8 @@ export function ColorHighlightPopoverContent({
           <ButtonGroup orientation="horizontal">
             <Button
               onClick={handleRemoveHighlight}
-              aria-label="Remove highlight"
-              tooltip="Remove highlight"
+              aria-label={messages.toolbarRemoveHighlight}
+              tooltip={messages.toolbarRemoveHighlight}
               tabIndex={selectedIndex === colors.length ? 0 : -1}
               type="button"
               role="menuitem"
@@ -171,6 +173,7 @@ export function ColorHighlightPopover({
   ...props
 }: ColorHighlightPopoverProps) {
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
   const [isOpen, setIsOpen] = useState(false);
   const { isVisible, canColorHighlight, isActive, label, Icon } =
     useColorHighlight({
@@ -196,7 +199,7 @@ export function ColorHighlightPopover({
           <Icon className="tiptap-button-icon" />
         </ColorHighlightPopoverButton>
       </PopoverTrigger>
-      <PopoverContent aria-label="Highlight colors">
+      <PopoverContent aria-label={messages.toolbarHighlightColors}>
         <ColorHighlightPopoverContent editor={editor} colors={colors} />
       </PopoverContent>
     </Popover>

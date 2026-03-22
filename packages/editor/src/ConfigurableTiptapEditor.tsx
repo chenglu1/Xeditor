@@ -5,6 +5,7 @@ import React from 'react';
 import { DualViewEditor } from './components/DualViewEditor';
 import { SingleViewEditor } from './components/SingleViewEditor';
 import { createEditorMessages } from './core/createEditorMessages';
+import { EditorMessagesProvider } from './core/editor-messages-context';
 import { useConfigurableEditor } from './core/useConfigurableEditor';
 import { MAX_FILE_SIZE } from './lib/tiptap-utils';
 import type { ConfigurableTiptapEditorProps } from './types';
@@ -43,7 +44,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
   defaultValue,
   valueType,
   contentType = 'markdown',
-  placeholder = '寮€濮嬭緭鍏?..',
+  placeholder,
   readOnly = false,
   disabled = false,
   showToolbar = true,
@@ -74,6 +75,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
   onChange,
 }) => {
   const resolvedMessages = createEditorMessages(messages);
+  const resolvedPlaceholder = placeholder ?? resolvedMessages.placeholder;
   const {
     activeMode,
     editor,
@@ -90,7 +92,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
     defaultValue,
     valueType,
     contentType,
-    placeholder,
+    placeholder: resolvedPlaceholder,
     readOnly,
     disabled,
     showToolbar,
@@ -122,65 +124,72 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
   });
 
   if (!editor) {
-    return <div>{resolvedMessages.loading}</div>;
-  }
-
-  if (readOnly) {
     return (
-      <ReadOnlyContentViewer
-        editor={editor}
-        minHeight={minHeight}
-        compact={compact}
-        className={className}
-      />
-    );
-  }
-
-  if (isDualViewEnabled) {
-    return (
-      <DualViewEditor
-        editor={editor}
-        activeMode={activeMode}
-        placeholder={placeholder}
-        markdownValue={markdownValue}
-        readOnly={readOnly}
-        disabled={disabled}
-        toolbarConfig={toolbarConfig}
-        showToolbar={showToolbar}
-        minHeight={minHeight}
-        compact={compact}
-        className={className}
-        isMobile={isMobile}
-        messages={editorMessages}
-        onMarkdownChange={onMarkdownChange}
-        onSwitchToMarkdown={onSwitchToMarkdown}
-        onSwitchToRichtext={onSwitchToRichtext}
-      />
+      <EditorMessagesProvider messages={editorMessages}>
+        <div aria-live="polite">{resolvedMessages.loading}</div>
+      </EditorMessagesProvider>
     );
   }
 
   return (
-    <SingleViewEditor
-      editor={editor}
-      placeholder={placeholder}
-      minHeight={minHeight}
-      compact={compact}
-      showToolbar={showToolbar}
-      toolbarConfig={toolbarConfig}
-      isMobile={isMobile}
-      className={className}
-      readOnly={readOnly}
-      disabled={disabled}
-      messages={editorMessages}
-    />
+    <EditorMessagesProvider messages={editorMessages}>
+      {readOnly ? (
+        <ReadOnlyContentViewer
+          editor={editor}
+          minHeight={minHeight}
+          compact={compact}
+          className={className}
+        />
+      ) : isDualViewEnabled ? (
+        <DualViewEditor
+          editor={editor}
+          activeMode={activeMode}
+          placeholder={resolvedPlaceholder}
+          markdownValue={markdownValue}
+          readOnly={readOnly}
+          disabled={disabled}
+          toolbarConfig={toolbarConfig}
+          showToolbar={showToolbar}
+          minHeight={minHeight}
+          compact={compact}
+          className={className}
+          isMobile={isMobile}
+          messages={editorMessages}
+          onMarkdownChange={onMarkdownChange}
+          onSwitchToMarkdown={onSwitchToMarkdown}
+          onSwitchToRichtext={onSwitchToRichtext}
+        />
+      ) : (
+        <SingleViewEditor
+          editor={editor}
+          placeholder={resolvedPlaceholder}
+          minHeight={minHeight}
+          compact={compact}
+          showToolbar={showToolbar}
+          toolbarConfig={toolbarConfig}
+          isMobile={isMobile}
+          className={className}
+          readOnly={readOnly}
+          disabled={disabled}
+          messages={editorMessages}
+        />
+      )}
+    </EditorMessagesProvider>
   );
 };
 
 const ConfigurableTiptapEditor: React.FC<ConfigurableTiptapEditorProps> = (
   props,
 ) => {
-  if (props.readOnly && props.viewerMode === 'static') {
+  const resolvedMessages = createEditorMessages(props.messages);
+  const isServer = typeof window === 'undefined';
+
+  if (props.readOnly && (props.viewerMode === 'static' || isServer)) {
     return <StaticContentViewer {...props} />;
+  }
+
+  if (isServer) {
+    return <div aria-live="polite">{resolvedMessages.loading}</div>;
   }
 
   return <ConfigurableTiptapEditorInner {...props} />;

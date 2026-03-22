@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { useEditorMessages } from '../core/editor-messages-context';
 import type { ToolbarConfig, ToolbarItem } from '../types';
 import { BlockquoteButton } from './tiptap-ui/blockquote-button';
 import { CodeBlockButton } from './tiptap-ui/code-block-button';
@@ -21,59 +22,68 @@ import {
 interface EditorToolbarProps {
   config: ToolbarConfig;
   isMobile: boolean;
+  disabled?: boolean;
   additionalContent?: React.ReactNode;
 }
 
-function renderBuiltInToolbarItem(item: ToolbarItem) {
+function renderBuiltInToolbarItem(
+  item: ToolbarItem,
+  disabled: boolean,
+) {
   if (typeof item !== 'string') {
     return null;
   }
 
   switch (item) {
     case 'undo':
-      return <UndoRedoButton action="undo" />;
+      return <UndoRedoButton action="undo" disabled={disabled} />;
     case 'redo':
-      return <UndoRedoButton action="redo" />;
+      return <UndoRedoButton action="redo" disabled={disabled} />;
     case 'heading':
-      return <HeadingDropdownMenu levels={[1, 2, 3, 4]} />;
+      return (
+        <HeadingDropdownMenu levels={[1, 2, 3, 4, 5, 6]} disabled={disabled} />
+      );
     case 'list':
       return (
-        <ListDropdownMenu types={['bulletList', 'orderedList', 'taskList']} />
+        <ListDropdownMenu
+          types={['bulletList', 'orderedList', 'taskList']}
+          disabled={disabled}
+        />
       );
     case 'blockquote':
-      return <BlockquoteButton />;
+      return <BlockquoteButton disabled={disabled} />;
     case 'codeBlock':
-      return <CodeBlockButton />;
+      return <CodeBlockButton disabled={disabled} />;
     case 'table':
-      return <TableDropdownMenu />;
+      return <TableDropdownMenu disabled={disabled} />;
     case 'bold':
-      return <MarkButton type="bold" />;
+      return <MarkButton type="bold" disabled={disabled} />;
     case 'italic':
-      return <MarkButton type="italic" />;
+      return <MarkButton type="italic" disabled={disabled} />;
     case 'strike':
-      return <MarkButton type="strike" />;
+      return <MarkButton type="strike" disabled={disabled} />;
     case 'code':
-      return <MarkButton type="code" />;
+      return <MarkButton type="code" disabled={disabled} />;
     case 'underline':
-      return <MarkButton type="underline" />;
+      return <MarkButton type="underline" disabled={disabled} />;
     case 'highlight':
-      return <ColorHighlightPopover />;
+      return <ColorHighlightPopover disabled={disabled} />;
     case 'link':
-      return <LinkPopover />;
+      return <LinkPopover disabled={disabled} />;
     case 'superscript':
-      return <MarkButton type="superscript" />;
+      return <MarkButton type="superscript" disabled={disabled} />;
     case 'subscript':
-      return <MarkButton type="subscript" />;
+      return <MarkButton type="subscript" disabled={disabled} />;
     case 'alignLeft':
-      return <TextAlignButton align="left" />;
+      return <TextAlignButton align="left" disabled={disabled} />;
     case 'alignCenter':
-      return <TextAlignButton align="center" />;
+      return <TextAlignButton align="center" disabled={disabled} />;
     case 'alignRight':
-      return <TextAlignButton align="right" />;
+      return <TextAlignButton align="right" disabled={disabled} />;
     case 'alignJustify':
-      return <TextAlignButton align="justify" />;
+      return <TextAlignButton align="justify" disabled={disabled} />;
     case 'image':
-      return <ImageUploadButton text="Add" />;
+      return <ImageUploadButton disabled={disabled} />;
     default:
       return null;
   }
@@ -82,12 +92,14 @@ function renderBuiltInToolbarItem(item: ToolbarItem) {
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
   config,
   isMobile,
+  disabled = false,
   additionalContent,
 }) => {
   const { toolbarSchema, renderToolbarItem, supportedToolbarButtons } = config;
+  const messages = useEditorMessages();
 
   return (
-    <Toolbar>
+    <Toolbar aria-label={messages.toolbarRegionLabel}>
       {toolbarSchema.map((group, groupIndex) => (
         <React.Fragment key={`toolbar-group-${groupIndex}`}>
           <ToolbarGroup>
@@ -108,7 +120,10 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
                 );
               }
 
-              const builtInElement = renderBuiltInToolbarItem(item);
+              const builtInElement = renderBuiltInToolbarItem(
+                item,
+                disabled,
+              );
               if (!builtInElement) {
                 return null;
               }

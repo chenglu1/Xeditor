@@ -6,6 +6,7 @@ import { forwardRef, useCallback, useEffect, useState } from 'react';
 // --- Hooks ---
 import type { UseLinkPopoverConfig } from './index';
 import { useLinkPopover } from './index';
+import { useEditorMessages } from '../../../core/editor-messages-context';
 import { useIsMobile } from '../../../hooks/use-mobile';
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
 
@@ -106,6 +107,7 @@ const LinkMain: React.FC<LinkMainProps> = ({
   isActive,
 }) => {
   const isMobile = useIsMobile();
+  const messages = useEditorMessages();
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -129,7 +131,8 @@ const LinkMain: React.FC<LinkMainProps> = ({
           <InputGroup>
             <Input
               type="url"
-              placeholder="Paste a link..."
+              placeholder={messages.toolbarLinkPlaceholder}
+              aria-label={messages.toolbarLink}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -144,7 +147,8 @@ const LinkMain: React.FC<LinkMainProps> = ({
             <Button
               type="button"
               onClick={setLink}
-              title="Apply link"
+              title={messages.toolbarApplyLink}
+              aria-label={messages.toolbarApplyLink}
               disabled={!url && !isActive}
               data-style="ghost"
             >
@@ -158,7 +162,8 @@ const LinkMain: React.FC<LinkMainProps> = ({
             <Button
               type="button"
               onClick={openLink}
-              title="Open in new window"
+              title={messages.toolbarOpenLink}
+              aria-label={messages.toolbarOpenLink}
               disabled={!url && !isActive}
               data-style="ghost"
             >
@@ -168,7 +173,8 @@ const LinkMain: React.FC<LinkMainProps> = ({
             <Button
               type="button"
               onClick={removeLink}
-              title="Remove link"
+              title={messages.toolbarRemoveLink}
+              aria-label={messages.toolbarRemoveLink}
               disabled={!url && !isActive}
               data-style="ghost"
             >
@@ -214,6 +220,7 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
     ref,
   ) => {
     const { editor } = useTiptapEditor(providedEditor);
+    const messages = useEditorMessages();
     const [isOpen, setIsOpen] = useState(false);
 
     const {
@@ -282,7 +289,7 @@ export const LinkPopover = forwardRef<HTMLButtonElement, LinkPopoverProps>(
           </LinkButton>
         </PopoverTrigger>
 
-        <PopoverContent>
+        <PopoverContent aria-label={messages.toolbarLink}>
           <LinkMain
             url={url}
             setUrl={setUrl}

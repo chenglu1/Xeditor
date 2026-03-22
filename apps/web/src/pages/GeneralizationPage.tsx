@@ -11,12 +11,15 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Link as RouterLink } from 'react-router-dom';
 import {
-  ConfigurableTiptapEditor,
   type EditorUpdateEvent,
-  type UploadedAsset,
 } from '@chenglu1/xeditor-editor';
+
+import { ConfigurableTiptapEditor } from '../components/LocalizedEditor';
+import { useLocalizedEditorMessages } from '../hooks/useLocalizedEditorMessages';
+import { handleDemoImageUpload } from '../lib/demo-upload';
 
 const JSON_INITIAL_DOC = {
   type: 'doc',
@@ -56,23 +59,6 @@ const UPLOAD_INITIAL_MARKDOWN = `## Media Upload Hooks
 Use the toolbar image button to insert a local image with a structured asset result.
 `;
 
-const CUSTOM_MESSAGES = {
-  loading: 'Loading generalized editor...',
-  modeRichText: 'Rich Text',
-  modeMarkdown: 'Markdown',
-  uploadClickOrDrop: 'Upload an image or drag it here',
-  uploadLimit: ({
-    limit,
-    maxSizeMB,
-  }: {
-    limit: number;
-    maxSizeMB: number;
-  }) => `Up to ${limit} files, ${maxSizeMB}MB each.`,
-  uploadInProgress: ({ count }: { count: number }) =>
-    `Uploading ${count} file${count === 1 ? '' : 's'}`,
-  clearAllUploads: 'Clear queue',
-};
-
 function formatUpdateSummary(event: EditorUpdateEvent | null) {
   if (!event) {
     return 'No update yet.';
@@ -84,24 +70,6 @@ function formatUpdateSummary(event: EditorUpdateEvent | null) {
     `characterCount: ${event.characterCount}`,
     `wordCount: ${event.wordCount ?? 0}`,
   ].join('\n');
-}
-
-function readFileAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result);
-        return;
-      }
-
-      reject(new Error('Failed to read file'));
-    };
-
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsDataURL(file);
-  });
 }
 
 function CodePanel(props: { title: string; value: string }) {
@@ -142,6 +110,8 @@ function CodePanel(props: { title: string; value: string }) {
 }
 
 export function GeneralizationPage() {
+  const { i18n } = useTranslation();
+  const localizedEditorMessages = useLocalizedEditorMessages();
   const [jsonDoc, setJsonDoc] = useState<any>(JSON_INITIAL_DOC);
   const [lastUpdate, setLastUpdate] = useState<EditorUpdateEvent | null>(null);
   const [toolbarContent, setToolbarContent] = useState(TOOLBAR_INITIAL_MARKDOWN);
@@ -152,6 +122,35 @@ export function GeneralizationPage() {
   const [uploadContent, setUploadContent] = useState(UPLOAD_INITIAL_MARKDOWN);
   const [uploadLogs, setUploadLogs] = useState<string[]>([]);
   const jsonEditorRef = useRef<any>(null);
+
+  const customMessages = {
+    ...localizedEditorMessages,
+    loading:
+      i18n.language === 'zh-CN'
+        ? '加载通用化编辑器中...'
+        : 'Loading generalized editor...',
+    modeRichText: i18n.language === 'zh-CN' ? '富文本' : 'Rich Text',
+    modeMarkdown: 'Markdown',
+    uploadClickOrDrop:
+      i18n.language === 'zh-CN'
+        ? '上传图片或拖拽到这里'
+        : 'Upload an image or drag it here',
+    uploadLimit: ({
+      limit,
+      maxSizeMB,
+    }: {
+      limit: number;
+      maxSizeMB: number;
+    }) =>
+      i18n.language === 'zh-CN'
+        ? `最多 ${limit} 个文件，每个 ${maxSizeMB}MB。`
+        : `Up to ${limit} files, ${maxSizeMB}MB each.`,
+    uploadInProgress: ({ count }: { count: number }) =>
+      i18n.language === 'zh-CN'
+        ? `正在上传 ${count} 个文件`
+        : `Uploading ${count} file${count === 1 ? '' : 's'}`,
+    clearAllUploads: i18n.language === 'zh-CN' ? '清空队列' : 'Clear queue',
+  };
 
   const appendUploadLog = (message: string) => {
     setUploadLogs((current) => [
@@ -190,22 +189,6 @@ export function GeneralizationPage() {
     setToolbarContent((current) => {
       return `${current}\n> inserted at ${new Date().toLocaleString()}\n`;
     });
-  };
-
-  const handleUpload = async (file: File): Promise<UploadedAsset> => {
-    await new Promise((resolve) => window.setTimeout(resolve, 300));
-    const src = await readFileAsDataUrl(file);
-
-    return {
-      src,
-      alt: file.name,
-      title: file.name,
-      mimeType: file.type,
-      meta: {
-        size: file.size,
-        source: 'demo',
-      },
-    };
   };
 
   return (
@@ -471,8 +454,8 @@ export function GeneralizationPage() {
                   <ConfigurableTiptapEditor
                     value={uploadContent}
                     valueType="markdown"
-                    messages={CUSTOM_MESSAGES}
-                    uploadHandler={handleUpload}
+                    messages={customMessages}
+                    uploadHandler={handleDemoImageUpload}
                     mediaUpload={{
                       validateFile: (file) => {
                         if (!file.type.startsWith('image/')) {

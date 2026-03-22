@@ -191,6 +191,71 @@ You can override the editor theme with CSS custom properties on `:root` or a hos
 }
 ```
 
+## Compatibility, Accessibility, And Performance
+
+Server rendering is safe by default:
+
+- `readOnly` content renders through the static viewer during SSR
+- editable instances render a lightweight loading shell on the server and hydrate on the client
+
+Consumer-visible labels can be localized through `messages`, including toolbar controls, table actions, upload labels, mode switches, and static loading text:
+
+```tsx
+<ConfigurableTiptapEditor
+  value={markdown}
+  valueType="markdown"
+  messages={{
+    loading: 'Loading…',
+    placeholder: 'Start typing…',
+    toolbarBold: 'Bold text',
+    toolbarInsertTable: 'Insert table',
+    markdownInputLabel: 'Markdown source',
+  }}
+/>
+```
+
+If your host already uses `react-i18next`, the package also exposes a dedicated adapter entry:
+
+```tsx
+import { ConfigurableTiptapEditor } from '@chenglu1/xeditor-editor/react-i18next';
+import {
+  XEDITOR_I18NEXT_RESOURCES,
+} from '@chenglu1/xeditor-editor/react-i18next';
+
+i18n.init({
+  resources: {
+    en: {
+      translation: {
+        app: {
+          title: 'Demo',
+        },
+      },
+      ...XEDITOR_I18NEXT_RESOURCES.en,
+    },
+    'zh-CN': {
+      translation: {
+        app: {
+          title: '演示',
+        },
+      },
+      ...XEDITOR_I18NEXT_RESOURCES['zh-CN'],
+    },
+  },
+});
+
+<ConfigurableTiptapEditor value={markdown} valueType="markdown" />;
+```
+
+The `react-i18next` adapter defaults to the `xeditor` namespace and keeps the editor-local copy in sync with the current language automatically.
+
+Performance tradeoffs to keep in mind:
+
+- Prefer `viewerMode="static"` for read-only lists, cards, dialogs, and search results. It avoids creating a full Tiptap editor instance.
+- Use `viewerMode="editor-shell"` only when you need full editor fidelity for read-only rendering.
+- Keep `presets` lean for lightweight consumers. `table`, `math`, and `media` add more code, commands, and UI surface than the formatting-only core.
+- Import layered styles when your host only needs part of the package surface. `styles/core.css` + `styles/content.css` is lighter than always loading the full bundle.
+- The full stylesheet payload is intentionally broad for compatibility; design-system consumers should prefer theme tokens and layered style imports over patching generated CSS.
+
 ## Advanced Extension Assembly
 
 Advanced consumers can use the stable subpath export:
@@ -227,8 +292,10 @@ For new integrations, prefer:
 
 - `dualView` is markdown-only
 - `viewerMode="static"` is optimized for read-only rendering
+- editable SSR renders a loading shell and initializes on the client
 - `valueType="html"` should only be used with trusted or sanitized content
 - `sanitizeHtml` is the recommended boundary for static viewer rendering
 - `uploadHandler` and `uploadUrl` are transport hooks only; auth, tenancy, and asset policy remain consumer-owned
 - style layers are available through `styles.css`, `styles/core.css`, `styles/content.css`, and `styles/ui.css`
+- `messages` now covers toolbar, upload, mode-switch, and table action labels for localization and a11y overrides
 - advanced extension assembly is available through `@chenglu1/xeditor-editor/advanced`

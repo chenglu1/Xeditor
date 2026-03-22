@@ -5,6 +5,10 @@ import { useMemo } from 'react';
 
 // --- Hooks ---
 import { useTiptapEditor } from '../../../hooks/use-tiptap-editor';
+import {
+  getListTypeLabel,
+  useEditorMessages,
+} from '../../../core/editor-messages-context';
 
 // --- Icons ---
 import { isNodeInSchema } from '../../../lib/tiptap-utils';
@@ -48,23 +52,25 @@ export interface ListOption {
   icon: React.ElementType;
 }
 
-export const listOptions: ListOption[] = [
-  {
-    label: 'Bullet List',
-    type: 'bulletList',
-    icon: ListIcon,
-  },
-  {
-    label: 'Ordered List',
-    type: 'orderedList',
-    icon: ListOrderedIcon,
-  },
-  {
-    label: 'Task List',
-    type: 'taskList',
-    icon: ListTodoIcon,
-  },
-];
+export function createListOptions(messages: ReturnType<typeof useEditorMessages>): ListOption[] {
+  return [
+    {
+      label: getListTypeLabel(messages, 'bulletList'),
+      type: 'bulletList',
+      icon: ListIcon,
+    },
+    {
+      label: getListTypeLabel(messages, 'orderedList'),
+      type: 'orderedList',
+      icon: ListOrderedIcon,
+    },
+    {
+      label: getListTypeLabel(messages, 'taskList'),
+      type: 'taskList',
+      icon: ListTodoIcon,
+    },
+  ];
+}
 
 export function canToggleAnyList(
   editor: Editor | null,
@@ -78,14 +84,15 @@ export function isAnyListActive(
   editor: Editor | null,
   listTypes: ListType[],
 ): boolean {
-  if (!editor || !editor.isEditable) return false;
+  if (!editor) return false;
   return listTypes.some((type) => isListActive(editor, type));
 }
 
 export function getFilteredListOptions(
+  options: ListOption[],
   availableTypes: ListType[],
-): typeof listOptions {
-  return listOptions.filter(
+): ListOption[] {
+  return options.filter(
     (option) => !option.type || availableTypes.includes(option.type),
   );
 }
@@ -117,7 +124,7 @@ export function getActiveListType(
   editor: Editor | null,
   availableTypes: ListType[],
 ): ListType | undefined {
-  if (!editor || !editor.isEditable) return undefined;
+  if (!editor) return undefined;
   return availableTypes.find((type) => isListActive(editor, type));
 }
 
@@ -168,10 +175,15 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
   } = config || {};
 
   const { editor } = useTiptapEditor(providedEditor);
+  const messages = useEditorMessages();
+  const listOptions = useMemo(() => createListOptions(messages), [messages]);
 
   const listInSchema = types.some((type) => isNodeInSchema(type, editor));
 
-  const filteredLists = useMemo(() => getFilteredListOptions(types), [types]);
+  const filteredLists = useMemo(
+    () => getFilteredListOptions(listOptions, types),
+    [listOptions, types],
+  );
 
   const canToggleAny = canToggleAnyList(editor, types);
   const isAnyActive = isAnyListActive(editor, types);
@@ -192,7 +204,7 @@ export function useListDropdownMenu(config?: UseListDropdownMenuConfig) {
     canToggle: canToggleAny,
     types,
     filteredLists,
-    label: 'List',
+    label: messages.toolbarList,
     Icon: activeList ? listIcons[activeList.type] : ListIcon,
   };
 }
