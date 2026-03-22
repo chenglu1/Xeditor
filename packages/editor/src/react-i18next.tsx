@@ -1,5 +1,3 @@
-import './styles/index.scss';
-
 import { useMemo } from 'react';
 import type { TFunction } from 'i18next';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +13,7 @@ export const XEDITOR_I18NEXT_NAMESPACE = 'xeditor';
 export const XEDITOR_I18NEXT_RESOURCES = {
   'zh-CN': {
     [XEDITOR_I18NEXT_NAMESPACE]: {
-      loading: '加载编辑器中...',
+      loading: '正在加载编辑器...',
       placeholder: '开始输入...',
       toolbarRegionLabel: '编辑器工具栏',
       richTextEditorLabel: '富文本编辑器',
@@ -239,11 +237,12 @@ export function useI18nextEditorMessages(
   options: I18nextEditorOptions = {},
 ): EditorMessages {
   const namespace = options.namespace ?? XEDITOR_I18NEXT_NAMESPACE;
-  const { t, i18n } = useTranslation(namespace);
+  const { keyPrefix } = options;
+  const { t } = useTranslation(namespace);
 
   return useMemo(
-    () => createI18nextEditorMessages(t, options),
-    [i18n.language, options.keyPrefix, t],
+    () => createI18nextEditorMessages(t, { keyPrefix }),
+    [keyPrefix, t],
   );
 }
 

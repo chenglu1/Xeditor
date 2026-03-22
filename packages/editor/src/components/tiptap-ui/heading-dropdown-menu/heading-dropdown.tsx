@@ -183,7 +183,7 @@ export const HeadingDropdown = forwardRef<
       onOpenChange?.(newState);
     };
 
-    const handleSelectLevel = (level: number) => {
+    const handleSelectLevel = () => {
       setIsOpen(false);
       onOpenChange?.(false);
       setTimeout(() => {
@@ -242,7 +242,7 @@ export const HeadingDropdown = forwardRef<
                       level={level as 1 | 2 | 3 | 4 | 5 | 6}
                       style={HEADING_PREVIEW_STYLES[level as 1 | 2 | 3 | 4 | 5 | 6]}
                       text={getHeadingLevelLabel(messages, level)}
-                      onToggled={() => handleSelectLevel(level)}
+                      onToggled={handleSelectLevel}
                       tooltip=""
                     />
                   ))}

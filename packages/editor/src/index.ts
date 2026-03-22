@@ -1,6 +1,3 @@
-// 自动导入样式，使用方无需手动引入
-import './styles/index.scss';
-
 export { default as ConfigurableTiptapEditor } from './ConfigurableTiptapEditor';
 export { StaticContentViewer } from './views/StaticContentViewer';
 export type {
@@ -30,7 +27,6 @@ export type {
   ImageUploadHandler,
 } from './types';
 
-// 导出上传工具
 export {
   uploadImage,
   createUploadHandler,

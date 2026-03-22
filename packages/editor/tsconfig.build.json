@@ -4,7 +4,7 @@
     "noEmit": false,
     "declaration": true,
     "declarationMap": false,
-    "emitDeclarationOnly": false,
+    "emitDeclarationOnly": true,
     "outDir": "dist",
     "sourceMap": false
   },

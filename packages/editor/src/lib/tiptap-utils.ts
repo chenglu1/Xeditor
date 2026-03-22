@@ -209,7 +209,7 @@ export function findNodeAtPosition(editor: Editor, position: number) {
       return null;
     }
     return node;
-  } catch (_error) {
+  } catch {
     // console.error(`Error getting node at position ${position}:`, _error);
     return null;
   }

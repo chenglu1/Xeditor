@@ -19,20 +19,23 @@ describe('createEditorExtensions', () => {
     expect(names).not.toContain('imageUpload');
   });
 
-  it('adds upload/media extensions and appends custom extensions', () => {
+  it('keeps defaults lean and auto-enables media when upload is configured', () => {
     const customExtension = Extension.create({
       name: 'customFeature',
     });
 
     const extensions = createEditorExtensions({
-      presets: ['base', 'media'],
       imageUploadHandler: vi.fn(async () => '/uploads/image.png'),
       extensions: [customExtension],
       messages: DEFAULT_EDITOR_MESSAGES,
     });
     const names = extensions.map((extension) => extension.name);
 
+    expect(names).toContain('table');
     expect(names).toContain('imageUpload');
+    expect(names).not.toContain('blockMath');
+    expect(names).not.toContain('inlineMath');
+    expect(names).not.toContain('details');
     expect(names[names.length - 1]).toBe('customFeature');
   });
 

@@ -10,6 +10,7 @@ import {
   ConfigurableTiptapEditor,
   type EditorUpdateEvent,
 } from '@chenglu1/xeditor-editor';
+import '@chenglu1/xeditor-editor/styles.css';
 
 export function MarkdownExample() {
   const [value, setValue] = useState('# Hello');
@@ -84,6 +85,16 @@ export function JsonExample() {
 
 Use `viewerMode="editor-shell"` when fidelity matters more than startup cost.
 
+If you only need a lightweight read-only surface, prefer the dedicated viewer entry:
+
+```tsx
+import { StaticContentViewer } from '@chenglu1/xeditor-editor/viewer';
+import '@chenglu1/xeditor-editor/styles/core.css';
+import '@chenglu1/xeditor-editor/styles/content.css';
+
+<StaticContentViewer value={markdown} valueType="markdown" minHeight="0" />;
+```
+
 ## 5. Schema-driven toolbar
 
 ```tsx
@@ -126,6 +137,15 @@ Available preset groups:
 - `media`
 - `details`
 - `markdownDialect`
+
+Default presets are intentionally lean:
+
+- `base`
+- `formatting`
+- `table`
+- `markdownDialect`
+
+The editor auto-enables `media` when you provide an `uploadHandler` or `uploadUrl`.
 
 ## 7. Structured media upload
 
@@ -181,3 +201,14 @@ Available preset groups:
   }}
 />
 ```
+
+## 10. Layered styles for optional math
+
+```tsx
+import '@chenglu1/xeditor-editor/styles/core.css';
+import '@chenglu1/xeditor-editor/styles/content.css';
+import '@chenglu1/xeditor-editor/styles/math.css';
+import '@chenglu1/xeditor-editor/styles/ui.css';
+```
+
+Only import `styles/math.css` when you enable the `math` preset.

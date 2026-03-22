@@ -19,7 +19,7 @@ export interface ImageUploadNodeOptions {
   upload?: UploadFunction;
   onError?: (error: Error) => void;
   onSuccess?: (asset: UploadedAsset) => void;
-  HTMLAttributes: Record<string, any>;
+  HTMLAttributes: Record<string, unknown>;
 }
 
 declare module '@tiptap/react' {

@@ -67,7 +67,7 @@ describe('react-i18next adapter', () => {
       </I18nextProvider>,
     );
 
-    expect(screen.getByText(`标题 | 2 级标题`)).toBeTruthy();
+    expect(screen.getByText('标题 | 2 级标题')).toBeTruthy();
   });
 
   it('supports custom namespace and keyPrefix overrides', async () => {

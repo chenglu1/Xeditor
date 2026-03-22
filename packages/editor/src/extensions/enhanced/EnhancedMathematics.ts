@@ -7,11 +7,24 @@
  * 3. InlineMath 使用 displayMode: false，保持行内样式
  * 4. 在渲染层修复，不改变原始数据
  */
-import { BlockMath, InlineMath } from '@tiptap/extension-mathematics';
+import {
+  BlockMath,
+  InlineMath,
+  type BlockMathOptions,
+  type InlineMathOptions,
+} from '@tiptap/extension-mathematics';
 import type { KatexOptions } from 'katex';
 import katex from 'katex';
 
 import type { EditorLogger } from '../../types';
+
+interface EnhancedMathOptions {
+  logger?: EditorLogger;
+}
+
+export type EnhancedBlockMathOptions = BlockMathOptions & EnhancedMathOptions;
+export type EnhancedInlineMathOptions = InlineMathOptions & EnhancedMathOptions;
+export type { EnhancedMathOptions };
 
 /**
  * 规范化 LaTeX 语法，移除不必要的空格
@@ -34,22 +47,18 @@ export function normalizeLatexSyntax(latex: string): string {
  * 增强的 BlockMath 扩展
  * 在渲染时自动修复 LaTeX 语法问题
  */
-export const EnhancedBlockMath = BlockMath.extend({
-  addOptions() {
-    const parentOptions = this.parent?.();
+export const EnhancedBlockMath = BlockMath.extend<EnhancedBlockMathOptions>({
+  addOptions(): EnhancedBlockMathOptions {
+    const parentOptions = this.parent?.() as BlockMathOptions | undefined;
 
     return {
       ...parentOptions,
       logger: undefined as EditorLogger | undefined,
-    } as any;
+    };
   },
 
   addNodeView() {
-    const logger = (
-      this.options as typeof this.options & {
-        logger?: EditorLogger;
-      }
-    ).logger;
+    const logger = this.options.logger;
 
     return ({ node, getPos }) => {
       const wrapper = document.createElement('div');
@@ -124,22 +133,18 @@ export const EnhancedBlockMath = BlockMath.extend({
  * 增强的 InlineMath 扩展
  * 在渲染时自动修复 LaTeX 语法问题
  */
-export const EnhancedInlineMath = InlineMath.extend({
-  addOptions() {
-    const parentOptions = this.parent?.();
+export const EnhancedInlineMath = InlineMath.extend<EnhancedInlineMathOptions>({
+  addOptions(): EnhancedInlineMathOptions {
+    const parentOptions = this.parent?.() as InlineMathOptions | undefined;
 
     return {
       ...parentOptions,
       logger: undefined as EditorLogger | undefined,
-    } as any;
+    };
   },
 
   addNodeView() {
-    const logger = (
-      this.options as typeof this.options & {
-        logger?: EditorLogger;
-      }
-    ).logger;
+    const logger = this.options.logger;
 
     return ({ node, getPos }) => {
       const wrapper = document.createElement('span');

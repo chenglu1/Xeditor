@@ -28,6 +28,7 @@ import {
   useState,
   version,
 } from 'react';
+
 interface TooltipProviderProps {
   children: React.ReactNode;
   initialOpen?: boolean;
@@ -129,6 +130,11 @@ function useTooltip({
 }
 
 const TooltipContext = createContext<TooltipContextValue | null>(null);
+type ElementWithOptionalRef = React.ReactElement<{
+  ref?: React.Ref<HTMLElement>;
+}> & {
+  ref?: React.Ref<HTMLElement>;
+};
 
 function useTooltipContext() {
   const context = useContext(TooltipContext);
@@ -168,26 +174,27 @@ export function Tooltip({ children, ...props }: TooltipProviderProps) {
 export const TooltipTrigger = forwardRef<HTMLElement, TooltipTriggerProps>(
   function TooltipTrigger({ children, asChild = false, ...props }, propRef) {
     const context = useTooltipContext();
-    const childrenRef = isValidElement(children)
+    const childElement = isValidElement(children)
+      ? (children as ElementWithOptionalRef)
+      : null;
+    const childrenRef = childElement
       ? parseInt(version, 10) >= 19
-        ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (children as { props: { ref?: React.Ref<any> } }).props.ref
-        : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (children as any).ref
+        ? childElement.props.ref
+        : childElement.ref
       : undefined;
     const ref = useMergeRefs([context.refs.setReference, propRef, childrenRef]);
 
-    if (asChild && isValidElement(children)) {
+    if (asChild && childElement) {
       const dataAttributes = {
         'data-tooltip-state': context.open ? 'open' : 'closed',
       };
 
       return cloneElement(
-        children,
+        childElement,
         context.getReferenceProps({
           ref,
           ...props,
-          ...(typeof children.props === 'object' ? children.props : {}),
+          ...(typeof childElement.props === 'object' ? childElement.props : {}),
           ...dataAttributes,
         }),
       );

@@ -1,4 +1,4 @@
-import { Image } from '@tiptap/extension-image';
+import { Image, type ImageOptions } from '@tiptap/extension-image';
 import {
   ReactNodeViewRenderer,
   NodeViewWrapper,
@@ -129,6 +129,10 @@ const ZoomInfo = styled.div`
 `;
 
 interface ImageViewProps extends ReactNodeViewProps {
+  logger?: EditorLogger;
+}
+
+interface CustomImageOptions extends ImageOptions {
   logger?: EditorLogger;
 }
 
@@ -363,22 +367,22 @@ const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
   );
 };
 
-export const CustomImage = Image.extend({
-  addOptions() {
-    const parentOptions = this.parent?.();
+export const CustomImage = Image.extend<CustomImageOptions>({
+  addOptions(): CustomImageOptions {
+    const parentOptions = this.parent?.() as ImageOptions | undefined;
 
     return {
+      inline: false,
+      allowBase64: false,
+      HTMLAttributes: {},
+      resize: false,
       ...parentOptions,
       logger: undefined as EditorLogger | undefined,
-    } as any;
+    };
   },
 
   addNodeView() {
-    const logger = (
-      this.options as typeof this.options & {
-        logger?: EditorLogger;
-      }
-    ).logger;
+    const logger = this.options.logger;
 
     return ReactNodeViewRenderer((props) => (
       <ImageView {...props} logger={logger} />

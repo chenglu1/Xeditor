@@ -21,7 +21,7 @@ vi.mock('@tiptap/markdown', () => ({
 
 vi.mock('../extensions/createEditorExtensions', () => ({
   createEditorExtensions: (...args: unknown[]) =>
-    mockCreateEditorExtensions(...args),
+    mockCreateEditorExtensions(...(args as any)),
 }));
 
 describe('StaticContentViewer', () => {
@@ -107,5 +107,29 @@ describe('StaticContentViewer', () => {
     expect(String(logger.warn.mock.calls[0][0])).toContain(
       'without sanitizeHtml',
     );
+  });
+
+  it('does not rebuild static renderer work when only frame props change', () => {
+    const { rerender } = render(
+      <StaticContentViewer
+        value="# Title"
+        valueType="markdown"
+        className="viewer-shell"
+      />,
+    );
+
+    expect(mockCreateEditorExtensions).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <StaticContentViewer
+        value="# Title"
+        valueType="markdown"
+        className="viewer-shell compact"
+        compact
+        minHeight="180px"
+      />,
+    );
+
+    expect(mockCreateEditorExtensions).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,8 +1,9 @@
 {
   "name": "@chenglu1/xeditor-editor",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "private": false,
   "description": "Reusable React rich text and Markdown editor built with Tiptap.",
+  "license": "MIT",
   "homepage": "https://github.com/chenglu1/Xeditor#readme",
   "bugs": {
     "url": "https://github.com/chenglu1/Xeditor/issues"
@@ -31,6 +32,12 @@
       "require": "./dist/advanced.cjs",
       "default": "./dist/advanced.esm.js"
     },
+    "./viewer": {
+      "types": "./dist/viewer.d.ts",
+      "import": "./dist/viewer.esm.js",
+      "require": "./dist/viewer.cjs",
+      "default": "./dist/viewer.esm.js"
+    },
     "./react-i18next": {
       "types": "./dist/react-i18next.d.ts",
       "import": "./dist/react-i18next.esm.js",
@@ -40,6 +47,7 @@
     "./styles.css": "./dist/xeditor-editor.css",
     "./styles/core.css": "./dist/styles/core.css",
     "./styles/content.css": "./dist/styles/content.css",
+    "./styles/math.css": "./dist/styles/math.css",
     "./styles/ui.css": "./dist/styles/ui.css",
     "./package.json": "./package.json"
   },
@@ -49,6 +57,7 @@
   ],
   "files": [
     "dist",
+    "LICENSE",
     "README.md",
     "MIGRATION.md",
     "USAGE.md"
@@ -58,7 +67,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/chenglu1/Xeditor.git",
+    "url": "git+https://github.com/chenglu1/Xeditor.git",
     "directory": "packages/editor"
   },
   "publishConfig": {
@@ -81,6 +90,7 @@
   },
   "dependencies": {
     "@floating-ui/react": "^0.26.24",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-popover": "^1.1.0",
     "@tiptap/core": "^3.14.0",
     "@tiptap/extension-character-count": "^3.14.0",
@@ -107,6 +117,7 @@
     "styled-components": "^6.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -114,22 +125,30 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.3",
     "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.4.0",
     "i18next": "^25.10.3",
     "jsdom": "^29.0.1",
     "react-i18next": "^16.6.0",
     "sass": "^1.79.0",
     "typescript": "^5.6.3",
+    "typescript-eslint": "^8.57.1",
     "vite": "^5.4.21",
     "vitest": "^2.1.9"
   },
   "scripts": {
+    "clean": "node ./scripts/clean-dist.mjs",
     "build:types": "tsc -p tsconfig.build.json",
     "build:css": "node ./scripts/build-css.mjs",
     "build:lib": "vite build",
-    "build": "pnpm run build:types && pnpm run build:css && pnpm run build:lib",
+    "build": "npm run clean && npm run build:types && npm run build:css && npm run build:lib",
+    "lint": "eslint src --max-warnings=0",
     "test": "vitest run --config vitest.config.ts",
     "test:watch": "vitest --config vitest.config.ts",
-    "prepublishOnly": "pnpm run build",
-    "publish:public": "pnpm run build && pnpm publish --access public --no-git-checks"
+    "pack:check": "node ./scripts/check-pack.mjs",
+    "verify:release": "npm run lint && npm run test && npm run build && node ../../scripts/test-bundle.mjs && npm run pack:check",
+    "prepublishOnly": "npm run verify:release",
+    "publish:public": "npm run verify:release && npm publish --access public --ignore-scripts"
   }
 }

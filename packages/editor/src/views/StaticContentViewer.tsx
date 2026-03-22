@@ -6,7 +6,10 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { createEditorLogger } from '../core/createEditorLogger';
 import { createEditorMessages } from '../core/createEditorMessages';
 import { resolveEditorValueType } from '../core/editor-content';
-import { createEditorExtensions } from '../extensions/createEditorExtensions';
+import {
+  createEditorExtensions,
+  type CreateEditorExtensionsOptions,
+} from '../extensions/createEditorExtensions';
 import {
   convertMarkdownTextAlignToHtml,
   normalizeListIndentation,
@@ -44,49 +47,46 @@ function preprocessMarkdownForStaticViewer(
   return nextMarkdown;
 }
 
-function serializeValueToStaticHtml(options: {
-  value: EditorValue;
-  valueType: EditorValueType;
-  editorProps: ConfigurableTiptapEditorProps;
-}) {
-  const { value, valueType, editorProps } = options;
+function createStaticHtmlSerializer(
+  extensionOptions: CreateEditorExtensionsOptions,
+) {
   const extensions = createEditorExtensions({
-    placeholder: editorProps.placeholder,
-    maxFileSize: editorProps.maxFileSize,
-    maxLength: editorProps.maxLength,
+    ...extensionOptions,
     imageUploadHandler: null,
-    messages: createEditorMessages(editorProps.messages),
-    logger: editorProps.logger
-      ? createEditorLogger(editorProps.logger)
-      : undefined,
-    presets: editorProps.presets,
-    extensions: editorProps.extensions,
-    extensionComposition: editorProps.extensionComposition,
-    disableBuiltIns: editorProps.disableBuiltIns,
-    markdownDialect: editorProps.markdownDialect,
   });
+  let markdownManager: MarkdownManager | null = null;
 
-  if (valueType === 'json') {
-    return generateHTML(value as JSONContent, extensions);
-  }
+  const getMarkdownManager = () => {
+    if (!markdownManager) {
+      markdownManager = new MarkdownManager({
+        extensions,
+      });
+    }
 
-  if (valueType === 'html') {
-    const doc = generateJSON(String(value || ''), extensions);
+    return markdownManager;
+  };
+
+  return (value: EditorValue, valueType: EditorValueType) => {
+    if (valueType === 'json') {
+      return generateHTML(value as JSONContent, extensions);
+    }
+
+    if (valueType === 'html') {
+      const doc = generateJSON(String(value || ''), extensions);
+      return generateHTML(doc, extensions);
+    }
+
+    const markdown = preprocessMarkdownForStaticViewer(
+      String(value || ''),
+      extensionOptions.markdownDialect,
+    );
+    const doc = getMarkdownManager().parse(markdown) as JSONContent;
     return generateHTML(doc, extensions);
-  }
-
-  const markdownManager = new MarkdownManager({
-    extensions,
-  });
-  const markdown = preprocessMarkdownForStaticViewer(
-    String(value || ''),
-    editorProps.markdownDialect,
-  );
-  const doc = markdownManager.parse(markdown) as JSONContent;
-  return generateHTML(doc, extensions);
+  };
 }
 
-interface StaticContentViewerProps extends ConfigurableTiptapEditorProps {
+export interface StaticContentViewerProps
+  extends ConfigurableTiptapEditorProps {
   value?: EditorValue;
   className?: string;
   compact?: boolean;
@@ -105,11 +105,23 @@ export const StaticContentViewer: React.FC<StaticContentViewerProps> = ({
   onError,
   sanitizeHtml,
   logger,
-  ...editorProps
+  placeholder,
+  maxFileSize,
+  maxLength,
+  messages,
+  presets,
+  extensions,
+  extensionComposition,
+  disableBuiltIns,
+  markdownDialect,
 }) => {
   const resolvedValueType = resolveEditorValueType(valueType, contentType);
   const resolvedValue = value ?? defaultValue;
   const resolvedLogger = useMemo(() => createEditorLogger(logger), [logger]);
+  const resolvedMessages = useMemo(
+    () => createEditorMessages(messages),
+    [messages],
+  );
   const hasWarnedAboutUnsafeHtmlRef = useRef(false);
 
   useEffect(() => {
@@ -129,22 +141,41 @@ export const StaticContentViewer: React.FC<StaticContentViewerProps> = ({
     }
   }, [resolvedLogger, resolvedValueType, sanitizeHtml]);
 
+  const staticHtmlSerializer = useMemo(
+    () =>
+      createStaticHtmlSerializer({
+        placeholder,
+        maxFileSize,
+        maxLength,
+        messages: resolvedMessages,
+        presets,
+        extensions,
+        extensionComposition,
+        disableBuiltIns,
+        markdownDialect,
+        logger: resolvedLogger,
+      }),
+    [
+      disableBuiltIns,
+      extensionComposition,
+      extensions,
+      markdownDialect,
+      maxFileSize,
+      maxLength,
+      placeholder,
+      presets,
+      resolvedLogger,
+      resolvedMessages,
+    ],
+  );
+
   const { html, fallbackText } = useMemo(() => {
     try {
       const nextValue = resolvedValue ?? (resolvedValueType === 'json'
         ? ({ type: 'doc', content: [] } as JSONContent)
         : '');
 
-      const nextHtml = serializeValueToStaticHtml({
-        value: nextValue,
-        valueType: resolvedValueType,
-        editorProps: {
-          ...editorProps,
-          value: nextValue,
-          valueType: resolvedValueType,
-          logger,
-        },
-      });
+      const nextHtml = staticHtmlSerializer(nextValue, resolvedValueType);
 
       return {
         html: sanitizeHtml
@@ -179,16 +210,11 @@ export const StaticContentViewer: React.FC<StaticContentViewerProps> = ({
       };
     }
   }, [
-    contentType,
-    defaultValue,
-    editorProps,
-    logger,
     onError,
     resolvedValue,
     resolvedValueType,
     sanitizeHtml,
-    value,
-    valueType,
+    staticHtmlSerializer,
   ]);
 
   return (

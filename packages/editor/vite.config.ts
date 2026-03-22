@@ -17,6 +17,7 @@ export default defineConfig({
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
         advanced: path.resolve(__dirname, 'src/advanced.ts'),
+        viewer: path.resolve(__dirname, 'src/viewer.ts'),
         'react-i18next': path.resolve(__dirname, 'src/react-i18next.tsx'),
       },
       name: 'XEditor',
@@ -24,6 +25,8 @@ export default defineConfig({
         const basename =
           entryName === 'advanced'
             ? 'advanced'
+            : entryName === 'viewer'
+              ? 'viewer'
             : entryName === 'react-i18next'
               ? 'react-i18next'
               : 'index';
@@ -54,6 +57,7 @@ export default defineConfig({
         '@tiptap/extension-mathematics',
         '@tiptap/markdown',
         '@tiptap/pm',
+        '@radix-ui/react-dropdown-menu',
         '@radix-ui/react-popover',
         '@floating-ui/react',
         'katex',

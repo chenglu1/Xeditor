@@ -68,7 +68,6 @@ export const textAlignLabels: Record<TextAlign, string> = {
  */
 export function canSetTextAlign(
   editor: Editor | null,
-  align: TextAlign,
 ): boolean {
   if (!editor || !editor.isEditable) return false;
   if (
@@ -116,7 +115,7 @@ export function isTextAlignActive(
  */
 export function setTextAlign(editor: Editor | null, align: TextAlign): boolean {
   if (!editor) return false;
-  if (!canSetTextAlign(editor, align)) return false;
+  if (!canSetTextAlign(editor)) return false;
 
   const chain = editor.chain().focus();
   if (hasSetTextAlign(chain)) {
@@ -134,13 +133,13 @@ export function shouldShowButton(props: {
   hideWhenUnavailable: boolean;
   align: TextAlign;
 }): boolean {
-  const { editor, hideWhenUnavailable, align } = props;
+  const { editor, hideWhenUnavailable } = props;
 
   if (!editor) return false;
   if (!isExtensionAvailable(editor, 'textAlign')) return false;
 
   if (hideWhenUnavailable) {
-    return !editor.isActive('code') && canSetTextAlign(editor, align);
+    return !editor.isActive('code') && canSetTextAlign(editor);
   }
 
   return true;
@@ -193,7 +192,7 @@ export function useTextAlign(config: UseTextAlignConfig) {
 
   const { editor } = useTiptapEditor(providedEditor);
   const messages = useEditorMessages();
-  const canAlign = canSetTextAlign(editor, align);
+  const canAlign = canSetTextAlign(editor);
   const isActive = isTextAlignActive(editor, align);
   const isVisible = shouldShowButton({
     editor,

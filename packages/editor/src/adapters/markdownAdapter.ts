@@ -3,6 +3,7 @@ import type { Node as TiptapNode } from '@tiptap/pm/model';
 import type { Editor as ReactEditor } from '@tiptap/react';
 
 import type { EditorLogger } from '../types';
+import type { SetContentOptions } from './htmlAdapter';
 
 const LIST_ITEM_PATTERN = /^[-*+]\s+|^\d+[.)]\s+/;
 const INDENT_PATTERN = /^( {2,})(\S.*)$/;
@@ -271,7 +272,9 @@ export function serializeMarkdownContent(editor: ReactEditor): string {
   return editor.getMarkdown();
 }
 
-export function createMarkdownSetContentOptions(emitUpdate: boolean) {
+export function createMarkdownSetContentOptions(
+  emitUpdate: boolean,
+): SetContentOptions {
   return {
     emitUpdate,
     contentType: 'markdown' as const,

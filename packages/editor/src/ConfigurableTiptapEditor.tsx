@@ -1,5 +1,3 @@
-import 'katex/dist/katex.min.css';
-
 import React from 'react';
 
 import { DualViewEditor } from './components/DualViewEditor';
@@ -74,8 +72,6 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
   onError,
   onChange,
 }) => {
-  const resolvedMessages = createEditorMessages(messages);
-  const resolvedPlaceholder = placeholder ?? resolvedMessages.placeholder;
   const {
     activeMode,
     editor,
@@ -92,7 +88,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
     defaultValue,
     valueType,
     contentType,
-    placeholder: resolvedPlaceholder,
+    placeholder,
     readOnly,
     disabled,
     showToolbar,
@@ -105,7 +101,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
     minHeight,
     compact,
     viewerMode,
-    messages: resolvedMessages,
+    messages,
     logger,
     uploadHandler,
     uploadUrl,
@@ -126,7 +122,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
   if (!editor) {
     return (
       <EditorMessagesProvider messages={editorMessages}>
-        <div aria-live="polite">{resolvedMessages.loading}</div>
+        <div aria-live="polite">{editorMessages.loading}</div>
       </EditorMessagesProvider>
     );
   }
@@ -144,7 +140,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
         <DualViewEditor
           editor={editor}
           activeMode={activeMode}
-          placeholder={resolvedPlaceholder}
+          placeholder={editorMessages.placeholder}
           markdownValue={markdownValue}
           readOnly={readOnly}
           disabled={disabled}
@@ -162,7 +158,7 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
       ) : (
         <SingleViewEditor
           editor={editor}
-          placeholder={resolvedPlaceholder}
+          placeholder={editorMessages.placeholder}
           minHeight={minHeight}
           compact={compact}
           showToolbar={showToolbar}

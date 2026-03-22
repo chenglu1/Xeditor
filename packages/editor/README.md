@@ -25,6 +25,7 @@ import {
   ConfigurableTiptapEditor,
   type EditorUpdateEvent,
 } from '@chenglu1/xeditor-editor';
+import '@chenglu1/xeditor-editor/styles.css';
 
 export function Example() {
   const [value, setValue] = useState('# Hello Xeditor');
@@ -54,6 +55,24 @@ export function Example() {
 Use `valueType` to define the content protocol and `onUpdate(event)` to receive structured update events.
 
 ## Read-Only Viewer
+
+For lightweight read-only surfaces, you can import the dedicated viewer entry:
+
+```tsx
+import { StaticContentViewer } from '@chenglu1/xeditor-editor/viewer';
+import '@chenglu1/xeditor-editor/styles/core.css';
+import '@chenglu1/xeditor-editor/styles/content.css';
+```
+
+```tsx
+<StaticContentViewer
+  value={markdown}
+  valueType="markdown"
+  minHeight="0"
+/>
+```
+
+Use the full editor entry only when you need editable behavior or read-only mode that preserves the editor shell.
 
 ```tsx
 <ConfigurableTiptapEditor
@@ -158,9 +177,7 @@ The package does not write operational warnings or errors directly to `console` 
 
 ## Styles
 
-The main package entry loads editor styles automatically.
-
-If your host setup needs an explicit stylesheet entry, you can also import:
+Import the full stylesheet once in your host app:
 
 ```tsx
 import '@chenglu1/xeditor-editor/styles.css';
@@ -171,11 +188,13 @@ For design-system integrations, the package now exposes layered styles:
 ```tsx
 import '@chenglu1/xeditor-editor/styles/core.css';
 import '@chenglu1/xeditor-editor/styles/content.css';
+import '@chenglu1/xeditor-editor/styles/math.css';
 import '@chenglu1/xeditor-editor/styles/ui.css';
 ```
 
 - `core.css`: editor shell, toolbar primitives, layout chrome
 - `content.css`: prose/content rendering styles
+- `math.css`: KaTeX styles for the optional `math` preset
 - `ui.css`: optional richer UI like floating table controls and upload surfaces
 
 You can override the editor theme with CSS custom properties on `:root` or a host container:
@@ -252,8 +271,8 @@ Performance tradeoffs to keep in mind:
 
 - Prefer `viewerMode="static"` for read-only lists, cards, dialogs, and search results. It avoids creating a full Tiptap editor instance.
 - Use `viewerMode="editor-shell"` only when you need full editor fidelity for read-only rendering.
-- Keep `presets` lean for lightweight consumers. `table`, `math`, and `media` add more code, commands, and UI surface than the formatting-only core.
-- Import layered styles when your host only needs part of the package surface. `styles/core.css` + `styles/content.css` is lighter than always loading the full bundle.
+- Keep `presets` lean for lightweight consumers. The default preset set is `base + formatting + table + markdownDialect`; opt into `math`, `media`, and `details` only when you need them.
+- Import layered styles when your host only needs part of the package surface. `styles/core.css` + `styles/content.css` is lighter than always loading the full bundle, and `styles/math.css` is only needed when the `math` preset is enabled.
 - The full stylesheet payload is intentionally broad for compatibility; design-system consumers should prefer theme tokens and layered style imports over patching generated CSS.
 
 ## Advanced Extension Assembly

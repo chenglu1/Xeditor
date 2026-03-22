@@ -4,6 +4,7 @@ import type { Editor } from '@tiptap/react';
 import {
   createHtmlSetContentOptions,
   serializeHtmlContent,
+  type SetContentOptions,
 } from '../adapters/htmlAdapter';
 import {
   createMarkdownSetContentOptions,
@@ -75,7 +76,7 @@ export function getEditorWordCount(editor: Editor): number {
 export function createSetContentOptions(
   valueType: EditorValueType,
   emitUpdate: boolean,
-) {
+): SetContentOptions {
   return contentAdapters[valueType].createSetContentOptions(emitUpdate);
 }
 
@@ -110,7 +111,7 @@ export function syncExternalValue(
 
   editor.commands.setContent(
     value as string | JSONContent,
-    createSetContentOptions(valueType, false) as any,
+    createSetContentOptions(valueType, false),
   );
 
   return true;

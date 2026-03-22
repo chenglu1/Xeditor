@@ -1,5 +1,6 @@
+import type { EditorView } from '@tiptap/pm/view';
 import { useEditor } from '@tiptap/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { createEditorExtensions } from '../extensions/createEditorExtensions';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -78,8 +79,14 @@ export function useConfigurableEditor({
 }: ConfigurableTiptapEditorProps): UseConfigurableEditorResult {
   const isMobile = useIsMobile();
   const resolvedValueType = resolveEditorValueType(valueType, contentType);
-  const resolvedMessages = createEditorMessages(messages);
-  const resolvedPlaceholder = placeholder ?? resolvedMessages.placeholder;
+  const resolvedMessages = useMemo(
+    () => createEditorMessages(messages),
+    [messages],
+  );
+  const resolvedPlaceholder = useMemo(
+    () => placeholder ?? resolvedMessages.placeholder,
+    [placeholder, resolvedMessages],
+  );
   const resolvedLogger = useMemo(() => createEditorLogger(logger), [logger]);
   const isControlled = value !== undefined;
   const hasWarnedInvalidDualViewRef = useRef(false);
@@ -97,16 +104,16 @@ export function useConfigurableEditor({
       : '',
   );
 
-  const reportError = (event: EditorErrorEvent) => {
+  const reportError = useCallback((event: EditorErrorEvent) => {
     onError?.(event);
     resolvedLogger.error(`Editor ${event.phase} error.`, {
       phase: event.phase,
       error: event.error,
       recoverable: event.recoverable,
     });
-  };
+  }, [onError, resolvedLogger]);
 
-  const emitUpdateEvent = (
+  const emitUpdateEvent = useCallback((
     editorInstance: NonNullable<ReturnType<typeof useEditor>>,
     source: EditorUpdateEvent['source'],
     explicitValueType: EditorValueType = resolvedValueType,
@@ -147,52 +154,89 @@ export function useConfigurableEditor({
       });
       return null;
     }
-  };
+  }, [onChange, onUpdate, reportError, resolvedValueType]);
 
   const isDualViewEnabled = dualView && resolvedValueType === 'markdown';
-  const imageUploadHandler = createImageUploadHandler({
-    uploadHandler,
-    uploadUrl,
-    maxFileSize,
-    mediaUpload,
-  });
+  const imageUploadHandler = useMemo(
+    () =>
+      createImageUploadHandler({
+        uploadHandler,
+        uploadUrl,
+        maxFileSize,
+        mediaUpload,
+      }),
+    [maxFileSize, mediaUpload, uploadHandler, uploadUrl],
+  );
 
-  const toolbarConfig = createToolbarConfig({
-    toolbarButtons,
-    supportedToolbarButtons,
-    toolbarSchema,
-    renderToolbarItem,
-    includeImageButton: !!imageUploadHandler,
-  });
+  const toolbarConfig = useMemo(
+    () =>
+      createToolbarConfig({
+        toolbarButtons,
+        supportedToolbarButtons,
+        toolbarSchema,
+        renderToolbarItem,
+        includeImageButton: !!imageUploadHandler,
+      }),
+    [
+      imageUploadHandler,
+      renderToolbarItem,
+      supportedToolbarButtons,
+      toolbarButtons,
+      toolbarSchema,
+    ],
+  );
 
-  const editor = useEditor({
-    extensions: createEditorExtensions({
-      placeholder: resolvedPlaceholder,
+  const handleUploadError = useCallback((error: Error) => {
+    reportError({
+      phase: 'upload',
+      error,
+      recoverable: true,
+    });
+  }, [reportError]);
+
+  const editorExtensions = useMemo(
+    () =>
+      createEditorExtensions({
+        placeholder: resolvedPlaceholder,
+        maxFileSize,
+        maxLength,
+        imageUploadHandler,
+        messages: resolvedMessages,
+        logger: resolvedLogger,
+        onUploadError: handleUploadError,
+        presets,
+        extensions,
+        extensionComposition,
+        disableBuiltIns,
+        markdownDialect,
+      }),
+    [
+      disableBuiltIns,
+      extensionComposition,
+      extensions,
+      handleUploadError,
+      imageUploadHandler,
+      markdownDialect,
       maxFileSize,
       maxLength,
-      imageUploadHandler,
-      messages: resolvedMessages,
-      logger: resolvedLogger,
-      onUploadError: (error) =>
-        reportError({
-          phase: 'upload',
-          error,
-          recoverable: true,
-        }),
       presets,
-      extensions,
-      extensionComposition,
-      disableBuiltIns,
-      markdownDialect,
-    }),
-    content: initialValueRef.current as any,
-    contentType: resolvedValueType === 'markdown' ? 'markdown' : undefined,
-    autofocus: false,
-    editorProps: {
+      resolvedLogger,
+      resolvedMessages,
+      resolvedPlaceholder,
+    ],
+  );
+
+  const editorInstanceProps = useMemo(
+    () => ({
       attributes: {
         class: 'focus:outline-none',
       },
-      handleTextInput: (view, from, to, text) => {
+      handleTextInput: (
+        view: EditorView,
+        from: number,
+        to: number,
+        text: string,
+      ) => {
         if (isComposingRef.current) {
           return false;
         }
@@ -217,7 +261,7 @@ export function useConfigurableEditor({
           return false;
         },
       },
-      handlePaste: (view, event) => {
+      handlePaste: (view: EditorView, event: ClipboardEvent) => {
         if (!maxLength) {
           return false;
         }
@@ -243,32 +287,45 @@ export function useConfigurableEditor({
 
         return false;
       },
-    },
+    }),
+    [maxLength],
+  );
+
+  const handleCreate = useCallback(({ editor: currentEditor }: { editor: NonNullable<ReturnType<typeof useEditor>> }) => {
+    if (resolvedValueType === 'markdown') {
+      const nextMarkdownValue = currentEditor.getMarkdown();
+      setMarkdownValue((currentValue) =>
+        currentValue === nextMarkdownValue ? currentValue : nextMarkdownValue,
+      );
+    }
+  }, [resolvedValueType]);
+
+  const handleEditorUpdate = useCallback(({ editor: currentEditor }: { editor: NonNullable<ReturnType<typeof useEditor>> }) => {
+    if (isDualViewEnabled) {
+      const nextMarkdownValue = currentEditor.getMarkdown();
+      setMarkdownValue((currentValue) =>
+        currentValue === nextMarkdownValue ? currentValue : nextMarkdownValue,
+      );
+    }
+
+    const nextValue = emitUpdateEvent(currentEditor, 'user');
+    if (nextValue !== null) {
+      lastSyncedExternalValueRef.current = nextValue;
+    }
+  }, [emitUpdateEvent, isDualViewEnabled]);
+
+  const editor = useEditor({
+    extensions: editorExtensions,
+    content: initialValueRef.current,
+    contentType: resolvedValueType === 'markdown' ? 'markdown' : undefined,
+    autofocus: false,
+    editorProps: editorInstanceProps,
     parseOptions: {
       preserveWhitespace: 'full',
     },
     editable: !(readOnly || disabled),
-    onCreate: ({ editor: currentEditor }) => {
-      if (resolvedValueType === 'markdown') {
-        const nextMarkdownValue = currentEditor.getMarkdown();
-        setMarkdownValue((currentValue) =>
-          currentValue === nextMarkdownValue ? currentValue : nextMarkdownValue,
-        );
-      }
-    },
-    onUpdate: ({ editor: currentEditor }) => {
-      if (isDualViewEnabled) {
-        const nextMarkdownValue = currentEditor.getMarkdown();
-        setMarkdownValue((currentValue) =>
-          currentValue === nextMarkdownValue ? currentValue : nextMarkdownValue,
-        );
-      }
-
-      const nextValue = emitUpdateEvent(currentEditor, 'user');
-      if (nextValue !== null) {
-        lastSyncedExternalValueRef.current = nextValue;
-      }
-    },
+    onCreate: handleCreate,
+    onUpdate: handleEditorUpdate,
   });
 
   useEffect(() => {
@@ -324,7 +381,7 @@ export function useConfigurableEditor({
       );
       lastSyncedExternalValueRef.current = value;
     }
-  }, [editor, isControlled, resolvedValueType, value]);
+  }, [editor, emitUpdateEvent, isControlled, resolvedValueType, value]);
 
   useEffect(() => {
     if (!editor) {
@@ -358,7 +415,7 @@ export function useConfigurableEditor({
     }
   }, [activeMode, isDualViewEnabled]);
 
-  const onSwitchToMarkdown = () => {
+  const onSwitchToMarkdown = useCallback(() => {
     if (editor) {
       const nextMarkdownValue = editor.getMarkdown();
       setMarkdownValue((currentValue) =>
@@ -371,14 +428,14 @@ export function useConfigurableEditor({
     if (editor) {
       emitUpdateEvent(editor, 'mode-switch', 'markdown');
     }
-  };
+  }, [editor, emitUpdateEvent]);
 
-  const onSwitchToRichtext = () => {
+  const onSwitchToRichtext = useCallback(() => {
     if (editor) {
       try {
         editor.commands.setContent(
           markdownValue,
-          createSetContentOptions('markdown', false) as any,
+          createSetContentOptions('markdown', false),
         );
       } catch (error) {
         reportError({
@@ -397,15 +454,15 @@ export function useConfigurableEditor({
     if (editor) {
       emitUpdateEvent(editor, 'mode-switch', 'markdown');
     }
-  };
+  }, [editor, emitUpdateEvent, markdownValue, reportError]);
 
-  const onMarkdownChange = (nextValue: string) => {
+  const onMarkdownChange = useCallback((nextValue: string) => {
     setMarkdownValue(nextValue);
 
     try {
       editor?.commands.setContent(
         nextValue,
-        createSetContentOptions('markdown', true) as any,
+        createSetContentOptions('markdown', true),
       );
     } catch (error) {
       reportError({
@@ -415,7 +472,7 @@ export function useConfigurableEditor({
         recoverable: true,
       });
     }
-  };
+  }, [editor, reportError]);
 
   return {
     activeMode,

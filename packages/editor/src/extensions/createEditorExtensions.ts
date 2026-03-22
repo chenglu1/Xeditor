@@ -28,6 +28,7 @@ import { createEnhancedMarkdown } from './enhanced/EnhancedMarkdown';
 import {
   EnhancedBlockMath,
   EnhancedInlineMath,
+  type EnhancedMathOptions,
 } from './enhanced/EnhancedMathematics';
 import { createOrderedListWithStart } from './enhanced/OrderedListWithStart';
 import { createTextAlignWithMarkdown } from './enhanced/TextAlignWithMarkdown';
@@ -49,13 +50,20 @@ export interface CreateEditorExtensionsOptions {
   onUploadError?: (error: Error) => void;
 }
 
-export const DEFAULT_EDITOR_PRESETS: EditorPresetName[] = [
+const EDITOR_PRESET_ORDER: EditorPresetName[] = [
   'base',
   'formatting',
   'table',
   'math',
   'media',
   'details',
+  'markdownDialect',
+];
+
+export const DEFAULT_EDITOR_PRESETS: EditorPresetName[] = [
+  'base',
+  'formatting',
+  'table',
   'markdownDialect',
 ];
 
@@ -158,7 +166,7 @@ const builtInExtensionRegistry: BuiltInExtensionEntry[] = [
   {
     key: 'custom-image',
     presets: ['base'],
-    create: ({ logger }) => CustomImage.configure({ logger } as any),
+    create: ({ logger }) => CustomImage.configure({ logger }),
   },
   {
     key: 'custom-react-node',
@@ -207,11 +215,11 @@ const builtInExtensionRegistry: BuiltInExtensionEntry[] = [
         EnhancedBlockMath.configure({
           katexOptions: katexConfig,
           logger,
-        } as any),
+        } satisfies EnhancedMathOptions & { katexOptions: typeof katexConfig }),
         EnhancedInlineMath.configure({
           katexOptions: katexConfig,
           logger,
-        } as any),
+        } satisfies EnhancedMathOptions & { katexOptions: typeof katexConfig }),
       ];
     },
   },
@@ -287,6 +295,19 @@ const builtInExtensionRegistry: BuiltInExtensionEntry[] = [
     },
   },
 ];
+
+function resolveEditorPresets(options: {
+  presets?: EditorPresetName[];
+  imageUploadHandler?: AssetUploadHandler | null;
+}): EditorPresetName[] {
+  const presetSet = new Set(options.presets ?? DEFAULT_EDITOR_PRESETS);
+
+  if (options.imageUploadHandler) {
+    presetSet.add('media');
+  }
+
+  return EDITOR_PRESET_ORDER.filter((preset) => presetSet.has(preset));
+}
 
 function toExtensionArray(
   extension: AnyExtension | AnyExtension[] | null,
@@ -391,7 +412,7 @@ export const createEditorExtensions = ({
   maxLength,
   imageUploadHandler,
   messages,
-  presets = DEFAULT_EDITOR_PRESETS,
+  presets,
   extensions = [],
   extensionComposition = [],
   disableBuiltIns = [],
@@ -399,7 +420,12 @@ export const createEditorExtensions = ({
   logger,
   onUploadError,
 }: CreateEditorExtensionsOptions) => {
-  const enabledPresets = new Set(presets);
+  const enabledPresets = new Set(
+    resolveEditorPresets({
+      presets,
+      imageUploadHandler,
+    }),
+  );
   const disabledBuiltIns = new Set(disableBuiltIns);
   const builtInGroups: ExtensionGroup[] = [];
 
@@ -414,15 +440,15 @@ export const createEditorExtensions = ({
 
     const nextExtension = toExtensionArray(
       entry.create({
-      placeholder,
-      maxFileSize,
-      maxLength,
-      imageUploadHandler,
-      messages,
-      markdownDialect,
-      logger,
-      onUploadError,
-    }),
+        placeholder,
+        maxFileSize,
+        maxLength,
+        imageUploadHandler,
+        messages,
+        markdownDialect,
+        logger,
+        onUploadError,
+      }),
     );
 
     if (nextExtension.length === 0) {

@@ -7,3 +7,6 @@ packages/**/dist
 
 # Logs
 *.log
+
+# Local package release validation cache
+packages/editor/.npm-cache

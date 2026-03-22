@@ -1,5 +1,5 @@
 declare module 'lodash-es' {
-  export function throttle<T extends (...args: any[]) => any>(
+  export function throttle<T extends (...args: never[]) => unknown>(
     func: T,
     wait?: number,
     options?: {
@@ -11,4 +11,3 @@ declare module 'lodash-es' {
     flush: () => void;
   };
 }
-

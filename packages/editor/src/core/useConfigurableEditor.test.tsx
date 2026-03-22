@@ -5,6 +5,18 @@ import { useConfigurableEditor } from './useConfigurableEditor';
 
 const mockUseEditor = vi.fn();
 const mockCreateEditorExtensions = vi.fn(() => []);
+const mockCreateImageUploadHandler = vi.fn(() => null);
+const mockCreateToolbarConfig = vi.fn(() => ({
+  showUndoRedo: false,
+  showStructure: false,
+  showFormatting: false,
+  showScript: false,
+  showAlign: false,
+  showImage: false,
+  supportedToolbarButtons: [],
+  toolbarSchema: [],
+  shouldShowButton: () => false,
+}));
 const mockUseIsMobile = vi.fn(() => false);
 
 vi.mock('@tiptap/react', () => ({
@@ -14,6 +26,15 @@ vi.mock('@tiptap/react', () => ({
 vi.mock('../extensions/createEditorExtensions', () => ({
   createEditorExtensions: (options: unknown) =>
     mockCreateEditorExtensions(options),
+}));
+
+vi.mock('./createImageUploadHandler', () => ({
+  createImageUploadHandler: (options: unknown) =>
+    mockCreateImageUploadHandler(options),
+}));
+
+vi.mock('./createToolbarConfig', () => ({
+  createToolbarConfig: (options: unknown) => mockCreateToolbarConfig(options),
 }));
 
 vi.mock('../hooks/use-mobile', () => ({
@@ -57,6 +78,8 @@ describe('useConfigurableEditor', () => {
   beforeEach(() => {
     mockUseEditor.mockReset();
     mockCreateEditorExtensions.mockClear();
+    mockCreateImageUploadHandler.mockClear();
+    mockCreateToolbarConfig.mockClear();
     mockUseIsMobile.mockReturnValue(false);
   });
 
@@ -161,6 +184,46 @@ describe('useConfigurableEditor', () => {
     rerender({ readOnly: true });
 
     expect(mockEditor.setEditable).toHaveBeenLastCalledWith(false);
+  });
+
+  it('does not rebuild editor assembly when only editable flags change', () => {
+    const mockEditor = createMockEditor('# initial');
+
+    mockUseEditor.mockImplementation(() => mockEditor);
+
+    const { rerender } = renderHook(
+      ({ readOnly, disabled }) =>
+        useConfigurableEditor({
+          value: '# initial',
+          valueType: 'markdown',
+          readOnly,
+          disabled,
+        }),
+      {
+        initialProps: {
+          readOnly: false,
+          disabled: false,
+        },
+      },
+    );
+
+    expect(mockCreateEditorExtensions).toHaveBeenCalledTimes(1);
+    expect(mockCreateImageUploadHandler).toHaveBeenCalledTimes(1);
+    expect(mockCreateToolbarConfig).toHaveBeenCalledTimes(1);
+
+    rerender({
+      readOnly: true,
+      disabled: false,
+    });
+
+    rerender({
+      readOnly: true,
+      disabled: true,
+    });
+
+    expect(mockCreateEditorExtensions).toHaveBeenCalledTimes(1);
+    expect(mockCreateImageUploadHandler).toHaveBeenCalledTimes(1);
+    expect(mockCreateToolbarConfig).toHaveBeenCalledTimes(1);
   });
 
   it('updates the editor editable state when disabled changes after mount', () => {

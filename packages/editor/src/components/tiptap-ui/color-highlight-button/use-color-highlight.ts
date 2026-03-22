@@ -76,6 +76,42 @@ export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number];
 
 export type HighlightMode = 'mark' | 'node';
 
+interface NodeBackgroundCanCommands {
+  toggleNodeBackgroundColor: (color: string) => boolean;
+}
+
+interface NodeBackgroundChain {
+  focus: () => NodeBackgroundChain;
+  toggleNodeBackgroundColor: (color: string) => NodeBackgroundChain;
+  unsetNodeBackgroundColor: () => NodeBackgroundChain;
+  run: () => boolean;
+}
+
+function getNodeBackgroundCanCommands(editor: Editor | null) {
+  if (!editor) {
+    return null;
+  }
+
+  const commands = editor.can() as unknown as Partial<NodeBackgroundCanCommands>;
+  return typeof commands.toggleNodeBackgroundColor === 'function'
+    ? (commands as NodeBackgroundCanCommands)
+    : null;
+}
+
+function getNodeBackgroundChain(editor: Editor | null) {
+  if (!editor) {
+    return null;
+  }
+
+  const chain = editor.chain().focus() as unknown as Partial<NodeBackgroundChain>;
+
+  return typeof chain.toggleNodeBackgroundColor === 'function' &&
+    typeof chain.unsetNodeBackgroundColor === 'function' &&
+    typeof chain.run === 'function'
+    ? (chain as NodeBackgroundChain)
+    : null;
+}
+
 /**
  * Configuration for the color highlight functionality
  */
@@ -147,12 +183,7 @@ export function canColorHighlight(
   } else {
     if (!isExtensionAvailable(editor, ['nodeBackground'])) return false;
 
-    try {
-      // @ts-expect-error - Custom extension command
-      return editor.can().toggleNodeBackgroundColor('test');
-    } catch {
-      return false;
-    }
+    return getNodeBackgroundCanCommands(editor)?.toggleNodeBackgroundColor('test') ?? false;
   }
 }
 
@@ -204,8 +235,7 @@ export function removeHighlight(
   if (mode === 'mark') {
     return editor.chain().focus().unsetMark('highlight').run();
   } else {
-    // @ts-expect-error - Custom extension command
-    return editor.chain().focus().unsetNodeBackgroundColor().run();
+    return getNodeBackgroundChain(editor)?.unsetNodeBackgroundColor().run() ?? false;
   }
 }
 
@@ -283,12 +313,10 @@ export function useColorHighlight(config: UseColorHighlightConfig) {
 
       return true;
     } else {
-      const success = editor
-        .chain()
-        .focus()
-        // @ts-expect-error - Custom extension command
-        .toggleNodeBackgroundColor(highlightColor)
-        .run();
+      const success =
+        getNodeBackgroundChain(editor)
+          ?.toggleNodeBackgroundColor(highlightColor)
+          .run() ?? false;
 
       if (success) {
         onApplied?.({ color: highlightColor, label, mode });
