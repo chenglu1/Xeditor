@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 
 import type { EditorMessages, UploadedAsset } from '../../../types';
 import { DEFAULT_EDITOR_MESSAGES } from '../../../types';
+import { generateUUID } from '../../../lib/generateUUID';
 import { focusNextNode, isValidPosition } from '../../../lib/tiptap-utils';
 import { CloseIcon } from '../../tiptap-icons/close-icon';
 import { Button } from '../../tiptap-ui-primitive/button';
@@ -39,11 +40,7 @@ export interface UploadOptions {
 }
 
 function getFileItemId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-
-  return `upload-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  return generateUUID();
 }
 
 function getFileBaseName(file: File) {

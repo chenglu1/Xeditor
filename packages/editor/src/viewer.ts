@@ -9,6 +9,7 @@ export type {
   EditorHtmlSanitizeContext,
   EditorHtmlSanitizer,
   EditorLogger,
+  EditorMathOptions,
   EditorMessages,
   EditorPresetName,
   EditorValue,

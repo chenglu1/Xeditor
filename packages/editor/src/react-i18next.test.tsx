@@ -45,7 +45,7 @@ async function createTestI18n() {
         ...XEDITOR_I18NEXT_RESOURCES['zh-CN'],
         custom: {
           editor: {
-            toolbarUndo: '回退',
+            toolbarUndo: '返回',
             uploadInProgress_one: '上传中 {{count}} 项',
             uploadInProgress_other: '上传中 {{count}} 项',
           },
@@ -79,6 +79,17 @@ describe('react-i18next adapter', () => {
       </I18nextProvider>,
     );
 
-    expect(screen.getByText('回退 | 上传中 3 项')).toBeTruthy();
+    expect(screen.getByText('返回 | 上传中 3 项')).toBeTruthy();
+  });
+
+  it('ships clean built-in chinese resources', () => {
+    expect(
+      XEDITOR_I18NEXT_RESOURCES['zh-CN'][XEDITOR_I18NEXT_NAMESPACE]
+        .toolbarHeading,
+    ).toBe('标题');
+    expect(
+      XEDITOR_I18NEXT_RESOURCES['zh-CN'][XEDITOR_I18NEXT_NAMESPACE]
+        .toolbarAlignCenter,
+    ).toBe('居中对齐');
   });
 });

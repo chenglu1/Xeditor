@@ -1,5 +1,6 @@
 import type { AnyExtension, JSONContent } from '@tiptap/core';
 import type { Editor } from '@tiptap/react';
+import type { KatexOptions } from 'katex';
 import type { ReactNode, Ref } from 'react';
 
 export type ContentType = 'markdown' | 'html';
@@ -72,6 +73,10 @@ export interface MarkdownDialectOptions {
   preserveOrderedListStart?: boolean;
   textAlignSyntax?: 'disabled' | 'directive';
   standaloneImageSpacing?: boolean;
+}
+
+export interface EditorMathOptions {
+  katexOptions?: Partial<KatexOptions>;
 }
 
 export interface EditorUpdateEvent {
@@ -238,6 +243,7 @@ export interface ConfigurableTiptapEditorProps {
   extensionComposition?: EditorExtensionCompositionItem[];
   disableBuiltIns?: string[];
   markdownDialect?: MarkdownDialectOptions;
+  mathOptions?: EditorMathOptions;
 
   editorRef?: Ref<Editor | null>;
   onUpdate?: (event: EditorUpdateEvent) => void;

@@ -14,7 +14,7 @@ export const XEDITOR_I18NEXT_RESOURCES = {
   'zh-CN': {
     [XEDITOR_I18NEXT_NAMESPACE]: {
       loading: '正在加载编辑器...',
-      placeholder: '开始输入...',
+      placeholder: '开始输入内容...',
       toolbarRegionLabel: '编辑器工具栏',
       richTextEditorLabel: '富文本编辑器',
       markdownInputLabel: 'Markdown 源码',
@@ -39,7 +39,7 @@ export const XEDITOR_I18NEXT_RESOURCES = {
       toolbarCode: '行内代码',
       toolbarUnderline: '下划线',
       toolbarHighlight: '高亮',
-      toolbarRemoveHighlight: '取消高亮',
+      toolbarRemoveHighlight: '移除高亮',
       toolbarHighlightColors: '高亮颜色',
       toolbarHighlightColor: '{{label}} 高亮颜色',
       toolbarLink: '链接',

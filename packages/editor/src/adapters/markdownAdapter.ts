@@ -2,7 +2,7 @@ import type { Editor } from '@tiptap/core';
 import type { Node as TiptapNode } from '@tiptap/pm/model';
 import type { Editor as ReactEditor } from '@tiptap/react';
 
-import type { EditorLogger } from '../types';
+import type { EditorLogger, MarkdownDialectOptions } from '../types';
 import type { SetContentOptions } from './htmlAdapter';
 
 const LIST_ITEM_PATTERN = /^[-*+]\s+|^\d+[.)]\s+/;
@@ -11,6 +11,7 @@ const STANDARD_INDENT = '    ';
 const STANDARD_INDENT_SPACES = 4;
 const ALIGN_SYNTAX_PATTERN = /:::\{align=(\w+)\}\n([\s\S]*?)\n:::/g;
 const MARKDOWN_ADAPTER_STORAGE_KEY = 'xeditorMarkdownAdapter';
+const MARKDOWN_IMAGE_PATTERN = /^!\[[^\]]*]\((?:[^()]|\([^()]*\))*\)$/;
 
 interface MarkdownManager {
   parse: (markdown: string) => unknown;
@@ -281,15 +282,127 @@ export function createMarkdownSetContentOptions(
   };
 }
 
-export function preprocessMarkdown(markdown: string): string {
+export function preprocessMarkdownForDialect(
+  markdown: string,
+  options?: MarkdownDialectOptions,
+): string {
   if (!markdown || typeof markdown !== 'string') {
     return markdown || '';
   }
 
-  let processedMarkdown = preprocessHtmlTables(markdown);
-  processedMarkdown = preprocessTableSpaces(processedMarkdown);
-  processedMarkdown = normalizeListIndentation(processedMarkdown);
+  let processedMarkdown = markdown;
+
+  if (options?.textAlignSyntax !== 'disabled') {
+    processedMarkdown = convertMarkdownTextAlignToHtml(processedMarkdown);
+  }
+
+  if (options?.normalizeTables !== false) {
+    processedMarkdown = preprocessHtmlTables(processedMarkdown);
+    processedMarkdown = preprocessTableSpaces(processedMarkdown);
+  }
+
+  if (options?.normalizeListIndentation !== false) {
+    processedMarkdown = normalizeListIndentation(processedMarkdown);
+  }
+
+  if (options?.standaloneImageSpacing !== false) {
+    processedMarkdown = normalizeStandaloneImageSpacing(processedMarkdown);
+  }
+
   return processedMarkdown;
+}
+
+export function preprocessMarkdown(markdown: string): string {
+  return preprocessMarkdownForDialect(markdown);
+}
+
+function isFenceDelimiter(
+  trimmedLine: string,
+  activeFence: { marker: string; length: number } | null,
+) {
+  const fenceMatch = trimmedLine.match(/^(`{3,}|~{3,})/);
+
+  if (!fenceMatch) {
+    return null;
+  }
+
+  const token = fenceMatch[1];
+
+  if (!activeFence) {
+    return {
+      opensFence: true,
+      closesFence: false,
+      marker: token[0],
+      length: token.length,
+    };
+  }
+
+  return {
+    opensFence: false,
+    closesFence:
+      token[0] === activeFence.marker && token.length >= activeFence.length,
+    marker: token[0],
+    length: token.length,
+  };
+}
+
+function isStandaloneMarkdownImageLine(line: string) {
+  const trimmedLine = line.trim();
+
+  if (!trimmedLine) {
+    return false;
+  }
+
+  return MARKDOWN_IMAGE_PATTERN.test(trimmedLine);
+}
+
+export function normalizeStandaloneImageSpacing(markdown: string): string {
+  if (!markdown || typeof markdown !== 'string') {
+    return markdown || '';
+  }
+
+  const lines = markdown.split('\n');
+  const result: string[] = [];
+  let activeFence: { marker: string; length: number } | null = null;
+
+  for (let lineIndex = 0; lineIndex < lines.length; lineIndex++) {
+    const line = lines[lineIndex];
+    const trimmedLine = line.trim();
+    const fenceState = isFenceDelimiter(trimmedLine, activeFence);
+
+    if (fenceState?.opensFence) {
+      activeFence = {
+        marker: fenceState.marker,
+        length: fenceState.length,
+      };
+      result.push(line);
+      continue;
+    }
+
+    if (fenceState?.closesFence) {
+      activeFence = null;
+      result.push(line);
+      continue;
+    }
+
+    if (activeFence || !isStandaloneMarkdownImageLine(line)) {
+      result.push(line);
+      continue;
+    }
+
+    if (result.length > 0 && result[result.length - 1].trim() !== '') {
+      result.push('');
+    }
+
+    result.push(trimmedLine);
+
+    const nextLine = lines[lineIndex + 1];
+    if (typeof nextLine === 'string' && nextLine.trim() !== '') {
+      result.push('');
+    }
+  }
+
+  return result.join('\n');
 }
 
 export function preprocessHtmlTables(markdown: string): string {
@@ -454,12 +567,15 @@ export function isListContinuation(
   );
 }
 
-export function postProcessMarkdown(markdown: string): string {
+export function postProcessMarkdown(
+  markdown: string,
+  options?: MarkdownDialectOptions,
+): string {
   if (!markdown || typeof markdown !== 'string') {
     return markdown || '';
   }
 
-  return markdown
+  const formattedMarkdown = markdown
     .replace(
       /`\[([^\]]+)\]\(([^)]+)\)`/g,
       (_, text, url) => `[\`${text}\`](${url})`,
@@ -472,6 +588,12 @@ export function postProcessMarkdown(markdown: string): string {
       /(?<!\*)\*\[([^\]]+)\]\(([^)]+)\)\*(?!\*)/g,
       (_, text, url) => `[*${text}*](${url})`,
     );
+
+  if (options?.standaloneImageSpacing === false) {
+    return formattedMarkdown;
+  }
+
+  return normalizeStandaloneImageSpacing(formattedMarkdown);
 }
 
 export function convertMarkdownTextAlignToHtml(markdown: string): string {

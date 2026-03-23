@@ -6,6 +6,11 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     ignores: [
+      '**/dist/**',
+      '**/.npm-cache/**',
+      '**/node_modules/**',
+      '**/*.test.ts',
+      '**/*.test.tsx',
       'dist/**',
       '.npm-cache/**',
       'node_modules/**',
@@ -16,7 +21,7 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['src/**/*.{ts,tsx}'],
+    files: ['**/*.{ts,tsx}'],
     languageOptions: {
       globals: {
         ...globals.browser,

@@ -7,6 +7,7 @@ const mockGenerateHTML = vi.fn();
 const mockGenerateJSON = vi.fn();
 const mockMarkdownParse = vi.fn();
 const mockCreateEditorExtensions = vi.fn(() => []);
+const mockPreprocessMarkdownForDialect = vi.fn();
 
 vi.mock('@tiptap/core', () => ({
   generateHTML: (...args: unknown[]) => mockGenerateHTML(...args),
@@ -19,6 +20,18 @@ vi.mock('@tiptap/markdown', () => ({
   })),
 }));
 
+vi.mock('../adapters/markdownAdapter', async () => {
+  const actual = await vi.importActual<typeof import('../adapters/markdownAdapter')>(
+    '../adapters/markdownAdapter'
+  );
+
+  return {
+    ...actual,
+    preprocessMarkdownForDialect: (...args: Parameters<typeof actual.preprocessMarkdownForDialect>) =>
+      mockPreprocessMarkdownForDialect(...args),
+  };
+});
+
 vi.mock('../extensions/createEditorExtensions', () => ({
   createEditorExtensions: (...args: unknown[]) =>
     mockCreateEditorExtensions(...(args as any)),
@@ -30,11 +43,13 @@ describe('StaticContentViewer', () => {
     mockGenerateJSON.mockReset();
     mockMarkdownParse.mockReset();
     mockCreateEditorExtensions.mockClear();
+    mockPreprocessMarkdownForDialect.mockReset();
 
     mockGenerateJSON.mockReturnValue({
       type: 'doc',
       content: [],
     });
+    mockPreprocessMarkdownForDialect.mockImplementation((value: string) => value);
     mockMarkdownParse.mockReturnValue({
       type: 'doc',
       content: [],
@@ -131,5 +146,44 @@ describe('StaticContentViewer', () => {
     );
 
     expect(mockCreateEditorExtensions).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses the shared markdown preprocessing pipeline for standalone images', () => {
+    const markdown = [
+      'Before image',
+      '![Cover](https://example.com/cover.png)',
+      'After image',
+    ].join('\n');
+    mockPreprocessMarkdownForDialect.mockImplementationOnce((value: string) => value);
+
+    render(<StaticContentViewer value={markdown} valueType="markdown" />);
+
+    expect(mockPreprocessMarkdownForDialect).toHaveBeenCalledWith(
+      markdown,
+      undefined,
+    );
+  });
+
+  it('allows standalone image spacing normalization to be disabled for static markdown rendering', () => {
+    const markdown = [
+      'Before image',
+      '![Cover](https://example.com/cover.png)',
+      'After image',
+    ].join('\n');
+    const dialect = { standaloneImageSpacing: false } as const;
+    mockPreprocessMarkdownForDialect.mockImplementationOnce((value: string) => value);
+
+    render(
+      <StaticContentViewer
+        value={markdown}
+        valueType="markdown"
+        markdownDialect={dialect}
+      />,
+    );
+
+    expect(mockPreprocessMarkdownForDialect).toHaveBeenCalledWith(
+      markdown,
+      dialect,
+    );
   });
 });

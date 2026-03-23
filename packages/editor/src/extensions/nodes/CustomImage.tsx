@@ -9,6 +9,35 @@ import { styled } from 'styled-components';
 
 import type { EditorLogger } from '../../types';
 
+let previewScrollLockCount = 0;
+let previousBodyOverflow = '';
+
+function lockPreviewScroll() {
+  if (typeof document === 'undefined') {
+    return;
+  }
+
+  if (previewScrollLockCount === 0) {
+    previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+  }
+
+  previewScrollLockCount += 1;
+}
+
+function unlockPreviewScroll() {
+  if (typeof document === 'undefined' || previewScrollLockCount === 0) {
+    return;
+  }
+
+  previewScrollLockCount -= 1;
+
+  if (previewScrollLockCount === 0) {
+    document.body.style.overflow = previousBodyOverflow;
+    previousBodyOverflow = '';
+  }
+}
+
 const PreviewModal = styled.div`
   display: flex;
   justify-content: center;
@@ -144,6 +173,7 @@ const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const imageRef = useRef<HTMLImageElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
   const { src, alt, title } = node.attrs as {
     src: string;
     alt?: string;
@@ -183,7 +213,7 @@ const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
 
   // 全屏
   const handleFullscreen = () => {
-    const modal = document.getElementById('tiptap-image-preview-modal');
+    const modal = modalRef.current;
     if (!modal) return;
 
     if (document.fullscreenElement) {
@@ -269,7 +299,7 @@ const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
     document.addEventListener('keydown', handleKeyDown);
 
     // 禁止页面滚动
-    document.body.style.overflow = 'hidden';
+    lockPreviewScroll();
 
     return () => {
       if (imageElement) {
@@ -278,7 +308,7 @@ const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      unlockPreviewScroll();
     };
   }, [showPreview, handleWheel, handleMouseMove, handleMouseUp, handleKeyDown]);
 
@@ -298,10 +328,7 @@ const ImageView: React.FC<ImageViewProps> = ({ node, logger }) => {
         }}
       />
       {showPreview && (
-        <PreviewModal
-          id="tiptap-image-preview-modal"
-          onClick={handleClosePreview}
-        >
+        <PreviewModal ref={modalRef} onClick={handleClosePreview}>
           <ImageContainer onClick={(e) => e.stopPropagation()}>
             <PreviewImage
               ref={imageRef}

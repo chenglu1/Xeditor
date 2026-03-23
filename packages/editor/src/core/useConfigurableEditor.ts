@@ -72,6 +72,7 @@ export function useConfigurableEditor({
   extensionComposition,
   disableBuiltIns,
   markdownDialect,
+  mathOptions,
   editorRef,
   onUpdate,
   onError,
@@ -209,6 +210,7 @@ export function useConfigurableEditor({
         extensionComposition,
         disableBuiltIns,
         markdownDialect,
+        mathOptions,
       }),
     [
       disableBuiltIns,
@@ -216,6 +218,7 @@ export function useConfigurableEditor({
       extensions,
       handleUploadError,
       imageUploadHandler,
+      mathOptions,
       markdownDialect,
       maxFileSize,
       maxLength,

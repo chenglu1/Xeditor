@@ -80,4 +80,28 @@ describe('createEditorExtensions', () => {
     expect(names.indexOf('insertedBeforeLink')).toBeLessThan(names.indexOf('link'));
     expect(names.indexOf('insertedAfterLink')).toBeGreaterThan(names.indexOf('link'));
   });
+
+  it('defaults KaTeX trust to false while allowing explicit overrides', () => {
+    const defaultMathExtensions = createEditorExtensions({
+      presets: ['math'],
+    });
+    const customMathExtensions = createEditorExtensions({
+      presets: ['math'],
+      mathOptions: {
+        katexOptions: {
+          trust: true,
+        },
+      },
+    });
+
+    const defaultBlockMath = defaultMathExtensions.find(
+      (extension) => extension.name === 'blockMath',
+    );
+    const customBlockMath = customMathExtensions.find(
+      (extension) => extension.name === 'blockMath',
+    );
+
+    expect(defaultBlockMath?.options.katexOptions.trust).toBe(false);
+    expect(customBlockMath?.options.katexOptions.trust).toBe(true);
+  });
 });

@@ -6,7 +6,9 @@ import {
   installMarkdownAdapter,
   isListContinuation,
   normalizeListIndentation,
+  normalizeStandaloneImageSpacing,
   postProcessMarkdown,
+  preprocessMarkdownForDialect,
   preprocessHtmlTables,
   preprocessMarkdown,
   preprocessTableSpaces,
@@ -17,28 +19,8 @@ import {
 import type { EditorLogger, MarkdownDialectOptions } from '../../types';
 
 function createDialectPreprocessor(options?: MarkdownDialectOptions) {
-  const {
-    normalizeListIndentation: shouldNormalizeListIndentation = true,
-    normalizeTables = true,
-  } = options || {};
-
   return (markdown: string) => {
-    if (!markdown || typeof markdown !== 'string') {
-      return markdown || '';
-    }
-
-    let processedMarkdown = markdown;
-
-    if (normalizeTables) {
-      processedMarkdown = preprocessHtmlTables(processedMarkdown);
-      processedMarkdown = preprocessTableSpaces(processedMarkdown);
-    }
-
-    if (shouldNormalizeListIndentation) {
-      processedMarkdown = normalizeListIndentation(processedMarkdown);
-    }
-
-    return processedMarkdown;
+    return preprocessMarkdownForDialect(markdown, options);
   };
 }
 
@@ -82,16 +64,12 @@ export const createEnhancedMarkdown = (options?: {
       registerMarkdownParseTransform(this.editor, {
         key: 'enhanced:preprocess',
         priority: 20,
-        transform:
-          options?.dialect?.normalizeListIndentation === false &&
-          options?.dialect?.normalizeTables === false
-            ? (markdown) => markdown
-            : dialectPreprocessor,
+        transform: dialectPreprocessor,
       });
       registerMarkdownSerializeTransform(this.editor, {
         key: 'enhanced:postprocess',
         priority: 10,
-        transform: (markdown) => postProcessMarkdown(markdown),
+        transform: (markdown) => postProcessMarkdown(markdown, options?.dialect),
       });
       installMarkdownAdapter(this.editor, {
         parser: storage.parser,
@@ -105,6 +83,7 @@ export const createEnhancedMarkdown = (options?: {
 export {
   isListContinuation,
   normalizeListIndentation,
+  normalizeStandaloneImageSpacing,
   postProcessMarkdown,
   preprocessHtmlTables,
   preprocessMarkdown,

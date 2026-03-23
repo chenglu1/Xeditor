@@ -11,10 +11,7 @@ import {
   type CreateEditorExtensionsOptions,
 } from '../extensions/createEditorExtensions';
 import {
-  convertMarkdownTextAlignToHtml,
-  normalizeListIndentation,
-  preprocessHtmlTables,
-  preprocessTableSpaces,
+  preprocessMarkdownForDialect,
 } from '../adapters/markdownAdapter';
 import type {
   ConfigurableTiptapEditorProps,
@@ -24,28 +21,6 @@ import type {
 } from '../types';
 import { EditorFrame } from './EditorFrame';
 import { EditorPane } from './EditorPane';
-
-function preprocessMarkdownForStaticViewer(
-  markdown: string,
-  options?: ConfigurableTiptapEditorProps['markdownDialect'],
-) {
-  let nextMarkdown = markdown;
-
-  if (options?.textAlignSyntax !== 'disabled') {
-    nextMarkdown = convertMarkdownTextAlignToHtml(nextMarkdown);
-  }
-
-  if (options?.normalizeTables !== false) {
-    nextMarkdown = preprocessHtmlTables(nextMarkdown);
-    nextMarkdown = preprocessTableSpaces(nextMarkdown);
-  }
-
-  if (options?.normalizeListIndentation !== false) {
-    nextMarkdown = normalizeListIndentation(nextMarkdown);
-  }
-
-  return nextMarkdown;
-}
 
 function createStaticHtmlSerializer(
   extensionOptions: CreateEditorExtensionsOptions,
@@ -76,7 +51,7 @@ function createStaticHtmlSerializer(
       return generateHTML(doc, extensions);
     }
 
-    const markdown = preprocessMarkdownForStaticViewer(
+    const markdown = preprocessMarkdownForDialect(
       String(value || ''),
       extensionOptions.markdownDialect,
     );
@@ -114,6 +89,7 @@ export const StaticContentViewer: React.FC<StaticContentViewerProps> = ({
   extensionComposition,
   disableBuiltIns,
   markdownDialect,
+  mathOptions,
 }) => {
   const resolvedValueType = resolveEditorValueType(valueType, contentType);
   const resolvedValue = value ?? defaultValue;
@@ -153,12 +129,14 @@ export const StaticContentViewer: React.FC<StaticContentViewerProps> = ({
         extensionComposition,
         disableBuiltIns,
         markdownDialect,
+        mathOptions,
         logger: resolvedLogger,
       }),
     [
       disableBuiltIns,
       extensionComposition,
       extensions,
+      mathOptions,
       markdownDialect,
       maxFileSize,
       maxLength,

@@ -20,6 +20,7 @@ import type {
   AssetUploadHandler,
   EditorExtensionCompositionItem,
   EditorLogger,
+  EditorMathOptions,
   EditorMessages,
   EditorPresetName,
   MarkdownDialectOptions,
@@ -46,6 +47,7 @@ export interface CreateEditorExtensionsOptions {
   extensionComposition?: EditorExtensionCompositionItem[];
   disableBuiltIns?: string[];
   markdownDialect?: MarkdownDialectOptions;
+  mathOptions?: EditorMathOptions;
   logger?: EditorLogger;
   onUploadError?: (error: Error) => void;
 }
@@ -100,6 +102,7 @@ interface BuiltInExtensionEntry {
     imageUploadHandler?: AssetUploadHandler | null;
     messages?: EditorMessages;
     markdownDialect?: MarkdownDialectOptions;
+    mathOptions?: EditorMathOptions;
     logger?: EditorLogger;
     onUploadError?: (error: Error) => void;
   }) => AnyExtension | AnyExtension[] | null;
@@ -203,12 +206,13 @@ const builtInExtensionRegistry: BuiltInExtensionEntry[] = [
   {
     key: 'math',
     presets: ['math'],
-    create: ({ logger }) => {
+    create: ({ logger, mathOptions }) => {
       const katexConfig = {
         throwOnError: false,
         errorColor: '#cc0000',
         strict: false,
-        trust: true,
+        trust: false,
+        ...mathOptions?.katexOptions,
       };
 
       return [
@@ -417,6 +421,7 @@ export const createEditorExtensions = ({
   extensionComposition = [],
   disableBuiltIns = [],
   markdownDialect,
+  mathOptions,
   logger,
   onUploadError,
 }: CreateEditorExtensionsOptions) => {
@@ -446,6 +451,7 @@ export const createEditorExtensions = ({
         imageUploadHandler,
         messages,
         markdownDialect,
+        mathOptions,
         logger,
         onUploadError,
       }),

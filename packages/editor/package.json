@@ -1,6 +1,6 @@
 {
   "name": "@chenglu1/xeditor-editor",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": false,
   "description": "Reusable React rich text and Markdown editor built with Tiptap.",
   "license": "MIT",

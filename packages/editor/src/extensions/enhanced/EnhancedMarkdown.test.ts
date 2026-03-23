@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  normalizeStandaloneImageSpacing,
   postProcessMarkdown,
   preprocessMarkdown,
 } from './EnhancedMarkdown';
@@ -46,5 +47,47 @@ describe('EnhancedMarkdown helpers', () => {
         '[*italic*](https://example.com)',
       ].join('\n'),
     );
+  });
+
+  it('keeps standalone markdown images isolated from surrounding paragraphs', () => {
+    const input = [
+      'Before image',
+      '![Cover](https://example.com/cover.png)',
+      'After image',
+    ].join('\n');
+
+    expect(normalizeStandaloneImageSpacing(input)).toBe(
+      [
+        'Before image',
+        '',
+        '![Cover](https://example.com/cover.png)',
+        '',
+        'After image',
+      ].join('\n'),
+    );
+  });
+
+  it('does not rewrite standalone markdown images inside fenced code blocks', () => {
+    const input = [
+      '```md',
+      '![Cover](https://example.com/cover.png)',
+      '```',
+    ].join('\n');
+
+    expect(normalizeStandaloneImageSpacing(input)).toBe(input);
+  });
+
+  it('allows standalone image spacing normalization to be disabled after serialization', () => {
+    const input = [
+      'Before image',
+      '![Cover](https://example.com/cover.png)',
+      'After image',
+    ].join('\n');
+
+    expect(
+      postProcessMarkdown(input, {
+        standaloneImageSpacing: false,
+      }),
+    ).toBe(input);
   });
 });

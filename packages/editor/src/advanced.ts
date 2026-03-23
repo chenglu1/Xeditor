@@ -25,6 +25,7 @@ export type {
   EditorExtensionCompositionItem,
   EditorExtensionPlacement,
   EditorLogger,
+  EditorMathOptions,
   EditorMessages,
   EditorPresetName,
   MarkdownDialectOptions,
