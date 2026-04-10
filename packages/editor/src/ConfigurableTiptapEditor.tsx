@@ -55,6 +55,10 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
   className = '',
   minHeight = '300px',
   compact = false,
+  stickyToolbar = true,
+  stickyToolbarTop = '0px',
+  scrollContainer = false,
+  containerHeight,
   viewerMode = 'editor-shell',
   messages,
   logger,
@@ -151,6 +155,10 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
           showToolbar={showToolbar}
           minHeight={minHeight}
           compact={compact}
+          stickyToolbar={stickyToolbar}
+          stickyToolbarTop={stickyToolbarTop}
+          scrollContainer={scrollContainer}
+          containerHeight={containerHeight}
           className={className}
           isMobile={isMobile}
           messages={editorMessages}
@@ -164,6 +172,10 @@ const ConfigurableTiptapEditorInner: React.FC<ConfigurableTiptapEditorProps> = (
           placeholder={editorMessages.placeholder}
           minHeight={minHeight}
           compact={compact}
+          stickyToolbar={stickyToolbar}
+          stickyToolbarTop={stickyToolbarTop}
+          scrollContainer={scrollContainer}
+          containerHeight={containerHeight}
           showToolbar={showToolbar}
           toolbarConfig={toolbarConfig}
           isMobile={isMobile}

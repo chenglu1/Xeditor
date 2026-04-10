@@ -24,6 +24,10 @@ interface DualViewEditorProps {
   showToolbar: boolean;
   minHeight: string;
   compact: boolean;
+  stickyToolbar?: boolean;
+  stickyToolbarTop?: string;
+  scrollContainer?: boolean;
+  containerHeight?: string;
   className?: string;
   isMobile: boolean;
   disabled?: boolean;
@@ -43,6 +47,10 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
   showToolbar,
   minHeight,
   compact,
+  stickyToolbar = true,
+  stickyToolbarTop = '0px',
+  scrollContainer = false,
+  containerHeight,
   className = '',
   isMobile,
   disabled = false,
@@ -95,6 +103,11 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
           <EditorPane
             compact={compact}
             minHeight={minHeight}
+            paneStyle={
+              scrollContainer
+                ? ({ height: containerHeight ?? minHeight } as React.CSSProperties)
+                : undefined
+            }
             headerClassName="xeditor-pane__header--muted"
             header={
               <div className="xeditor-toolbar-slot xeditor-toolbar-slot--mode-only xeditor-toolbar-slot--muted">
@@ -123,8 +136,18 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
               <EditorPane
                 compact={compact}
                 minHeight={minHeight}
+                paneStyle={
+                  scrollContainer
+                    ? ({ height: containerHeight ?? minHeight } as React.CSSProperties)
+                    : undefined
+                }
                 header={richtextHeader}
-                headerClassName="xeditor-pane__header--sticky"
+                headerClassName={stickyToolbar ? 'xeditor-pane__header--sticky' : ''}
+                headerStyle={
+                  stickyToolbar
+                    ? ({ top: stickyToolbarTop } as React.CSSProperties)
+                    : undefined
+                }
                 bodyClassName="tiptap-editor-scrollable xeditor-pane__body--scrollable"
                 bodyStyle={{
                   '--xeditor-pane-body-padding': compact ? '0px' : '12px',

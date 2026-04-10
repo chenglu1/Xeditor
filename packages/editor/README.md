@@ -114,6 +114,26 @@ import DOMPurify from 'dompurify';
 />
 ```
 
+## Sticky Toolbar Layout
+
+Use built-in layout props when you want the toolbar fixed inside the editor shell while content scrolls:
+
+```tsx
+<ConfigurableTiptapEditor
+  value={markdown}
+  valueType="markdown"
+  scrollContainer
+  containerHeight="min(70vh, 720px)"
+  stickyToolbar
+  stickyToolbarTop="0px"
+/>
+```
+
+- `scrollContainer`: enables internal scrolling for the editor body
+- `containerHeight`: fixed shell height used when `scrollContainer` is enabled
+- `stickyToolbar`: enables/disables sticky toolbar behavior
+- `stickyToolbarTop`: sticky offset (for example when host app has a fixed top nav)
+
 You can also insert or replace built-in extension groups without forking the default assembly order:
 
 ```tsx

@@ -15,6 +15,10 @@ interface SingleViewEditorProps {
   placeholder: string;
   minHeight: string;
   compact: boolean;
+  stickyToolbar?: boolean;
+  stickyToolbarTop?: string;
+  scrollContainer?: boolean;
+  containerHeight?: string;
   showToolbar: boolean;
   toolbarConfig: ToolbarConfig;
   isMobile: boolean;
@@ -28,6 +32,10 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
   editor,
   minHeight,
   compact,
+  stickyToolbar = true,
+  stickyToolbarTop = '0px',
+  scrollContainer = false,
+  containerHeight,
   showToolbar,
   toolbarConfig,
   isMobile,
@@ -46,7 +54,17 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
             compact={compact}
             minHeight={minHeight}
             paneClassName="editor-wrapper"
-            headerClassName="xeditor-pane__header--sticky"
+            paneStyle={
+              scrollContainer
+                ? ({ height: containerHeight ?? minHeight } as React.CSSProperties)
+                : undefined
+            }
+            headerClassName={stickyToolbar ? 'xeditor-pane__header--sticky' : ''}
+            headerStyle={
+              stickyToolbar
+                ? ({ top: stickyToolbarTop } as React.CSSProperties)
+                : undefined
+            }
             header={
               showToolbar ? (
                 <div className="xeditor-toolbar-slot">
@@ -70,7 +88,12 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
             bodyStyle={{
               '--xeditor-pane-body-padding': compact ? '0px' : '12px',
             } as React.CSSProperties}
-            bodyClassName="xeditor-pane__body--padded"
+            bodyClassName={[
+              'xeditor-pane__body--padded',
+              scrollContainer ? 'xeditor-pane__body--scrollable' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
           >
             <EditorContent
               editor={editor}

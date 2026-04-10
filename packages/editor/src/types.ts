@@ -228,6 +228,10 @@ export interface ConfigurableTiptapEditorProps {
   className?: string;
   minHeight?: string;
   compact?: boolean;
+  stickyToolbar?: boolean;
+  stickyToolbarTop?: string;
+  scrollContainer?: boolean;
+  containerHeight?: string;
   viewerMode?: 'static' | 'editor-shell';
   messages?: Partial<EditorMessages>;
   sanitizeHtml?: EditorHtmlSanitizer;

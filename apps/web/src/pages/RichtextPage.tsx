@@ -131,6 +131,9 @@ export function RichtextPage() {
                   value={content}
                   valueType="markdown"
                   disabled={disabled}
+                  scrollContainer
+                  minHeight="560px"
+                  containerHeight="min(70vh, 720px)"
                   uploadHandler={handleDemoImageUpload}
                   onUpdate={handleContentUpdate}
                 />
