@@ -356,6 +356,53 @@ function isStandaloneMarkdownImageLine(line: string) {
   return MARKDOWN_IMAGE_PATTERN.test(trimmedLine);
 }
 
+function isEmptyParagraphMarkdown(line: string) {
+  const compactLine = line.replace(/[ \t]/g, '');
+
+  if (/^(?:&nbsp;|&#160;)+$/i.test(compactLine)) {
+    return true;
+  }
+
+  return /\u00a0/.test(line) && compactLine.replace(/\u00a0/g, '') === '';
+}
+
+function hasTrailingEmptyParagraph(doc?: TiptapNode) {
+  const lastChild = doc?.lastChild;
+
+  if (!lastChild || lastChild.type?.name !== 'paragraph') {
+    return false;
+  }
+
+  return lastChild.childCount === 0;
+}
+
+export function stripTrailingEmptyParagraphMarker(
+  markdown: string,
+  doc?: TiptapNode,
+): string {
+  if (!markdown || typeof markdown !== 'string' || !hasTrailingEmptyParagraph(doc)) {
+    return markdown || '';
+  }
+
+  const lines = markdown.split('\n');
+
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+    lines.pop();
+  }
+
+  if (lines.length === 0 || !isEmptyParagraphMarkdown(lines[lines.length - 1])) {
+    return markdown;
+  }
+
+  lines.pop();
+
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') {
+    lines.pop();
+  }
+
+  return lines.join('\n');
+}
+
 export function normalizeStandaloneImageSpacing(markdown: string): string {
   if (!markdown || typeof markdown !== 'string') {
     return markdown || '';
@@ -570,6 +617,7 @@ export function isListContinuation(
 export function postProcessMarkdown(
   markdown: string,
   options?: MarkdownDialectOptions,
+  doc?: TiptapNode,
 ): string {
   if (!markdown || typeof markdown !== 'string') {
     return markdown || '';
@@ -589,11 +637,16 @@ export function postProcessMarkdown(
       (_, text, url) => `[*${text}*](${url})`,
     );
 
+  const sanitizedMarkdown = stripTrailingEmptyParagraphMarker(
+    formattedMarkdown,
+    doc,
+  );
+
   if (options?.standaloneImageSpacing === false) {
-    return formattedMarkdown;
+    return sanitizedMarkdown;
   }
 
-  return normalizeStandaloneImageSpacing(formattedMarkdown);
+  return normalizeStandaloneImageSpacing(sanitizedMarkdown);
 }
 
 export function convertMarkdownTextAlignToHtml(markdown: string): string {

@@ -69,7 +69,8 @@ export const createEnhancedMarkdown = (options?: {
       registerMarkdownSerializeTransform(this.editor, {
         key: 'enhanced:postprocess',
         priority: 10,
-        transform: (markdown) => postProcessMarkdown(markdown, options?.dialect),
+        transform: (markdown, doc) =>
+          postProcessMarkdown(markdown, options?.dialect, doc),
       });
       installMarkdownAdapter(this.editor, {
         parser: storage.parser,

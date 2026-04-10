@@ -49,6 +49,44 @@ describe('EnhancedMarkdown helpers', () => {
     );
   });
 
+  it('removes only the trailing empty paragraph marker emitted by Tiptap paragraph serialization', () => {
+    const input = [
+      'Before',
+      '',
+      '&nbsp;',
+    ].join('\n');
+
+    const doc = {
+      lastChild: {
+        type: { name: 'paragraph' },
+        childCount: 0,
+      },
+    } as any;
+
+    expect(postProcessMarkdown(input, undefined, doc)).toBe(
+      [
+        'Before',
+      ].join('\n'),
+    );
+  });
+
+  it('keeps non-trailing placeholder paragraph entities untouched when the document does not end with an empty paragraph', () => {
+    const input = [
+      'Before',
+      '&nbsp;',
+      'After',
+    ].join('\n');
+
+    const doc = {
+      lastChild: {
+        type: { name: 'paragraph' },
+        childCount: 1,
+      },
+    } as any;
+
+    expect(postProcessMarkdown(input, undefined, doc)).toBe(input);
+  });
+
   it('keeps standalone markdown images isolated from surrounding paragraphs', () => {
     const input = [
       'Before image',
