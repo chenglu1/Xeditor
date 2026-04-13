@@ -13,6 +13,7 @@ import {
 
 // --- Icons ---
 import {
+  createCurrentBlockCanChain,
   findNodePosition,
   isNodeInSchema,
   isNodeTypeSelected,
@@ -111,13 +112,25 @@ export function canToggleList(
   // or we can clear formatting/nodes to arrive at a list.
   switch (type) {
     case 'bulletList':
-      return editor.can().toggleBulletList() || editor.can().clearNodes();
+      return (
+        editor.can().toggleBulletList() ||
+        editor.can().clearNodes() ||
+        createCurrentBlockCanChain(editor)?.toggleBulletList().run() ||
+        false
+      );
     case 'orderedList':
-      return editor.can().toggleOrderedList() || editor.can().clearNodes();
+      return (
+        editor.can().toggleOrderedList() ||
+        editor.can().clearNodes() ||
+        createCurrentBlockCanChain(editor)?.toggleOrderedList().run() ||
+        false
+      );
     case 'taskList':
       return (
         editor.can().toggleList('taskList', 'taskItem') ||
-        editor.can().clearNodes()
+        editor.can().clearNodes() ||
+        createCurrentBlockCanChain(editor)?.toggleList('taskList', 'taskItem').run() ||
+        false
       );
     default:
       return false;

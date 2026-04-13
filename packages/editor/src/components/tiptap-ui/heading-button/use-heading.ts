@@ -13,6 +13,7 @@ import {
 
 // --- Lib ---
 import {
+  createCurrentBlockCanChain,
   findNodePosition,
   isNodeInSchema,
   isNodeTypeSelected,
@@ -108,9 +109,27 @@ export function canToggle(
 
   // Either we can set heading directly on the selection,
   // or we can clear formatting/nodes to arrive at a heading.
+  if (
+    level
+      ? editor.can().setNode('heading', { level })
+      : editor.can().setNode('heading')
+  ) {
+    return true;
+  }
+
+  if (editor.can().clearNodes()) {
+    return true;
+  }
+
+  const convertedBlockChain = createCurrentBlockCanChain(editor);
+
+  if (!convertedBlockChain) {
+    return false;
+  }
+
   return level
-    ? editor.can().setNode('heading', { level }) || editor.can().clearNodes()
-    : editor.can().setNode('heading') || editor.can().clearNodes();
+    ? convertedBlockChain.setNode('heading', { level }).run()
+    : convertedBlockChain.setNode('heading').run();
 }
 
 /**

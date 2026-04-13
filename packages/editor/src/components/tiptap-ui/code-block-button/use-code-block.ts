@@ -10,6 +10,7 @@ import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Lib ---
 import {
+  createCurrentBlockCanChain,
   findNodePosition,
   isNodeInSchema,
   isNodeTypeSelected,
@@ -77,7 +78,11 @@ export function canToggle(
   // or we can clear formatting/nodes to arrive at a code block.
   return (
     editor.can().toggleNode('codeBlock', 'paragraph') ||
-    editor.can().clearNodes()
+    editor.can().clearNodes() ||
+    createCurrentBlockCanChain(editor)
+      ?.toggleNode('codeBlock', 'paragraph')
+      .run() ||
+    false
   );
 }
 

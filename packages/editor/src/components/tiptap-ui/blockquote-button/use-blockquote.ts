@@ -10,6 +10,7 @@ import { useEditorMessages } from '../../../core/editor-messages-context';
 
 // --- Icons ---
 import {
+  createCurrentBlockCanChain,
   findNodePosition,
   isNodeInSchema,
   isNodeTypeSelected,
@@ -75,7 +76,12 @@ export function canToggleBlockquote(
 
   // Either we can wrap in blockquote directly on the selection,
   // or we can clear formatting/nodes to arrive at a blockquote.
-  return editor.can().toggleWrap('blockquote') || editor.can().clearNodes();
+  return (
+    editor.can().toggleWrap('blockquote') ||
+    editor.can().clearNodes() ||
+    createCurrentBlockCanChain(editor)?.toggleWrap('blockquote').run() ||
+    false
+  );
 }
 
 /**

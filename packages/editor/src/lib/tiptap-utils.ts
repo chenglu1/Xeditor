@@ -333,6 +333,55 @@ export function selectionWithinConvertibleTypes(
 }
 
 /**
+ * Creates a dry-run command chain that mirrors the block-level conversion flow
+ * used by the toolbar actions for the currently focused block.
+ */
+export function createCurrentBlockCanChain(editor: Editor | null) {
+  if (!editor) return null;
+
+  const currentBlock =
+    editor.state.selection.$anchor.depth > 0
+      ? editor.state.selection.$anchor.node(1)
+      : editor.state.selection.$anchor.parent;
+
+  const currentBlockPosition = findNodePosition({
+    editor,
+    node: currentBlock,
+  });
+
+  if (!isValidPosition(currentBlockPosition?.pos)) {
+    return null;
+  }
+
+  const currentBlockNode = editor.state.doc.nodeAt(currentBlockPosition.pos);
+
+  if (!currentBlockNode) {
+    return null;
+  }
+
+  const firstChild = currentBlockNode.firstChild?.firstChild;
+  const lastChild = currentBlockNode.lastChild?.lastChild;
+
+  const from = firstChild
+    ? currentBlockPosition.pos + firstChild.nodeSize
+    : currentBlockPosition.pos + 1;
+  const to = lastChild
+    ? currentBlockPosition.pos + currentBlockNode.nodeSize - lastChild.nodeSize
+    : currentBlockPosition.pos + currentBlockNode.nodeSize - 1;
+
+  if (from > to) {
+    return null;
+  }
+
+  return editor
+    .can()
+    .chain()
+    .setNodeSelection(currentBlockPosition.pos)
+    .setTextSelection({ from, to })
+    .clearNodes();
+}
+
+/**
  * Handles image upload with progress tracking and abort capability
  * @param file The file to upload
  * @param onProgress Optional callback for tracking upload progress
