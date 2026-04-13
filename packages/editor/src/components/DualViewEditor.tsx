@@ -83,6 +83,7 @@ export const DualViewEditor: React.FC<DualViewEditorProps> = ({
           .join(' ')}
       >
         <EditorToolbar
+          editor={editor}
           config={toolbarConfig}
           isMobile={isMobile}
           disabled={isToolbarDisabled}

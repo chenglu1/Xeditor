@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Editor } from '@tiptap/react';
 
 import { useEditorMessages } from '../core/editor-messages-context';
 import type { ToolbarConfig, ToolbarItem } from '../types';
@@ -20,6 +21,7 @@ import {
 } from './tiptap-ui-primitive/toolbar';
 
 interface EditorToolbarProps {
+  editor?: Editor | null;
   config: ToolbarConfig;
   isMobile: boolean;
   disabled?: boolean;
@@ -29,6 +31,7 @@ interface EditorToolbarProps {
 function renderBuiltInToolbarItem(
   item: ToolbarItem,
   disabled: boolean,
+  editor: Editor | null,
 ) {
   if (typeof item !== 'string') {
     return null;
@@ -36,60 +39,66 @@ function renderBuiltInToolbarItem(
 
   switch (item) {
     case 'undo':
-      return <UndoRedoButton action="undo" disabled={disabled} />;
+      return <UndoRedoButton editor={editor ?? undefined} action="undo" disabled={disabled} />;
     case 'redo':
-      return <UndoRedoButton action="redo" disabled={disabled} />;
+      return <UndoRedoButton editor={editor ?? undefined} action="redo" disabled={disabled} />;
     case 'heading':
       return (
-        <HeadingDropdownMenu levels={[1, 2, 3, 4, 5, 6]} disabled={disabled} />
+        <HeadingDropdownMenu
+          editor={editor ?? undefined}
+          levels={[1, 2, 3, 4, 5, 6]}
+          disabled={disabled}
+        />
       );
     case 'list':
       return (
         <ListDropdownMenu
+          editor={editor ?? undefined}
           types={['bulletList', 'orderedList', 'taskList']}
           disabled={disabled}
         />
       );
     case 'blockquote':
-      return <BlockquoteButton disabled={disabled} />;
+      return <BlockquoteButton editor={editor ?? undefined} disabled={disabled} />;
     case 'codeBlock':
-      return <CodeBlockButton disabled={disabled} />;
+      return <CodeBlockButton editor={editor ?? undefined} disabled={disabled} />;
     case 'table':
-      return <TableDropdownMenu disabled={disabled} />;
+      return <TableDropdownMenu editor={editor ?? undefined} disabled={disabled} />;
     case 'bold':
-      return <MarkButton type="bold" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="bold" disabled={disabled} />;
     case 'italic':
-      return <MarkButton type="italic" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="italic" disabled={disabled} />;
     case 'strike':
-      return <MarkButton type="strike" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="strike" disabled={disabled} />;
     case 'code':
-      return <MarkButton type="code" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="code" disabled={disabled} />;
     case 'underline':
-      return <MarkButton type="underline" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="underline" disabled={disabled} />;
     case 'highlight':
-      return <ColorHighlightPopover disabled={disabled} />;
+      return <ColorHighlightPopover editor={editor ?? undefined} disabled={disabled} />;
     case 'link':
-      return <LinkPopover disabled={disabled} />;
+      return <LinkPopover editor={editor ?? undefined} disabled={disabled} />;
     case 'superscript':
-      return <MarkButton type="superscript" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="superscript" disabled={disabled} />;
     case 'subscript':
-      return <MarkButton type="subscript" disabled={disabled} />;
+      return <MarkButton editor={editor ?? undefined} type="subscript" disabled={disabled} />;
     case 'alignLeft':
-      return <TextAlignButton align="left" disabled={disabled} />;
+      return <TextAlignButton editor={editor ?? undefined} align="left" disabled={disabled} />;
     case 'alignCenter':
-      return <TextAlignButton align="center" disabled={disabled} />;
+      return <TextAlignButton editor={editor ?? undefined} align="center" disabled={disabled} />;
     case 'alignRight':
-      return <TextAlignButton align="right" disabled={disabled} />;
+      return <TextAlignButton editor={editor ?? undefined} align="right" disabled={disabled} />;
     case 'alignJustify':
-      return <TextAlignButton align="justify" disabled={disabled} />;
+      return <TextAlignButton editor={editor ?? undefined} align="justify" disabled={disabled} />;
     case 'image':
-      return <ImageUploadButton disabled={disabled} />;
+      return <ImageUploadButton editor={editor ?? undefined} disabled={disabled} />;
     default:
       return null;
   }
 }
 
 export const EditorToolbar: React.FC<EditorToolbarProps> = ({
+  editor = null,
   config,
   isMobile,
   disabled = false,
@@ -123,6 +132,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({
               const builtInElement = renderBuiltInToolbarItem(
                 item,
                 disabled,
+                editor,
               );
               if (!builtInElement) {
                 return null;

@@ -15,6 +15,7 @@ import {
 import {
   createCurrentBlockCanChain,
   findNodePosition,
+  isNodeSelectionLike,
   isNodeInSchema,
   isNodeTypeSelected,
   isValidPosition,
@@ -170,7 +171,7 @@ export function toggleHeading(
     let tr = state.tr;
 
     // No selection, find the cursor position
-    if (state.selection.empty || state.selection instanceof TextSelection) {
+    if (state.selection.empty || !isNodeSelectionLike(state.selection)) {
       const pos = findNodePosition({
         editor,
         node: state.selection.$anchor.node(1),
@@ -186,7 +187,7 @@ export function toggleHeading(
     let chain = editor.chain().focus();
 
     // Handle NodeSelection
-    if (selection instanceof NodeSelection) {
+    if (isNodeSelectionLike(selection)) {
       const firstChild = selection.node.firstChild?.firstChild;
       const lastChild = selection.node.lastChild?.lastChild;
 

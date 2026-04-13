@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { createCurrentBlockCanChain } from './tiptap-utils';
+import {
+  createCurrentBlockCanChain,
+  isNodeTypeSelected,
+  selectionWithinConvertibleTypes,
+} from './tiptap-utils';
 
 describe('createCurrentBlockCanChain', () => {
   it('builds a dry-run chain for the current block content', () => {
@@ -44,5 +48,40 @@ describe('createCurrentBlockCanChain', () => {
     expect(chain.setNodeSelection).toHaveBeenCalledWith(0);
     expect(chain.setTextSelection).toHaveBeenCalledWith({ from: 1, to: 5 });
     expect(chain.clearNodes).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats cross-bundle text selections as convertible based on structure instead of instanceof', () => {
+    const editor = {
+      state: {
+        selection: {
+          from: 1,
+          to: 6,
+          empty: false,
+          constructor: { name: 'TextSelection' },
+        },
+        doc: {
+          nodesBetween: vi.fn((from: number, to: number, callback: (node: unknown) => boolean | void) => {
+            expect(from).toBe(1);
+            expect(to).toBe(6);
+            callback({ isTextblock: true, type: { name: 'paragraph' } });
+          }),
+        },
+      },
+    } as any;
+
+    expect(selectionWithinConvertibleTypes(editor, ['paragraph'])).toBe(true);
+  });
+
+  it('recognizes node selections by structure instead of relying on NodeSelection identity', () => {
+    const editor = {
+      state: {
+        selection: {
+          empty: false,
+          node: { type: { name: 'image' } },
+        },
+      },
+    } as any;
+
+    expect(isNodeTypeSelected(editor, ['image'])).toBe(true);
   });
 });

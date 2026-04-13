@@ -1,8 +1,6 @@
 import type { Node as TiptapNode } from '@tiptap/pm/model';
 import type { Transaction } from '@tiptap/pm/state';
 import {
-  AllSelection,
-  NodeSelection,
   Selection,
   TextSelection,
 } from '@tiptap/pm/state';
@@ -287,12 +285,29 @@ export function isNodeTypeSelected(
 
   if (selection.empty) return false;
 
-  if (selection instanceof NodeSelection) {
+  if (isNodeSelectionLike(selection)) {
     const node = selection.node;
     return node ? types.includes(node.type.name) : false;
   }
 
   return false;
+}
+
+type NodeSelectionLike = {
+  node: TiptapNode;
+  from: number;
+  to: number;
+};
+
+export function isNodeSelectionLike(
+  selection: unknown,
+): selection is NodeSelectionLike {
+  return (
+    !!selection &&
+    typeof selection === 'object' &&
+    'node' in selection &&
+    !!(selection as { node?: TiptapNode | null }).node
+  );
 }
 
 /**
@@ -312,24 +327,20 @@ export function selectionWithinConvertibleTypes(
   const { selection } = state;
   const allowed = new Set(types);
 
-  if (selection instanceof NodeSelection) {
+  if (isNodeSelectionLike(selection)) {
     const nodeType = selection.node?.type?.name;
     return !!nodeType && allowed.has(nodeType);
   }
 
-  if (selection instanceof TextSelection || selection instanceof AllSelection) {
-    let valid = true;
-    state.doc.nodesBetween(selection.from, selection.to, (node) => {
-      if (node.isTextblock && !allowed.has(node.type.name)) {
-        valid = false;
-        return false; // stop early
-      }
-      return valid;
-    });
+  let valid = true;
+  state.doc.nodesBetween(selection.from, selection.to, (node) => {
+    if (node.isTextblock && !allowed.has(node.type.name)) {
+      valid = false;
+      return false;
+    }
     return valid;
-  }
-
-  return false;
+  });
+  return valid;
 }
 
 /**

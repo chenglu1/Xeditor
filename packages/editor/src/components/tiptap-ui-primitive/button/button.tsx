@@ -1,4 +1,4 @@
-import { forwardRef, Fragment, useMemo } from 'react';
+import { forwardRef, Fragment, useMemo, useRef } from 'react';
 
 // --- Tiptap UI Primitive ---
 import { cn, parseShortcutKeys } from '../../../lib/tiptap-utils';
@@ -33,7 +33,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       className,
       children,
+      onClick,
       onMouseDown,
+      onMouseUp,
       tooltip,
       showTooltip = true,
       shortcutKeys,
@@ -42,6 +44,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     },
     ref,
   ) => {
+    const shouldDispatchClickRef = useRef(false);
+    const ignoreNextNativeClickRef = useRef(false);
     const shortcuts = useMemo<string[]>(
       () => parseShortcutKeys({ shortcutKeys }),
       [shortcutKeys],
@@ -49,11 +53,51 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
     const handleMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => {
       onMouseDown?.(event);
+      shouldDispatchClickRef.current = false;
 
       // Keep the editor selection stable while toolbar buttons are clicked.
-      if (!event.defaultPrevented && !props.disabled) {
+      if (
+        !event.defaultPrevented &&
+        !props.disabled &&
+        event.button === 0
+      ) {
         event.preventDefault();
+        shouldDispatchClickRef.current = true;
       }
+    };
+
+    const handleMouseUp = (event: React.MouseEvent<HTMLButtonElement>) => {
+      onMouseUp?.(event);
+
+      if (
+        shouldDispatchClickRef.current &&
+        !event.defaultPrevented &&
+        !props.disabled &&
+        event.button === 0
+      ) {
+        shouldDispatchClickRef.current = false;
+        ignoreNextNativeClickRef.current = true;
+        event.currentTarget.click();
+        return;
+      }
+
+      shouldDispatchClickRef.current = false;
+    };
+
+    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (ignoreNextNativeClickRef.current) {
+        if (event.detail === 0) {
+          onClick?.(event);
+          return;
+        }
+
+        ignoreNextNativeClickRef.current = false;
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      onClick?.(event);
     };
 
     if (!tooltip || !showTooltip) {
@@ -62,7 +106,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className={cn('tiptap-button', className)}
           ref={ref}
           aria-label={ariaLabel}
+          onClick={handleClick}
           onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           {...props}
         >
           {children}
@@ -76,7 +122,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className={cn('tiptap-button', className)}
           ref={ref}
           aria-label={ariaLabel}
+          onClick={handleClick}
           onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
           {...props}
         >
           {children}

@@ -77,6 +77,7 @@ export const SingleViewEditor: React.FC<SingleViewEditorProps> = ({
                       .join(' ')}
                   >
                     <EditorToolbar
+                      editor={editor}
                       config={toolbarConfig}
                       isMobile={isMobile}
                       disabled={isToolbarDisabled}
