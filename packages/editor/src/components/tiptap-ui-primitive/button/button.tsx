@@ -33,6 +33,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     {
       className,
       children,
+      onMouseDown,
       tooltip,
       showTooltip = true,
       shortcutKeys,
@@ -46,12 +47,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       [shortcutKeys],
     );
 
+    const handleMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => {
+      onMouseDown?.(event);
+
+      // Keep the editor selection stable while toolbar buttons are clicked.
+      if (!event.defaultPrevented && !props.disabled) {
+        event.preventDefault();
+      }
+    };
+
     if (!tooltip || !showTooltip) {
       return (
         <button
           className={cn('tiptap-button', className)}
           ref={ref}
           aria-label={ariaLabel}
+          onMouseDown={handleMouseDown}
           {...props}
         >
           {children}
@@ -65,6 +76,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           className={cn('tiptap-button', className)}
           ref={ref}
           aria-label={ariaLabel}
+          onMouseDown={handleMouseDown}
           {...props}
         >
           {children}
