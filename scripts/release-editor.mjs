@@ -114,13 +114,17 @@ function bumpVersion(currentVersion, bumpType) {
   }
 }
 
+function shouldUseShell(command) {
+  return process.platform === 'win32' && /\.(cmd|bat)$/i.test(command);
+}
+
 function runCommand(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: options.cwd ?? repoRoot,
       env: options.env ?? process.env,
       stdio: options.captureOutput ? ['ignore', 'pipe', 'pipe'] : 'inherit',
-      shell: false,
+      shell: shouldUseShell(command),
     });
 
     let stdout = '';
